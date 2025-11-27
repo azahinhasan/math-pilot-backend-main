@@ -14,10 +14,9 @@ describe('AppController', () => {
     appController = app.get<AppController>(AppController);
   });
 
-  // TODO: Replace unit test with reliable tests for current controller
-  // describe('root', () => {
-  //   it('should return "Hello World!"', () => {
-  //     expect(appController.getUsers()).toBe('Hello World!');
-  //   });
-  // });
+  describe('root', () => {
+    it('should return "Math Pilot V2 API"', () => {
+      expect(appController.getHello()).toBe('Math Pilot V2 API');
+    });
+  });
 });
