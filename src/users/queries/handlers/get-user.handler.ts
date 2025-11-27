@@ -5,6 +5,10 @@ import { InternalServerErrorException } from '@nestjs/common';
 
 @QueryHandler(GetUserQuery)
 export class GetUserHandler implements IQueryHandler<GetUserQuery> {
+  /**
+   * Fetches a single user from Clerk by User ID.
+   * Returns a simplified user object including the role from metadata.
+   */
   async execute(query: GetUserQuery) {
     const { userId } = query;
     try {

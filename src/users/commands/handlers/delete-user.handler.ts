@@ -8,6 +8,10 @@ import {
 
 @CommandHandler(DeleteUserCommand)
 export class DeleteUserHandler implements ICommandHandler<DeleteUserCommand> {
+  /**
+   * Deletes a user from Clerk by their User ID.
+   * This is irreversible.
+   */
   async execute(command: DeleteUserCommand) {
     const { userId } = command;
     try {

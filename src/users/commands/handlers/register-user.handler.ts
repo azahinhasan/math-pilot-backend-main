@@ -10,6 +10,15 @@ import {
 export class RegisterUserHandler
   implements ICommandHandler<RegisterUserCommand>
 {
+  /**
+   * Handles user registration by creating a user in Clerk.
+   *
+   * Logic:
+   * 1. Calls Clerk Backend API to create a user.
+   * 2. Sets 'publicMetadata' to store the custom role (e.g., student, teacher, institution, parent).
+   * 3. Handles password optionality (skip checks if not provided possibly for using SSO instead).
+   * 4. Catches 'form_identifier_exists' to throw a 409 Conflict if email is taken.
+   */
   async execute(command: RegisterUserCommand) {
     const { email, name, role, password, additionalInfo } = command;
 
