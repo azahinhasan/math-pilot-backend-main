@@ -13,7 +13,7 @@ import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { GetUsersQuery } from './queries/get-users.query';
 import { GetUserQuery } from './queries/get-user.query';
 import { RegisterUserCommand } from './commands/register-user.command';
-import { ClerkAuthGuard } from '../clerk-auth-guard';
+import { ClerkAuthGuard } from '../../clerk-auth-guard';
 
 import { DeleteUserCommand } from './commands/delete-user.command';
 

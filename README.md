@@ -29,6 +29,9 @@
 
 ```bash
 $ npm install
+$  npx prisma generate
+$  yarn db:migrate
+$  yarn db:seed
 ```
 
 ## Compile and run the project

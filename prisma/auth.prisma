@@ -1,0 +1,25 @@
+// enum AuthProvider {
+//   Email
+//   Google
+// }
+
+// model Auth {
+//   id                     String        @id @default(cuid())
+//   email                  String?       @unique
+//   username               String?       @unique
+//   password_hashed        String
+//   auth_provider          AuthProvider?
+//   clerk_id              String?
+//   is_active              Boolean       @default(true)
+//   role_id                String
+//   password_reset_token   String?       @unique
+//   password_reset_expires DateTime?
+//   last_updated_pass      DateTime?
+//   createdAt              DateTime      @default(now())
+//   updatedAt              DateTime      @updatedAt
+
+//   role     Role      @relation(fields: [role_id], references: [id])
+//   guardian             Guardian?     
+//   student              Student?
+//   created_students     Student[]     @relation("CreatedStudents")
+// }

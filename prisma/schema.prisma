@@ -1,0 +1,100 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["prismaSchemaFolder"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum AuthProvider {
+  Email
+  Google
+}
+
+model Auth {
+  id                     String        @id @default(cuid())
+  email                  String?       @unique
+  username               String?       @unique
+  password_hashed        String
+  auth_provider          AuthProvider?
+  clerk_id              String?
+  is_active              Boolean       @default(true)
+  role_id                String
+  password_reset_token   String?       @unique
+  password_reset_expires DateTime?
+  last_updated_pass      DateTime?
+  createdAt              DateTime      @default(now())
+  updatedAt              DateTime      @updatedAt
+
+  role     Role      @relation(fields: [role_id], references: [id])
+  guardian             Guardian?     
+  student              Student?
+  created_students     Student[]     @relation("CreatedStudents")
+}
+
+model Guardian {
+  id        String   @id @default(cuid())
+  full_name String
+  auth_id   String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  voided    Boolean  @default(false)
+
+  auth Auth @relation(fields: [auth_id], references: [id])
+}
+
+model Role {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  voided      Boolean  @default(false)
+
+  auths Auth[]
+}
+model Student {
+  id           String   @id @default(cuid())
+  full_name    String
+  auth_id      String   @unique
+  age_group_id String?
+  board_id     String?
+  level_id     String?
+  country      String?
+  created_by   String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  voided       Boolean  @default(false)
+
+  auth         Auth       @relation(fields: [auth_id], references: [id])
+  age_group    AgeGroup?  @relation(fields: [age_group_id], references: [id])
+  board        Board?     @relation(fields: [board_id], references: [id])
+  level        Level?     @relation(fields: [level_id], references: [id])
+  creator      Auth?      @relation("CreatedStudents", fields: [created_by], references: [id])
+}
+
+model AgeGroup {
+  id       String    @id @default(cuid())
+  name     String    @unique
+  students Student[]
+}
+
+model Board {
+  id       String    @id @default(cuid())
+  name     String    @unique
+  students Student[]
+}
+
+model Level {
+  id       String    @id @default(cuid())
+  name     String    @unique
+  students Student[]
+}
