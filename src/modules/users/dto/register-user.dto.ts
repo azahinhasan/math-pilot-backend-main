@@ -1,11 +1,12 @@
 import {
   IsEmail,
-  IsNotEmpty,
   IsString,
+  IsNotEmpty,
   IsEnum,
-  IsOptional,
   MinLength,
+  IsOptional,
 } from 'class-validator';
+import { Role } from 'types/role-type';
 
 export class RegisterUserDto {
   @IsEmail()
@@ -15,10 +16,10 @@ export class RegisterUserDto {
   @IsNotEmpty()
   name: string;
 
-  @IsEnum(['institution', 'teacher', 'student', 'parent'], {
+  @IsEnum(Role, {
     message: 'Role must be one of: institution, teacher, student, parent',
   })
-  role: RoleType;
+  role: Role;
 
   @IsString()
   @MinLength(8, { message: 'Password must be at least 8 characters long' })

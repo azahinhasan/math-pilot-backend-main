@@ -6,7 +6,6 @@ CREATE TABLE "Auth" (
     "id" TEXT NOT NULL,
     "email" TEXT,
     "username" TEXT,
-    "password_hashed" TEXT NOT NULL,
     "auth_provider" "AuthProvider",
     "clerk_id" TEXT,
     "is_active" BOOLEAN NOT NULL DEFAULT true,

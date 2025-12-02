@@ -3,13 +3,29 @@ import { RegisterUserCommand } from '../register-user.command';
 import clerkClient from '@clerk/clerk-sdk-node';
 import {
   ConflictException,
+  Injectable,
   InternalServerErrorException,
+  NotFoundException,
+  OnModuleInit,
 } from '@nestjs/common';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { Role } from 'types/role-type';
 
+@Injectable()
 @CommandHandler(RegisterUserCommand)
 export class RegisterUserHandler
-  implements ICommandHandler<RegisterUserCommand>
+  implements ICommandHandler<RegisterUserCommand>, OnModuleInit
 {
+  private roles: Map<string, string> = new Map();
+
+  constructor(private readonly prisma: PrismaService) {}
+
+  async onModuleInit() {
+    const roles = await this.prisma.role.findMany();
+    roles.forEach((role) => {
+      this.roles.set(role.name.toUpperCase(), role.id);
+    });
+  }
   /**
    * Handles user registration by creating a user in Clerk.
    *
@@ -36,15 +52,47 @@ export class RegisterUserHandler
         skipPasswordRequirement: !password,
       });
 
-      return {
-        message: 'User registration processed successfully',
-        user: {
+      const roleId = this.roles.get(role.toUpperCase());
+      if (!roleId) {
+        throw new NotFoundException(`Role '${role}' not found`);
+      }
+
+      const createdUser = await this.prisma.$transaction(async (prisma) => {
+        const auth = await prisma.auth.create({
+          data: {
+            email: email,
+            clerkId: user.id,
+            roleId: roleId
+          },
+        });
+
+        const commonData = {
+          fullName: name,
+          authId: auth.id,
+        };
+
+        if (role === Role.GUARDIAN) {
+          await prisma.guardian.create({
+            data: { ...commonData, ...additionalInfo },
+          });
+        } else if (role === Role.STUDENT) {
+          await prisma.student.create({
+            data: { ...commonData, ...additionalInfo },
+          });
+        }
+
+        return {
           id: user.id,
           email: user.emailAddresses[0].emailAddress,
           name: `${user.firstName} ${user.lastName}`,
           role: user.publicMetadata.role,
-          clerkUser: user,
-        },
+          // clerkUser:user
+        };
+      });
+
+      return {
+        message: 'User registration processed successfully',
+        user: createdUser,
       };
     } catch (error) {
       console.error(
