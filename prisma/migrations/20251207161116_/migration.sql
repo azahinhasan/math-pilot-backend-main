@@ -2,6 +2,18 @@
 CREATE TYPE "AuthProvider" AS ENUM ('Email', 'Google');
 
 -- CreateTable
+CREATE TABLE "Role" (
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "description" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "voided" BOOLEAN NOT NULL DEFAULT false,
+
+    CONSTRAINT "Role_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "Auth" (
     "id" TEXT NOT NULL,
     "email" TEXT,
@@ -32,25 +44,11 @@ CREATE TABLE "Guardian" (
 );
 
 -- CreateTable
-CREATE TABLE "Role" (
-    "id" TEXT NOT NULL,
-    "name" TEXT NOT NULL,
-    "description" TEXT,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-    "voided" BOOLEAN NOT NULL DEFAULT false,
-
-    CONSTRAINT "Role_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
 CREATE TABLE "Student" (
     "id" TEXT NOT NULL,
     "full_name" TEXT NOT NULL,
     "auth_id" TEXT NOT NULL,
-    "age_group_id" TEXT,
-    "board_id" TEXT,
-    "level_id" TEXT,
+    "board_age_level_id" TEXT,
     "country" TEXT,
     "created_by" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -61,28 +59,18 @@ CREATE TABLE "Student" (
 );
 
 -- CreateTable
-CREATE TABLE "AgeGroup" (
+CREATE TABLE "BoardAgeLevel" (
     "id" TEXT NOT NULL,
-    "name" TEXT NOT NULL,
+    "board_name" TEXT NOT NULL,
+    "age_level_name" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "AgeGroup_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "BoardAgeLevel_pkey" PRIMARY KEY ("id")
 );
 
--- CreateTable
-CREATE TABLE "Board" (
-    "id" TEXT NOT NULL,
-    "name" TEXT NOT NULL,
-
-    CONSTRAINT "Board_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "Level" (
-    "id" TEXT NOT NULL,
-    "name" TEXT NOT NULL,
-
-    CONSTRAINT "Level_pkey" PRIMARY KEY ("id")
-);
+-- CreateIndex
+CREATE UNIQUE INDEX "Role_name_key" ON "Role"("name");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Auth_email_key" ON "Auth"("email");
@@ -97,19 +85,10 @@ CREATE UNIQUE INDEX "Auth_password_reset_token_key" ON "Auth"("password_reset_to
 CREATE UNIQUE INDEX "Guardian_auth_id_key" ON "Guardian"("auth_id");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Role_name_key" ON "Role"("name");
-
--- CreateIndex
 CREATE UNIQUE INDEX "Student_auth_id_key" ON "Student"("auth_id");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "AgeGroup_name_key" ON "AgeGroup"("name");
-
--- CreateIndex
-CREATE UNIQUE INDEX "Board_name_key" ON "Board"("name");
-
--- CreateIndex
-CREATE UNIQUE INDEX "Level_name_key" ON "Level"("name");
+CREATE UNIQUE INDEX "BoardAgeLevel_board_name_age_level_name_key" ON "BoardAgeLevel"("board_name", "age_level_name");
 
 -- AddForeignKey
 ALTER TABLE "Auth" ADD CONSTRAINT "Auth_role_id_fkey" FOREIGN KEY ("role_id") REFERENCES "Role"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -121,13 +100,7 @@ ALTER TABLE "Guardian" ADD CONSTRAINT "Guardian_auth_id_fkey" FOREIGN KEY ("auth
 ALTER TABLE "Student" ADD CONSTRAINT "Student_auth_id_fkey" FOREIGN KEY ("auth_id") REFERENCES "Auth"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Student" ADD CONSTRAINT "Student_age_group_id_fkey" FOREIGN KEY ("age_group_id") REFERENCES "AgeGroup"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Student" ADD CONSTRAINT "Student_board_id_fkey" FOREIGN KEY ("board_id") REFERENCES "Board"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Student" ADD CONSTRAINT "Student_level_id_fkey" FOREIGN KEY ("level_id") REFERENCES "Level"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "Student" ADD CONSTRAINT "Student_board_age_level_id_fkey" FOREIGN KEY ("board_age_level_id") REFERENCES "BoardAgeLevel"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Student" ADD CONSTRAINT "Student_created_by_fkey" FOREIGN KEY ("created_by") REFERENCES "Auth"("id") ON DELETE SET NULL ON UPDATE CASCADE;

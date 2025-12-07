@@ -24,7 +24,67 @@ async function main() {
     console.log(`Created role with id: ${newRole.id}`);
   }
 
-  console.log(`Seeding finished.`);
+  console.log(`Seeding finished Roles.`);
+
+  // Seed BoardAgeLevel
+  const boardAgeLevels = [
+    {
+      board_name: "AQA",
+      level_name: "GCSE",
+      description: "AQA GCSE"
+    },
+    {
+      board_name: "AQA",
+      level_name: "A_Level",
+      description: "AQA A Level"
+    },
+    {
+      board_name: "Edexcel",
+      level_name: "A_Level",
+      description: "Edexcel A Level"
+    },
+    {
+      board_name: "Pearson_Edexcel",
+      level_name: "GCSE",
+      description: "Pearson Edexcel GCSE"
+    },
+    {
+      board_name: "Pearson_Edexcel",
+      level_name: "A_Level",
+      description: "Pearson Edexcel A Level"
+    },
+    {
+      board_name: "OCR",
+      level_name: "GCSE",
+      description: "OCR GCSE"
+    },
+    {
+      board_name: "OCR",
+      level_name: "A_Level",
+      description: "OCR A Level"
+    }
+  ];
+
+  for (const boardAgeLevel of boardAgeLevels) {
+    const newBoardAgeLevel = await prisma.boardAgeLevel.upsert({
+      where: { 
+        boardName_ageLevelName: {
+          boardName: boardAgeLevel.board_name,
+          ageLevelName: boardAgeLevel.level_name
+        }
+      },
+      update: {},
+      create: {
+        boardName: boardAgeLevel.board_name,
+        ageLevelName: boardAgeLevel.level_name,
+      },
+    });
+    console.log(`Created board-age level with id: ${newBoardAgeLevel.id} (${boardAgeLevel.board_name} - ${boardAgeLevel.level_name})`);
+  }
+
+  console.log(`Seeding finished BoardAgeLevel.`);
+
+  
 }
 
 main()

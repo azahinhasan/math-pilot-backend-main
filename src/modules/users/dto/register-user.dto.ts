@@ -27,5 +27,7 @@ export class RegisterUserDto {
   password?: string;
 
   @IsOptional()
-  additionalInfo?: any;
+  additionalInfo?: {
+    boardAgeLevel?:string;
+  };
 }

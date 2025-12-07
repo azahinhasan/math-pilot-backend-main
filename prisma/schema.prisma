@@ -14,9 +14,32 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Role {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  voided      Boolean  @default(false)
+
+  auths Auth[]
+}
+
 enum AuthProvider {
   Email
   Google
+}
+
+enum BoardName {
+  AQA
+  Edexcel
+  Pearson_Edexcel
+  OCR
+}
+
+enum AgeLevelName {
+  A_Level
+  GCSE
 }
 
 model Auth {
@@ -50,51 +73,31 @@ model Guardian {
   auth Auth @relation(fields: [authId], references: [id])
 }
 
-model Role {
-  id          String   @id @default(uuid())
-  name        String   @unique
-  description String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  voided      Boolean  @default(false)
-
-  auths Auth[]
-}
-
 model Student {
-  id         String   @id @default(uuid())
-  fullName   String   @map("full_name")
-  authId     String   @unique @map("auth_id")
-  ageGroupId String?  @map("age_group_id")
-  boardId    String?  @map("board_id")
-  levelId    String?  @map("level_id")
-  country    String?
-  createdBy  String?  @map("created_by")
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  voided     Boolean  @default(false)
+  id              String   @id @default(uuid())
+  fullName        String   @map("full_name")
+  authId          String   @unique @map("auth_id")
+  boardAgeLevelId String?  @map("board_age_level_id")
+  country         String?
+  createdBy       String?  @map("created_by")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  voided          Boolean  @default(false)
 
-  auth      Auth      @relation(fields: [authId], references: [id])
-  ageGroup  AgeGroup? @relation(fields: [ageGroupId], references: [id])
-  board     Board?    @relation(fields: [boardId], references: [id])
-  level     Level?    @relation(fields: [levelId], references: [id])
-  creator   Auth?     @relation("CreatedStudents", fields: [createdBy], references: [id])
+  auth           Auth            @relation(fields: [authId], references: [id])
+  boardAgeLevel  BoardAgeLevel?  @relation(fields: [boardAgeLevelId], references: [id])
+  creator        Auth?           @relation("CreatedStudents", fields: [createdBy], references: [id])
 }
 
-model AgeGroup {
-  id       String    @id @default(uuid())
-  name     String    @unique
-  students Student[]
+model BoardAgeLevel {
+  id            String        @id @default(uuid())
+  boardName     BoardName     @map("board_name")
+  ageLevelName  AgeLevelName  @map("age_level_name")
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  students      Student[]
+
+  @@unique([boardName, ageLevelName])
 }
 
-model Board {
-  id       String    @id @default(uuid())
-  name     String    @unique
-  students Student[]
-}
 
-model Level {
-  id       String    @id @default(uuid())
-  name     String    @unique
-  students Student[]
-}
