@@ -100,4 +100,103 @@ model BoardAgeLevel {
   @@unique([boardName, ageLevelName])
 }
 
+model QuestionType {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  voided      Boolean  @default(false)
+
+  questions Question[]
+
+  @@map("question_types")
+}
+
+enum ContentBy {
+  HUMAN
+  AI
+}
+
+enum QuestionFor {
+  Test
+  Practice
+}
+
+enum DifficultyLevel {
+  Beginner  
+  Intermediate
+  Advanced
+}
+
+model Question {
+  id                  String    @id @default(uuid())
+  name                String
+  questionText        String    @map("question_text")
+  questionContentLink String    @map("question_content_link")
+  contentBy           ContentBy @default(HUMAN) @map("content_by")
+  questionFor         QuestionFor @default(Practice) @map("question_for")
+  difficulty          Int       @default(0)
+  totalMarks          Int?      @map("total_marks")
+  timeLimit           Int?      @map("time_limit")
+  hint                String
+  explanation         String?
+  imageUrl            String?     @map("image_url")
+  difficulty_level    DifficultyLevel @default(Beginner) @map("difficulty_level")
+  stepCount           Int       @map("step_count")
+  serialNo            Int       @map("serial_no")
+  questionTypeId      String    @map("question_type_id")
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt           DateTime  @updatedAt @map("updated_at")
+  voided              Boolean   @default(false)
+
+  questionType  QuestionType   @relation(fields: [questionTypeId], references: [id])
+  solutionBases SolutionBase[]
+
+  @@map("questions")
+}
+
+model SolutionBase {
+  id        String   @id @default(uuid())
+  questionId String   @unique @map("question_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  question             Question               @relation(fields: [questionId], references: [id])
+  solutionMCQs         SolutionMcq[]
+  solutionDescriptives SolutionDescriptive[]
+
+  @@map("solution_base")
+}
+
+model SolutionMcq {
+  id             String   @id @default(uuid()) @map("mcq_option_id")
+  solutionBaseId String   @map("solution_base_id")
+  optionText     String   @map("option_text")
+  isCorrect      Boolean  @default(false) @map("is_correct")
+  mark           Int?
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+  voided         Boolean  @default(false)
+
+  solutionBase SolutionBase @relation(fields: [solutionBaseId], references: [id])
+
+  @@map("solution_mcq")
+}
+
+model SolutionDescriptive {
+  id                    String   @id @default(uuid()) @map("descriptive_id")
+  solutionBaseId        String   @unique @map("solution_base_id")
+  descriptiveSolution   String?  @map("descriptive_solution") //correct_ans
+  markingStepsJson      Json?    @map("marking_steps_json")
+  maxMarks              Int?     @map("max_marks")
+  createdAt             DateTime @default(now()) @map("created_at")
+  updatedAt             DateTime @updatedAt @map("updated_at")
+  voided                Boolean  @default(false)
+
+  solutionBase SolutionBase @relation(fields: [solutionBaseId], references: [id])
+
+  @@map("solution_descriptive")
+}
+
 

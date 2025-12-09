@@ -1,4 +1,5 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, BoardName, AgeLevelName } from '@prisma/client';
+import seedQuestionTypes from './question-types';
 
 const prisma = new PrismaClient();
 
@@ -29,38 +30,38 @@ async function main() {
   // Seed BoardAgeLevel
   const boardAgeLevels = [
     {
-      board_name: "AQA",
-      level_name: "GCSE",
+      board_name: BoardName.AQA,
+      level_name: AgeLevelName.GCSE,
       description: "AQA GCSE"
     },
     {
-      board_name: "AQA",
-      level_name: "A_Level",
+      board_name: BoardName.AQA,
+      level_name: AgeLevelName.A_Level,
       description: "AQA A Level"
     },
     {
-      board_name: "Edexcel",
-      level_name: "A_Level",
+      board_name: BoardName.Edexcel,
+      level_name: AgeLevelName.A_Level,
       description: "Edexcel A Level"
     },
     {
-      board_name: "Pearson_Edexcel",
-      level_name: "GCSE",
+      board_name: BoardName.Pearson_Edexcel,
+      level_name: AgeLevelName.GCSE,
       description: "Pearson Edexcel GCSE"
     },
     {
-      board_name: "Pearson_Edexcel",
-      level_name: "A_Level",
+      board_name: BoardName.Pearson_Edexcel,
+      level_name: AgeLevelName.A_Level,
       description: "Pearson Edexcel A Level"
     },
     {
-      board_name: "OCR",
-      level_name: "GCSE",
+      board_name: BoardName.OCR,
+      level_name: AgeLevelName.GCSE,
       description: "OCR GCSE"
     },
     {
-      board_name: "OCR",
-      level_name: "A_Level",
+      board_name: BoardName.OCR,
+      level_name: AgeLevelName.A_Level,
       description: "OCR A Level"
     }
   ];
@@ -82,7 +83,9 @@ async function main() {
     console.log(`Created board-age level with id: ${newBoardAgeLevel.id} (${boardAgeLevel.board_name} - ${boardAgeLevel.level_name})`);
   }
 
-  console.log(`Seeding finished BoardAgeLevel.`);
+    console.log(`Seeding finished BoardAgeLevel.`);
+
+  await seedQuestionTypes();
 
   
 }
