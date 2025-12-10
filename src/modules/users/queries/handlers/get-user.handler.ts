@@ -1,29 +1,25 @@
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { GetUserQuery } from '../get-user.query';
-import clerkClient from '@clerk/clerk-sdk-node';
-import { InternalServerErrorException } from '@nestjs/common';
+import { PrismaService } from '../../../../prisma/prisma.service';
+import { HttpException, HttpStatus } from '@nestjs/common';
 
 @QueryHandler(GetUserQuery)
 export class GetUserHandler implements IQueryHandler<GetUserQuery> {
-  /**
-   * Fetches a single user from Clerk by User ID.
-   * Returns a simplified user object including the role from metadata.
-   */
-  async execute(query: GetUserQuery) {
+  constructor(private readonly prisma: PrismaService) {}
+
+  async execute(query: GetUserQuery): Promise<any> {
     const { userId } = query;
-    try {
-      const user = await clerkClient.users.getUser(userId);
-      return {
-        id: user.id,
-        email: user.emailAddresses[0]?.emailAddress,
-        name: `${user.firstName || ''} ${user.lastName || ''}`.trim(),
-        role: user.publicMetadata.role,
-        clerkUser: user,
-      };
-    } catch (error) {
-      throw new InternalServerErrorException(
-        `Failed to fetch user details: ${error.message}`,
-      );
+
+    const auth = await this.prisma.auth.findUnique({
+      where: { id: userId },
+      include: { role: true, student: true, guardian: true },
+    });
+
+    if (!auth) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }
+
+    return auth;
   }
 }
+

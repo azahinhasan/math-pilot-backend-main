@@ -6,6 +6,7 @@ import { UsersModule } from './modules/users/users.module';
 import { ClerkModule } from './clerk/clerk.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { PracticeModeModule } from './modules/practice-mode/practice-mode.module';
+import { RoleModule } from './modules/role/role.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { PracticeModeModule } from './modules/practice-mode/practice-mode.module
     ClerkModule,
     PrismaModule,
     PracticeModeModule,
+    RoleModule,
   ], // Read .env file for environment variables
   controllers: [AppController],
   providers: [AppService],

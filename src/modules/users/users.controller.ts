@@ -18,6 +18,8 @@ import { ClerkAuthGuard } from '../../clerk-auth-guard';
 import { DeleteUserCommand } from './commands/delete-user.command';
 
 import { RegisterUserDto } from './dto/register-user.dto';
+import { OnboardingDto } from './dto/onboarding.dto';
+import { OnboardingCommand } from './commands/onboarding.command';
 
 @Controller('users')
 export class UsersController {
@@ -66,5 +68,15 @@ export class UsersController {
   // !WARN: This is unsafe for prod.
   async deleteUser(@Param('id') id: string) {
     return this.commandBus.execute(new DeleteUserCommand(id));
+  }
+
+  @Post('onboarding')
+  async onboarding(@Body() onboardingDto: OnboardingDto) {
+    return this.commandBus.execute(new OnboardingCommand(onboardingDto));
+  }
+
+  @Get(':id')
+  async getUser(@Param('id') id: string) {
+    return this.queryBus.execute(new GetUserQuery(id));
   }
 }

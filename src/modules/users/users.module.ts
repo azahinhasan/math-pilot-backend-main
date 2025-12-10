@@ -7,6 +7,7 @@ import { GetUsersHandler } from './queries/handlers/get-users.handler';
 import { GetUserHandler } from './queries/handlers/get-user.handler';
 import { RegisterUserHandler } from './commands/handlers/register-user.handler';
 import { DeleteUserHandler } from './commands/handlers/delete-user.handler';
+import { OnboardingHandler } from './commands/handlers/onboarding.handler';
 
 @Module({
   imports: [CqrsModule, ConfigModule, PrismaModule],
@@ -16,6 +17,7 @@ import { DeleteUserHandler } from './commands/handlers/delete-user.handler';
     GetUserHandler,
     RegisterUserHandler,
     DeleteUserHandler,
+    OnboardingHandler,
   ],
 })
 export class UsersModule {}
