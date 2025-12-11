@@ -1,3 +1,3 @@
 export class GetUserQuery {
-  constructor(public readonly userId: string) {}
+  constructor(public readonly clerkId: string) {}
 }

@@ -8,11 +8,42 @@ export class GetUserHandler implements IQueryHandler<GetUserQuery> {
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(query: GetUserQuery): Promise<any> {
-    const { userId } = query;
+    const { clerkId } = query;
 
-    const auth = await this.prisma.auth.findUnique({
-      where: { id: userId },
-      include: { role: true, student: true, guardian: true },
+    const auth = await this.prisma.auth.findFirst({
+      where: { clerkId: clerkId },
+      select: {
+        id: true,
+        email: true,
+        username: true,
+        role: {
+          select: {
+            id: true,
+            name: true,
+            description: true,
+          },
+        },
+        student: {
+          select: {
+            id: true,
+            fullName: true,
+            country: true,
+            boardAgeLevel: {
+              select: {
+                id: true,
+                boardName: true,
+                ageLevelName: true,
+              },
+            },
+          },
+        },
+        guardian: {
+          select: {
+            id: true,
+            fullName: true,
+          },
+        },
+      },
     });
 
     if (!auth) {

@@ -41,27 +41,6 @@ export class UsersController {
     );
   }
 
-  @Get('profile')
-  @UseGuards(ClerkAuthGuard)
-  async getProfile(@Req() req) {
-    try {
-      // req.user is populated by ClerkAuthGuard with the JWT claims
-      const userId = req.user.sub;
-
-      // Execute Query to fetch user details
-      const user = await this.queryBus.execute(new GetUserQuery(userId));
-
-      return {
-        message: 'Profile retrieved successfully',
-        user,
-      };
-    } catch (error) {
-      throw new InternalServerErrorException(
-        `Failed to fetch user details: ${error.message}`,
-      );
-    }
-  }
-
   @Delete(':id')
   @UseGuards(ClerkAuthGuard)
   // TODO: Restrict to admin or self. For dev, maybe open or just auth.
@@ -73,6 +52,27 @@ export class UsersController {
   @Post('onboarding')
   async onboarding(@Body() onboardingDto: OnboardingDto) {
     return this.commandBus.execute(new OnboardingCommand(onboardingDto));
+  }
+
+  @Get('profile')
+  @UseGuards(ClerkAuthGuard)
+  async getUserProfile(@Req() req) {
+    try {
+      // req.user is populated by ClerkAuthGuard with the JWT claims
+      const clerkId = req.user.sub;
+
+      // Execute Query to fetch user profile details including student/guardian info
+      const userProfile = await this.queryBus.execute(new GetUserQuery(clerkId));
+
+      return {
+        message: 'User profile retrieved successfully',
+        profile: userProfile,
+      };
+    } catch (error) {
+      throw new InternalServerErrorException(
+        `Failed to fetch user profile: ${error.message}`,
+      );
+    }
   }
 
   @Get(':id')

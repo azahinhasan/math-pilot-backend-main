@@ -47,7 +47,7 @@ model Auth {
   email                String?       @unique
   username             String?       @unique
   authProvider         AuthProvider? @map("auth_provider")
-  clerkId              String?       @map("clerk_id")
+  clerkId              String?       @unique @map("clerk_id")
   isActive             Boolean       @default(true) @map("is_active")
   roleId               String        @map("role_id")
   passwordResetToken   String?       @unique @map("password_reset_token")
