@@ -29,9 +29,9 @@ async function bootstrap() {
   app.enableCors({ origin: true, credentials: true });
   await app.listen(port).then(() => {
     console.log(`
-          ####################################
+          #########################################################
           🔥  Server listening on port: http://localhost:${port} 🔥
-          ####################################
+          #########################################################
     `);
   });
 }

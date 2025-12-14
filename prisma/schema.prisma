@@ -18,8 +18,8 @@ model Role {
   id          String   @id @default(uuid())
   name        String   @unique
   description String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
   voided      Boolean  @default(false)
 
   auths Auth[]
@@ -53,8 +53,8 @@ model Auth {
   passwordResetToken   String?       @unique @map("password_reset_token")
   passwordResetExpires DateTime?     @map("password_reset_expires")
   lastUpdatedPass      DateTime?     @map("last_updated_pass")
-  createdAt            DateTime      @default(now())
-  updatedAt            DateTime      @updatedAt
+  createdAt            DateTime      @default(now()) @map("created_at")
+  updatedAt            DateTime      @updatedAt @map("updated_at")
 
   role            Role      @relation(fields: [roleId], references: [id])
   guardian        Guardian?
@@ -66,8 +66,8 @@ model Guardian {
   id        String   @id @default(uuid())
   fullName  String   @map("full_name")
   authId    String   @unique @map("auth_id")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
   voided    Boolean  @default(false)
 
   auth Auth @relation(fields: [authId], references: [id])
@@ -80,8 +80,8 @@ model Student {
   boardAgeLevelId String?  @map("board_age_level_id")
   country         String?
   createdBy       String?  @map("created_by")
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
   voided          Boolean  @default(false)
 
   auth           Auth            @relation(fields: [authId], references: [id])
@@ -93,8 +93,9 @@ model BoardAgeLevel {
   id            String        @id @default(uuid())
   boardName     BoardName     @map("board_name")
   ageLevelName  AgeLevelName  @map("age_level_name")
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @updatedAt @map("updated_at")
+  voided        Boolean       @default(false)
   students      Student[]
 
   @@unique([boardName, ageLevelName])
@@ -153,7 +154,6 @@ model Question {
   questionType  QuestionType   @relation(fields: [questionTypeId], references: [id])
   solutionBases SolutionBase[]
 
-  @@map("questions")
 }
 
 model SolutionBase {
@@ -166,7 +166,6 @@ model SolutionBase {
   solutionMCQs         SolutionMcq[]
   solutionDescriptives SolutionDescriptive[]
 
-  @@map("solution_base")
 }
 
 model SolutionMcq {
@@ -181,7 +180,6 @@ model SolutionMcq {
 
   solutionBase SolutionBase @relation(fields: [solutionBaseId], references: [id])
 
-  @@map("solution_mcq")
 }
 
 model SolutionDescriptive {
@@ -196,7 +194,6 @@ model SolutionDescriptive {
 
   solutionBase SolutionBase @relation(fields: [solutionBaseId], references: [id])
 
-  @@map("solution_descriptive")
 }
 
 

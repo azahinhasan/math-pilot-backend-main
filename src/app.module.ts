@@ -7,6 +7,7 @@ import { ClerkModule } from './clerk/clerk.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { PracticeModeModule } from './modules/practice-mode/practice-mode.module';
 import { RoleModule } from './modules/role/role.module';
+import { BoardAgeLevelModule } from './modules/board-age-level/board-age-level.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { RoleModule } from './modules/role/role.module';
     PrismaModule,
     PracticeModeModule,
     RoleModule,
+    BoardAgeLevelModule
   ], // Read .env file for environment variables
   controllers: [AppController],
   providers: [AppService],
