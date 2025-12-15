@@ -197,3 +197,92 @@ model SolutionDescriptive {
 }
 
 
+enum ReviewStatus {
+  Scheduled
+  InProgress
+  InReview
+  Graded
+}
+
+enum ExamType {
+  Competitive
+  Normal
+  Mock
+}
+
+enum ExamDifficulty {
+  Beginner
+  Intermediate
+  Advanced
+}
+
+model Topic {
+  id           String   @id @default(uuid())
+  name         String
+  description  String?
+  logoFileName String?  @map("logo_file_name")
+  moduleId     String?  @map("module_id")
+  serialNumber Int      @map("serial_number")
+  paperNumber  Int      @map("paper_number")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+  voided       Boolean  @default(false)
+
+  subtopics     Subtopic[]
+  examSubtopics ExamSubtopic[]
+
+  @@map("topics")
+}
+
+model Subtopic {
+  id           String   @id @default(uuid())
+  name         String
+  logoFileName String?  @map("logo_file_name")
+  serialNumber Int      @map("serial_number")
+  content      String?
+  topicId      String   @map("topic_id")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+  voided       Boolean  @default(false)
+
+  topic         Topic         @relation(fields: [topicId], references: [id])
+  examSubtopics ExamSubtopic[]
+
+  @@map("subtopics")
+}
+
+model Exam {
+  id                  Int      @id @default(autoincrement())
+  name                String
+  startTime           DateTime @map("start_time")
+  endTime             DateTime @map("end_time")
+  type                ExamType
+  /// Only for competitive exams
+  difficulty          ExamDifficulty?
+  timeLimit           Int?     @map("time_limit")
+  maxNumberOfQuestions Int?    @map("max_number_of_questions")
+  status              ReviewStatus?
+  totalMarks          Int?     @map("total_marks")
+  classId             String?  @map("class_id")
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+  voided              Boolean  @default(false)
+
+  subtopics ExamSubtopic[]
+
+  @@map("exams")
+}
+
+model ExamSubtopic {
+  examId    Int    @map("exam_id")
+  topicId   String @map("topic_id")
+  subtopicId String @map("subtopic_id")
+
+  exam    Exam    @relation(fields: [examId], references: [id])
+  topic   Topic   @relation(fields: [topicId], references: [id])
+  subtopic Subtopic @relation(fields: [subtopicId], references: [id])
+
+  @@id([examId, topicId, subtopicId])
+  @@map("exam_subtopics")
+}
+
