@@ -11,7 +11,23 @@ export class GetModulesBySubjectHandler
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(query: GetModulesBySubjectQuery) {
-    const { subject } = query;
+    const { subject, clerkId } = query;
+
+    const authData = await this.prisma.auth.findUnique({
+      where: {
+        clerkId,
+      },
+      include: {
+        student: {
+          include: {
+            boardAgeLevel: true,
+          },
+        },
+      },
+    });
+
+    console.log('Auth Data:', authData,clerkId);
+    console.log('Student Board:', authData?.student?.boardAgeLevel);
 
     const modules = await this.prisma.module.findMany({
       where: {
