@@ -14,17 +14,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Role {
-  id          String   @id @default(uuid())
-  name        String   @unique
-  description String?
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
-  voided      Boolean  @default(false)
-
-  auths Auth[]
-}
-
+// Enums //
 enum AuthProvider {
   Email
   Google
@@ -44,6 +34,46 @@ enum AgeLevelName {
 
 enum Subject {
   Mathematics
+}
+enum ContentBy {
+  HUMAN
+  AI
+}
+
+enum QuestionFor {
+  Test
+  Practice
+}
+
+enum DifficultyLevel {
+  Beginner
+  Intermediate
+  Advanced
+}
+
+enum SubmissionType {
+  Exam
+  Homework
+  Practice
+}
+
+enum SubmissionStatus {
+  InProgress
+  Submitted
+  Graded
+}
+// Models //
+
+
+model Role {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  voided      Boolean  @default(false)
+
+  auths Auth[]
 }
 
 model Auth {
@@ -83,6 +113,10 @@ model Student {
   authId          String   @unique @map("auth_id")
   boardAgeLevelId String?  @map("board_age_level_id")
   country         String?
+  currentStreak   Int
+  longestStreak   Int
+  totalXp         Int
+  lastActivity    DateTime @map("last_activity")
   createdBy       String?  @map("created_by")
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @updatedAt @map("updated_at")
@@ -91,6 +125,7 @@ model Student {
   auth          Auth           @relation(fields: [authId], references: [id])
   boardAgeLevel BoardAgeLevel? @relation(fields: [boardAgeLevelId], references: [id])
   creator       Auth?          @relation("CreatedStudents", fields: [createdBy], references: [id])
+  submissions   Submission[]
 }
 
 model BoardAgeLevel {
@@ -102,7 +137,8 @@ model BoardAgeLevel {
   voided       Boolean      @default(false)
   students     Student[]
 
-  modules Module[]
+  modules   Module[]
+  subtopics Subtopic[]
 
   @@unique([boardName, ageLevelName])
 }
@@ -120,9 +156,48 @@ model Module {
   voided          Boolean  @default(false)
 
   boardAgeLevel BoardAgeLevel @relation(fields: [boardAgeLevelId], references: [id])
+  topics        Topic[]
+  questions     Question[]
 
   @@unique([name, subject, boardAgeLevelId])
 }
+
+model Topic {
+  id           String   @id @default(uuid())
+  name         String
+  description  String?
+  logoFileName String?  @map("logo_file_name")
+  moduleId     String   @map("module_id")
+  serialNumber Int      @map("serial_number")
+  paperNumber  Int      @map("paper_number")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+  voided       Boolean  @default(false)
+
+  module    Module     @relation(fields: [moduleId], references: [id])
+  subtopics Subtopic[]
+  questions Question[]
+}
+
+model Subtopic {
+  id              String   @id @default(uuid())
+  name            String
+  logoFileName    String?  @map("logo_file_name")
+  serialNumber    Int      @map("serial_number")
+  content         String?
+  topicId         String   @map("topic_id")
+  institutionId   String?  @map("institution_id")
+  boardAgeLevelId String?  @map("board_age_level_id")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+  voided          Boolean  @default(false)
+
+  topic         Topic          @relation(fields: [topicId], references: [id])
+  boardAgeLevel BoardAgeLevel? @relation(fields: [boardAgeLevelId], references: [id])
+  questions     Question[]
+}
+
+
 
 model QuestionType {
   id          String   @id @default(uuid())
@@ -137,22 +212,6 @@ model QuestionType {
   @@map("question_types")
 }
 
-enum ContentBy {
-  HUMAN
-  AI
-}
-
-enum QuestionFor {
-  Test
-  Practice
-}
-
-enum DifficultyLevel {
-  Beginner
-  Intermediate
-  Advanced
-}
-
 model Question {
   id                  String          @id @default(uuid())
   name                String
@@ -165,17 +224,26 @@ model Question {
   timeLimit           Int?            @map("time_limit")
   hint                String
   explanation         String?
+  givenContext        String? // Example: A ball is thrown vertically upward with an initial velocity of 20 m/s.
+  findObjective       String? // Example: Calculate the maximum height reached by the ball and the time taken to reach that height.
   imageUrl            String?         @map("image_url")
   difficulty_level    DifficultyLevel @default(Beginner) @map("difficulty_level")
   stepCount           Int             @map("step_count")
   serialNo            Int             @map("serial_no")
   questionTypeId      String          @map("question_type_id")
+  moduleId            String?         @map("module_id")
+  topicId             String?         @map("topic_id")
+  subtopicId          String?         @map("subtopic_id")
   createdAt           DateTime        @default(now()) @map("created_at")
   updatedAt           DateTime        @updatedAt @map("updated_at")
   voided              Boolean         @default(false)
 
   questionType  QuestionType   @relation(fields: [questionTypeId], references: [id])
+  module        Module?        @relation(fields: [moduleId], references: [id])
+  topic         Topic?         @relation(fields: [topicId], references: [id])
+  subtopic      Subtopic?      @relation(fields: [subtopicId], references: [id])
   solutionBases SolutionBase[]
+  submissions   Submission[]
 }
 
 model SolutionBase {
@@ -187,6 +255,7 @@ model SolutionBase {
   question             Question              @relation(fields: [questionId], references: [id])
   solutionMCQs         SolutionMcq[]
   solutionDescriptives SolutionDescriptive[]
+  submittedAnswers     SubmittedAnswer[]
 }
 
 model SolutionMcq {
@@ -213,4 +282,70 @@ model SolutionDescriptive {
   voided              Boolean  @default(false)
 
   solutionBase SolutionBase @relation(fields: [solutionBaseId], references: [id])
+}
+
+model Submission {
+  id                   Int              @id @default(autoincrement())
+  studentId            String           @map("student_id")
+  // teacherId         String?          @map("teacher_id") // Commented: teachers table not available
+  questionId           String           @map("question_id")
+  type                 SubmissionType
+  status               SubmissionStatus
+  awardedMarks         Int?             @map("awarded_marks")
+  correctAnswersCount  Int?             @map("correct_answers_count")
+  // examId            String?          @map("exam_id") // Commented: exams table not available
+  // homeworkId        String?          @map("homework_id") // Commented: assignments table not available
+  beganAt              DateTime         @map("began_at")
+  endedAt              DateTime?        @map("ended_at")
+  updatedAt            DateTime         @updatedAt @map("updated_at")
+  voided               Boolean          @default(false)
+
+  student          Student            @relation(fields: [studentId], references: [id])
+  question         Question           @relation(fields: [questionId], references: [id])
+  submittedAnswers SubmittedAnswer[]
+  submittedMcqs    SubmittedMcq[]
+  submittedDescriptives SubmittedDescriptive[]
+}
+
+model SubmittedAnswer {
+  submissionId        Int    @map("submission_id")
+  solutionId          String @map("solution_id")
+  timeTakenInSeconds  Int?   @map("time_taken_in_seconds")
+
+  submission   Submission   @relation(fields: [submissionId], references: [id])
+  solutionBase SolutionBase @relation(fields: [solutionId], references: [id])
+
+  @@id([submissionId, solutionId])
+}
+
+model SubmittedMcq {
+  id               String   @id @default(uuid()) @map("mcq_option_id")
+  submissionId     Int      @map("submission_id")
+  solutionId       String   @map("solution_id")
+  submittedOption  String   @map("submitted_option")
+  isCorrect        Boolean  @default(false) @map("is_correct")
+  awardedMark      Int?     @map("awarded_mark")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+  voided           Boolean  @default(false)
+
+  submission Submission @relation(fields: [submissionId], references: [id])
+
+  @@unique([submissionId, solutionId])
+}
+
+model SubmittedDescriptive {
+  id                         String   @id @default(uuid()) @map("descriptive_id")
+  submissionId               Int      @map("submission_id")
+  solutionId                 String   @map("solution_id")
+  descriptiveSubmittedAnswer String?  @map("descriptive_submitted_answer")
+  solutionImageUrl           String?  @map("solution_image_url")
+  awardedMarks               Int?     @map("awarded_marks")
+  createdAt                  DateTime @default(now()) @map("created_at")
+  updatedAt                  DateTime @updatedAt @map("updated_at")
+  voided                     Boolean  @default(false)
+
+  submission Submission @relation(fields: [submissionId], references: [id])
+
+  @@unique([submissionId, solutionId])
 }
