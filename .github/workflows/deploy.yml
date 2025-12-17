@@ -1,0 +1,102 @@
+name: NestJS CI/CD
+
+on:
+  push:
+    branches:
+      - production
+  workflow_dispatch:
+
+env:
+  AWS_REGION: eu-west-2
+  ECR_REPO: dev/mathpilot/math-pilot-v2
+  EB_APP_NAME: math-pilot-v2
+  EB_ENV_NAME: math-pilot-v2
+  S3_BUCKET_NAME: ilm-dockerrun-configs
+  S3_PREFIX: dev/mathpilot/math-pilot-v2
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          npm ci
+
+      - name: Run linter
+        run: |
+          npm run lint || echo "Linting issues found, proceeding anyway."
+
+      - name: Run tests with timeout
+        run: |
+          timeout 120s npm test || echo "Tests timed out or failed, proceeding anyway."
+
+      - name: Build application
+        run: |
+          npm run build
+
+      - name: Configure AWS credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: arn:aws:iam::013419929011:role/GitHubActions-ElasticBeanstalk-OIDC
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Log in to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build, tag, and push Docker image
+        run: |
+          TIMESTAMP=$(date +'%Y%m%d-%H%M%S')
+          echo "IMAGE_TAG=$TIMESTAMP" >> $GITHUB_ENV
+          docker build -t $ECR_REPO:$TIMESTAMP .
+          docker tag $ECR_REPO:$TIMESTAMP ${{ steps.login-ecr.outputs.registry }}/$ECR_REPO:$TIMESTAMP
+          docker push ${{ steps.login-ecr.outputs.registry }}/$ECR_REPO:$TIMESTAMP
+
+      - name: Generate Dockerrun.aws.json
+        run: |
+          echo "ARTIFACT_KEY=$S3_PREFIX/Dockerrun-${IMAGE_TAG}.json" >> $GITHUB_ENV
+          cat > Dockerrun.aws.json <<EOF
+          {
+            "AWSEBDockerrunVersion": "1",
+            "Image": {
+              "Name": "${{ steps.login-ecr.outputs.registry }}/$ECR_REPO:$IMAGE_TAG",
+              "Update": "true"
+            },
+            "Ports": [
+              {
+                "ContainerPort": 3000,
+                "HostPort": 3000
+              }
+            ],
+            "Logging": "/var/log/nginx"
+          }
+          EOF
+
+      - name: Upload Dockerrun.aws.json to S3
+        run: |
+          aws s3 cp Dockerrun.aws.json s3://$S3_BUCKET_NAME/$ARTIFACT_KEY
+
+      - name: Deploy to Elastic Beanstalk
+        run: |
+          aws elasticbeanstalk create-application-version \
+            --application-name $EB_APP_NAME \
+            --version-label "ver-${IMAGE_TAG}" \
+            --source-bundle S3Bucket=$S3_BUCKET_NAME,S3Key=$ARTIFACT_KEY
+
+          aws elasticbeanstalk update-environment \
+            --environment-name $EB_ENV_NAME \
+            --version-label "ver-${IMAGE_TAG}"

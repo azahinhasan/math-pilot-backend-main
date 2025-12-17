@@ -1,0 +1,63 @@
+################################################################################
+# STAGE 1: DEPENDENCIES
+# Install production dependencies for optimal layer caching
+################################################################################
+FROM node:22-alpine AS deps
+
+LABEL stage=dependencies
+
+WORKDIR /app
+
+# Build deps for native modules
+RUN apk add --no-cache python3 make g++
+
+COPY package*.json ./
+
+RUN npm ci --omit=dev && \
+    npm cache clean --force
+
+################################################################################
+# STAGE 2: BUILD
+# Compile TypeScript source code to JavaScript
+################################################################################
+FROM node:22-alpine AS builder
+
+LABEL stage=builder
+
+WORKDIR /app
+
+RUN apk add --no-cache python3 make g++
+
+COPY package*.json ./
+
+RUN npm ci && \
+    npm cache clean --force
+
+COPY . .
+
+RUN npm run build
+
+################################################################################
+# STAGE 3: PRODUCTION RUNTIME
+# Minimal production image with only runtime dependencies
+################################################################################
+FROM node:22-alpine AS runner
+
+LABEL stage=production
+
+WORKDIR /app
+
+ENV NODE_ENV=production
+
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nestjs -u 1001
+
+COPY --from=deps --chown=nestjs:nodejs /app/node_modules ./node_modules
+COPY --from=builder --chown=nestjs:nodejs /app/dist ./dist
+COPY --chown=nestjs:nodejs package*.json ./
+
+USER nestjs
+
+EXPOSE 3000
+
+CMD ["node", "dist/src/main"]
