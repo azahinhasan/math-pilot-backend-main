@@ -26,13 +26,21 @@ export class GetModulesBySubjectHandler
       },
     });
 
-    console.log('Auth Data:', authData,clerkId);
-    console.log('Student Board:', authData?.student?.boardAgeLevel);
+    /* Fallback because student boardAgeLevel may be represented either as a FK (boardAgeLevelId)
+     or as an expanded relation (boardAgeLevel.id) depending on how the auth record was created/loaded. */
+    const studentBoardAgeLevelId =
+      authData?.student?.boardAgeLevelId ??
+      authData?.student?.boardAgeLevel?.id;
+
+    if (!studentBoardAgeLevelId) {
+      throw new Error('No board found for student');
+    }
 
     const modules = await this.prisma.module.findMany({
       where: {
         subject,
         voided: false,
+        boardAgeLevelId: studentBoardAgeLevelId,
       },
       include: {
         boardAgeLevel: {
