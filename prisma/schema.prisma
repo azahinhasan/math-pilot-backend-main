@@ -47,9 +47,9 @@ enum QuestionFor {
 }
 
 enum DifficultyLevel {
-  Beginner
-  Intermediate
-  Advanced
+  Easy
+  Medium
+  Hard
 }
 
 enum SubmissionType {
@@ -75,12 +75,6 @@ enum ExamType {
   Competitive
   Normal
   Mock
-}
-
-enum ExamDifficulty {
-  Easy
-  Medium
-  Hard
 }
 
 enum GradingType {
@@ -402,20 +396,20 @@ model SubmittedDescriptive {
 }
 
 model Exam {
-  id                   String          @id @default(uuid())
+  id                   String           @id @default(uuid())
   name                 String
-  startTime            DateTime        @map("start_time")
-  endTime              DateTime        @map("end_time")
+  startTime            DateTime         @map("start_time")
+  endTime              DateTime         @map("end_time")
   type                 ExamType
-  difficulty           ExamDifficulty? // Will be called Beginner, Intermediate, Advanced for competitive exams
-  timeLimit            Int?            @map("time_limit")
-  maxNumberOfQuestions Int?            @map("max_number_of_questions")
+  difficulty           DifficultyLevel? // Will be called Beginner, Intermediate, Advanced for competitive exams
+  timeLimit            Int?             @map("time_limit")
+  maxNumberOfQuestions Int?             @map("max_number_of_questions")
   status               ReviewStatus?
-  totalMarks           Int?            @map("total_marks")
-  classId              String?         @map("class_id") // Only for exams assigned for a class
-  createdAt            DateTime        @default(now()) @map("created_at")
-  updatedAt            DateTime        @updatedAt @map("updated_at")
-  voided               Boolean         @default(false)
+  totalMarks           Int?             @map("total_marks")
+  classId              String?          @map("class_id") // Only for exams assigned for a class
+  createdAt            DateTime         @default(now()) @map("created_at")
+  updatedAt            DateTime         @updatedAt @map("updated_at")
+  voided               Boolean          @default(false)
 
   subtopics ExamSubtopic[]
 
