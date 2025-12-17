@@ -9,6 +9,7 @@ import { PracticeModeModule } from './modules/practice-mode/practice-mode.module
 import { RoleModule } from './modules/role/role.module';
 import { BoardAgeLevelModule } from './modules/board-age-level/board-age-level.module';
 import { ModulesModule } from './modules/modules/modules.module';
+import { ExamsModule } from './modules/exams/exams.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { ModulesModule } from './modules/modules/modules.module';
     RoleModule,
     BoardAgeLevelModule,
     ModulesModule,
+    ExamsModule
   ], // Read .env file for environment variables
   controllers: [AppController],
   providers: [AppService],

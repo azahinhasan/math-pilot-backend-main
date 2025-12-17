@@ -35,6 +35,7 @@ enum AgeLevelName {
 enum Subject {
   Mathematics
 }
+
 enum ContentBy {
   HUMAN
   AI
@@ -62,8 +63,8 @@ enum SubmissionStatus {
   Submitted
   Graded
 }
-// Models //
 
+// Models //
 
 model Role {
   id          String   @id @default(uuid())
@@ -174,9 +175,10 @@ model Topic {
   updatedAt    DateTime @updatedAt @map("updated_at")
   voided       Boolean  @default(false)
 
-  module    Module     @relation(fields: [moduleId], references: [id])
-  subtopics Subtopic[]
-  questions Question[]
+  module        Module         @relation(fields: [moduleId], references: [id])
+  subtopics     Subtopic[]
+  questions     Question[]
+  examSubtopics ExamSubtopic[]
 }
 
 model Subtopic {
@@ -195,9 +197,8 @@ model Subtopic {
   topic         Topic          @relation(fields: [topicId], references: [id])
   boardAgeLevel BoardAgeLevel? @relation(fields: [boardAgeLevelId], references: [id])
   questions     Question[]
+  examSubtopics ExamSubtopic[]
 }
-
-
 
 model QuestionType {
   id          String   @id @default(uuid())
@@ -285,32 +286,32 @@ model SolutionDescriptive {
 }
 
 model Submission {
-  id                   Int              @id @default(autoincrement())
-  studentId            String           @map("student_id")
+  id                  Int              @id @default(autoincrement())
+  studentId           String           @map("student_id")
   // teacherId         String?          @map("teacher_id") // Commented: teachers table not available
-  questionId           String           @map("question_id")
-  type                 SubmissionType
-  status               SubmissionStatus
-  awardedMarks         Int?             @map("awarded_marks")
-  correctAnswersCount  Int?             @map("correct_answers_count")
-  // examId            String?          @map("exam_id") // Commented: exams table not available
+  questionId          String           @map("question_id")
+  type                SubmissionType
+  status              SubmissionStatus
+  awardedMarks        Int?             @map("awarded_marks")
+  correctAnswersCount Int?             @map("correct_answers_count")
+  examId              String?          @map("exam_id") // Commented: exams table not available
   // homeworkId        String?          @map("homework_id") // Commented: assignments table not available
-  beganAt              DateTime         @map("began_at")
-  endedAt              DateTime?        @map("ended_at")
-  updatedAt            DateTime         @updatedAt @map("updated_at")
-  voided               Boolean          @default(false)
+  beganAt             DateTime         @map("began_at")
+  endedAt             DateTime?        @map("ended_at")
+  updatedAt           DateTime         @updatedAt @map("updated_at")
+  voided              Boolean          @default(false)
 
-  student          Student            @relation(fields: [studentId], references: [id])
-  question         Question           @relation(fields: [questionId], references: [id])
-  submittedAnswers SubmittedAnswer[]
-  submittedMcqs    SubmittedMcq[]
+  student               Student                @relation(fields: [studentId], references: [id])
+  question              Question               @relation(fields: [questionId], references: [id])
+  submittedAnswers      SubmittedAnswer[]
+  submittedMcqs         SubmittedMcq[]
   submittedDescriptives SubmittedDescriptive[]
 }
 
 model SubmittedAnswer {
-  submissionId        Int    @map("submission_id")
-  solutionId          String @map("solution_id")
-  timeTakenInSeconds  Int?   @map("time_taken_in_seconds")
+  submissionId       Int    @map("submission_id")
+  solutionId         String @map("solution_id")
+  timeTakenInSeconds Int?   @map("time_taken_in_seconds")
 
   submission   Submission   @relation(fields: [submissionId], references: [id])
   solutionBase SolutionBase @relation(fields: [solutionId], references: [id])
@@ -319,15 +320,15 @@ model SubmittedAnswer {
 }
 
 model SubmittedMcq {
-  id               String   @id @default(uuid()) @map("mcq_option_id")
-  submissionId     Int      @map("submission_id")
-  solutionId       String   @map("solution_id")
-  submittedOption  String   @map("submitted_option")
-  isCorrect        Boolean  @default(false) @map("is_correct")
-  awardedMark      Int?     @map("awarded_mark")
-  createdAt        DateTime @default(now()) @map("created_at")
-  updatedAt        DateTime @updatedAt @map("updated_at")
-  voided           Boolean  @default(false)
+  id              String   @id @default(uuid()) @map("mcq_option_id")
+  submissionId    Int      @map("submission_id")
+  solutionId      String   @map("solution_id")
+  submittedOption String   @map("submitted_option")
+  isCorrect       Boolean  @default(false) @map("is_correct")
+  awardedMark     Int?     @map("awarded_mark")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+  voided          Boolean  @default(false)
 
   submission Submission @relation(fields: [submissionId], references: [id])
 
@@ -348,4 +349,58 @@ model SubmittedDescriptive {
   submission Submission @relation(fields: [submissionId], references: [id])
 
   @@unique([submissionId, solutionId])
+}
+
+enum ReviewStatus {
+  Scheduled
+  InProgress
+  InReview
+  Graded
+}
+
+enum ExamType {
+  Competitive
+  Normal
+  Mock
+}
+
+enum ExamDifficulty {
+  Easy
+  Medium
+  Hard
+}
+
+model Exam {
+  id                   String          @id @default(uuid())
+  name                 String
+  startTime            DateTime        @map("start_time")
+  endTime              DateTime        @map("end_time")
+  type                 ExamType
+  difficulty           ExamDifficulty? // Will be called Beginner, Intermediate, Advanced for competitive exams
+  timeLimit            Int?            @map("time_limit")
+  maxNumberOfQuestions Int?            @map("max_number_of_questions")
+  status               ReviewStatus?
+  totalMarks           Int?            @map("total_marks")
+  classId              String?         @map("class_id") // Only for exams assigned for a class
+  createdAt            DateTime        @default(now()) @map("created_at")
+  updatedAt            DateTime        @updatedAt @map("updated_at")
+  voided               Boolean         @default(false)
+
+  subtopics ExamSubtopic[]
+
+  @@map("exams")
+}
+
+// Maintains the many to many relationship between exams and topics and subtopics
+model ExamSubtopic {
+  id         String @id @default(uuid())
+  examId     String @map("exam_id")
+  topicId    String @map("topic_id")
+  subtopicId String @map("subtopic_id")
+
+  exam     Exam     @relation(fields: [examId], references: [id])
+  topic    Topic    @relation(fields: [topicId], references: [id])
+  subtopic Subtopic @relation(fields: [subtopicId], references: [id])
+
+  @@map("exam_subtopics")
 }
