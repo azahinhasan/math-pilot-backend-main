@@ -153,15 +153,17 @@ model Question {
   stepCount           Int             @map("step_count")
   serialNo            Int             @map("serial_no")
   questionTypeId      String          @map("question_type_id")
-  // module_id varchar [ref: > modules.id]
-  // topic_id varchar [ref: > topics.id]
-  // subtopic_id varchar [ref: > subtopics.id]
+  topicId             String?         @map("topic_id")
+  subtopicId          String?         @map("subtopic_id")
   createdAt           DateTime        @default(now()) @map("created_at")
   updatedAt           DateTime        @updatedAt @map("updated_at")
   voided              Boolean         @default(false)
 
   questionType  QuestionType   @relation(fields: [questionTypeId], references: [id])
+  topic         Topic?         @relation(fields: [topicId], references: [id])
+  subtopic      Subtopic?      @relation(fields: [subtopicId], references: [id])
   solutionBases SolutionBase[]
+  questionSets  QuestionSet[]
 }
 
 model SolutionBase {
@@ -234,6 +236,7 @@ model Topic {
 
   subtopics     Subtopic[]
   examSubtopics ExamSubtopic[]
+  questions     Question[]
 
   @@map("topics")
 }
@@ -253,6 +256,7 @@ model Subtopic {
 
   topic         Topic          @relation(fields: [topicId], references: [id])
   examSubtopics ExamSubtopic[]
+  questions     Question[]
 
   @@map("subtopics")
 }
@@ -274,6 +278,7 @@ model Exam {
   voided               Boolean         @default(false)
 
   subtopics ExamSubtopic[]
+  questionSets QuestionSet[]
 
   @@map("exams")
 }
@@ -290,4 +295,29 @@ model ExamSubtopic {
 
   @@id([examId, topicId, subtopicId])
   @@map("exam_subtopics")
+}
+
+// Stores a selected set of questions assigned to an exam.
+model QuestionSet {
+  id         String   @id @default(uuid())
+  serialId   Int?     @map("serial_id")
+  // Mock-only metadata (per docs/db.dbml). Kept optional for now because the current codebase
+  // doesn't yet model Modules/Homework as first-class Prisma models.
+  homeworkId    Int?      @map("homework_id")
+  name          String?   // For Mock Only. Example: General Mathematics
+  year          Int?      // For Mock Only. Example: 2020
+  season        String?   // For Mock Only. Example: Summer
+  markSchemeUrl String?   @map("mark_scheme_url")
+  moduleId      String?   @map("module_id")
+  examId     Int      @map("exam_id")
+  questionId String   @map("question_id")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+  voided     Boolean  @default(false)
+
+  exam     Exam     @relation(fields: [examId], references: [id])
+  question Question @relation(fields: [questionId], references: [id])
+
+  @@unique([examId, questionId])
+  @@map("question_sets")
 }
