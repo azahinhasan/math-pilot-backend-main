@@ -201,7 +201,6 @@ model SolutionDescriptive {
   solutionBase SolutionBase @relation(fields: [solutionBaseId], references: [id])
 }
 
-
 enum ReviewStatus {
   Scheduled
   InProgress
@@ -216,9 +215,9 @@ enum ExamType {
 }
 
 enum ExamDifficulty {
-  Beginner
-  Intermediate
-  Advanced
+  Easy
+  Medium
+  Hard
 }
 
 model Topic {
@@ -226,7 +225,7 @@ model Topic {
   name         String
   description  String?
   logoFileName String?  @map("logo_file_name")
-  moduleId     String?  @map("module_id")
+  // moduleId     String  @map("module_id")
   serialNumber Int      @map("serial_number")
   paperNumber  Int      @map("paper_number")
   createdAt    DateTime @default(now()) @map("created_at")
@@ -246,48 +245,49 @@ model Subtopic {
   serialNumber Int      @map("serial_number")
   content      String?
   topicId      String   @map("topic_id")
+  // institutionId   String   @map("institution_id") // [ref: > institutions.id]
+  // boardAgeLevelId String   @map("board_age_level_id") // [ref: > boardAgeLevels.id]
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
   voided       Boolean  @default(false)
 
-  topic         Topic         @relation(fields: [topicId], references: [id])
+  topic         Topic          @relation(fields: [topicId], references: [id])
   examSubtopics ExamSubtopic[]
 
   @@map("subtopics")
 }
 
 model Exam {
-  id                  Int      @id @default(autoincrement())
-  name                String
-  startTime           DateTime @map("start_time")
-  endTime             DateTime @map("end_time")
-  type                ExamType
-  /// Only for competitive exams
-  difficulty          ExamDifficulty?
-  timeLimit           Int?     @map("time_limit")
-  maxNumberOfQuestions Int?    @map("max_number_of_questions")
-  status              ReviewStatus?
-  totalMarks          Int?     @map("total_marks")
-  classId             String?  @map("class_id")
-  createdAt           DateTime @default(now()) @map("created_at")
-  updatedAt           DateTime @updatedAt @map("updated_at")
-  voided              Boolean  @default(false)
+  id                   Int             @id @default(autoincrement())
+  name                 String
+  startTime            DateTime        @map("start_time")
+  endTime              DateTime        @map("end_time")
+  type                 ExamType
+  difficulty           ExamDifficulty? // Will be called Beginner, Intermediate, Advanced for competitive exams
+  timeLimit            Int?            @map("time_limit")
+  maxNumberOfQuestions Int?            @map("max_number_of_questions")
+  status               ReviewStatus?
+  totalMarks           Int?            @map("total_marks")
+  classId              String?         @map("class_id") // Only for exams assigned for a class
+  createdAt            DateTime        @default(now()) @map("created_at")
+  updatedAt            DateTime        @updatedAt @map("updated_at")
+  voided               Boolean         @default(false)
 
   subtopics ExamSubtopic[]
 
   @@map("exams")
 }
 
+// Maintains the many to many relationship between exams and topics and subtopics
 model ExamSubtopic {
-  examId    Int    @map("exam_id")
-  topicId   String @map("topic_id")
+  examId     Int    @map("exam_id")
+  topicId    String @map("topic_id")
   subtopicId String @map("subtopic_id")
 
-  exam    Exam    @relation(fields: [examId], references: [id])
-  topic   Topic   @relation(fields: [topicId], references: [id])
+  exam     Exam     @relation(fields: [examId], references: [id])
+  topic    Topic    @relation(fields: [topicId], references: [id])
   subtopic Subtopic @relation(fields: [subtopicId], references: [id])
 
   @@id([examId, topicId, subtopicId])
   @@map("exam_subtopics")
 }
-
