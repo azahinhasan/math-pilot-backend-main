@@ -16,9 +16,9 @@ function normalizeDifficulty(value: unknown): ExamDifficulty | unknown {
   if (typeof value !== 'string') return value;
   const v = value.trim().toLowerCase();
 
-  if (v === 'beginner') return ExamDifficulty.Beginner;
-  if (v === 'intermediate') return ExamDifficulty.Intermediate;
-  if (v === 'advanced') return ExamDifficulty.Advanced;
+  if (v === 'beginner') return ExamDifficulty.Easy;
+  if (v === 'intermediate') return ExamDifficulty.Medium;
+  if (v === 'advanced') return ExamDifficulty.Hard;
 
   return value;
 }
@@ -27,8 +27,7 @@ function normalizeExamType(value: unknown): ExamType | unknown {
   if (typeof value !== 'string') return value;
   const v = value.trim().toLowerCase();
 
-  // Keep backwards-compat for old clients, but canonical enum is "Competitive"
-  if (v === 'competitive' || v === 'competetive') return ExamType.Competitive;
+  if (v === 'competitive') return ExamType.Competitive;
   if (v === 'normal') return ExamType.Normal;
   if (v === 'mock') return ExamType.Mock;
 
@@ -80,5 +79,3 @@ export class CreateExamDto {
   @IsString()
   name?: string;
 }
-
-
