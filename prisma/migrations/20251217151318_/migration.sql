@@ -262,11 +262,12 @@ CREATE TABLE "Submission" (
 
 -- CreateTable
 CREATE TABLE "SubmittedAnswer" (
+    "id" TEXT NOT NULL,
     "submission_id" TEXT NOT NULL,
     "solution_id" TEXT NOT NULL,
     "time_taken_in_seconds" INTEGER,
 
-    CONSTRAINT "SubmittedAnswer_pkey" PRIMARY KEY ("submission_id","solution_id")
+    CONSTRAINT "SubmittedAnswer_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -547,6 +548,9 @@ CREATE UNIQUE INDEX "SolutionBase_question_id_key" ON "SolutionBase"("question_i
 
 -- CreateIndex
 CREATE UNIQUE INDEX "SolutionDescriptive_solution_base_id_key" ON "SolutionDescriptive"("solution_base_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "SubmittedAnswer_submission_id_solution_id_key" ON "SubmittedAnswer"("submission_id", "solution_id");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "SubmittedMcq_submission_id_solution_id_key" ON "SubmittedMcq"("submission_id", "solution_id");

@@ -367,6 +367,8 @@ model SubmittedAnswer {
   submission             Submission              @relation(fields: [submissionId], references: [id])
   solutionBase           SolutionBase            @relation(fields: [solutionId], references: [id])
   submittedMatchingPairs SubmittedMatchingPair[]
+
+  @@unique([submissionId, solutionId])
 }
 
 model SubmittedMcq {
