@@ -25,7 +25,7 @@ export class TokenGeneratorService {
       if (email) {
         const users = await this.clerkClient.users.getUserList({
           emailAddress: [email],
-          limit: 1,
+          limit: 10,
         });
         if (users.data.length === 0) {
           throw new NotFoundException(`User with email ${email} not found.`);
