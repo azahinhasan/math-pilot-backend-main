@@ -3,7 +3,7 @@ name: NestJS CI/CD
 on:
   push:
     branches:
-      - production
+      - release
   workflow_dispatch:
 
 env:
