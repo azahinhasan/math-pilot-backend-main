@@ -34,6 +34,12 @@ CREATE TYPE "ExamType" AS ENUM ('Competitive', 'Normal', 'Mock');
 -- CreateEnum
 CREATE TYPE "ExamDifficulty" AS ENUM ('Easy', 'Medium', 'Hard');
 
+-- CreateEnum
+CREATE TYPE "GradingType" AS ENUM ('GRADED', 'PRACTISE');
+
+-- CreateEnum
+CREATE TYPE "AssignmentType" AS ENUM ('HOMEWORK', 'PRACTICE');
+
 -- CreateTable
 CREATE TABLE "Role" (
     "id" TEXT NOT NULL,
@@ -210,7 +216,7 @@ CREATE TABLE "SolutionBase" (
 
 -- CreateTable
 CREATE TABLE "SolutionMcq" (
-    "mcq_option_id" TEXT NOT NULL,
+    "id" TEXT NOT NULL,
     "solution_base_id" TEXT NOT NULL,
     "option_text" TEXT NOT NULL,
     "is_correct" BOOLEAN NOT NULL DEFAULT false,
@@ -219,7 +225,7 @@ CREATE TABLE "SolutionMcq" (
     "updated_at" TIMESTAMP(3) NOT NULL,
     "voided" BOOLEAN NOT NULL DEFAULT false,
 
-    CONSTRAINT "SolutionMcq_pkey" PRIMARY KEY ("mcq_option_id")
+    CONSTRAINT "SolutionMcq_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -238,7 +244,7 @@ CREATE TABLE "SolutionDescriptive" (
 
 -- CreateTable
 CREATE TABLE "Submission" (
-    "id" SERIAL NOT NULL,
+    "id" TEXT NOT NULL,
     "student_id" TEXT NOT NULL,
     "question_id" TEXT NOT NULL,
     "type" "SubmissionType" NOT NULL,
@@ -256,7 +262,7 @@ CREATE TABLE "Submission" (
 
 -- CreateTable
 CREATE TABLE "SubmittedAnswer" (
-    "submission_id" INTEGER NOT NULL,
+    "submission_id" TEXT NOT NULL,
     "solution_id" TEXT NOT NULL,
     "time_taken_in_seconds" INTEGER,
 
@@ -265,8 +271,8 @@ CREATE TABLE "SubmittedAnswer" (
 
 -- CreateTable
 CREATE TABLE "SubmittedMcq" (
-    "mcq_option_id" TEXT NOT NULL,
-    "submission_id" INTEGER NOT NULL,
+    "id" TEXT NOT NULL,
+    "submission_id" TEXT NOT NULL,
     "solution_id" TEXT NOT NULL,
     "submitted_option" TEXT NOT NULL,
     "is_correct" BOOLEAN NOT NULL DEFAULT false,
@@ -275,13 +281,13 @@ CREATE TABLE "SubmittedMcq" (
     "updated_at" TIMESTAMP(3) NOT NULL,
     "voided" BOOLEAN NOT NULL DEFAULT false,
 
-    CONSTRAINT "SubmittedMcq_pkey" PRIMARY KEY ("mcq_option_id")
+    CONSTRAINT "SubmittedMcq_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "SubmittedDescriptive" (
-    "descriptive_id" TEXT NOT NULL,
-    "submission_id" INTEGER NOT NULL,
+    "id" TEXT NOT NULL,
+    "submission_id" TEXT NOT NULL,
     "solution_id" TEXT NOT NULL,
     "descriptive_submitted_answer" TEXT,
     "solution_image_url" TEXT,
@@ -290,11 +296,11 @@ CREATE TABLE "SubmittedDescriptive" (
     "updated_at" TIMESTAMP(3) NOT NULL,
     "voided" BOOLEAN NOT NULL DEFAULT false,
 
-    CONSTRAINT "SubmittedDescriptive_pkey" PRIMARY KEY ("descriptive_id")
+    CONSTRAINT "SubmittedDescriptive_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "exams" (
+CREATE TABLE "Exam" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "start_time" TIMESTAMP(3) NOT NULL,
@@ -310,17 +316,200 @@ CREATE TABLE "exams" (
     "updated_at" TIMESTAMP(3) NOT NULL,
     "voided" BOOLEAN NOT NULL DEFAULT false,
 
-    CONSTRAINT "exams_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "Exam_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "exam_subtopics" (
+CREATE TABLE "SolutionMatchingPair" (
+    "id" TEXT NOT NULL,
+    "solution_base_id" TEXT NOT NULL,
+    "column_left_text" TEXT NOT NULL,
+    "column_right_text" TEXT NOT NULL,
+    "mark" INTEGER,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+    "voided" BOOLEAN NOT NULL DEFAULT false,
+
+    CONSTRAINT "SolutionMatchingPair_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "StudentSchedule" (
+    "id" TEXT NOT NULL,
+    "student_id" TEXT NOT NULL,
+    "module_id" TEXT NOT NULL,
+    "day" TEXT NOT NULL,
+    "start_time" TEXT NOT NULL,
+    "end_time" TEXT NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+    "voided" BOOLEAN NOT NULL DEFAULT false,
+
+    CONSTRAINT "StudentSchedule_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "ExamSubtopic" (
     "id" TEXT NOT NULL,
     "exam_id" TEXT NOT NULL,
     "topic_id" TEXT NOT NULL,
     "subtopic_id" TEXT NOT NULL,
 
-    CONSTRAINT "exam_subtopics_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "ExamSubtopic_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Assignment" (
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "due_date" TIMESTAMP(3),
+    "type" "AssignmentType" NOT NULL,
+    "grading_type" "GradingType" NOT NULL,
+    "status" "ReviewStatus",
+    "subtopic_id" TEXT,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+    "voided" BOOLEAN NOT NULL DEFAULT false,
+
+    CONSTRAINT "Assignment_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "QuestionSet" (
+    "id" TEXT NOT NULL,
+    "serial_no" INTEGER,
+    "question_id" TEXT,
+    "exam_id" TEXT,
+    "name" TEXT,
+    "year" INTEGER,
+    "season" TEXT,
+    "mark_scheme_url" TEXT,
+    "module_id" TEXT NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+    "voided" BOOLEAN NOT NULL DEFAULT false,
+    "assignmentId" TEXT,
+
+    CONSTRAINT "QuestionSet_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "SubmittedMatchingPair" (
+    "id" TEXT NOT NULL,
+    "submission_id" TEXT NOT NULL,
+    "solution_id" TEXT NOT NULL,
+    "column_left_text" TEXT NOT NULL,
+    "column_right_text" TEXT NOT NULL,
+    "awarded_mark" INTEGER,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+    "voided" BOOLEAN NOT NULL DEFAULT false,
+
+    CONSTRAINT "SubmittedMatchingPair_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "RunningCanvas" (
+    "id" TEXT NOT NULL,
+    "hint" TEXT,
+    "canvas_json" TEXT,
+    "user_id" TEXT NOT NULL,
+    "question_id" TEXT NOT NULL,
+
+    CONSTRAINT "RunningCanvas_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "AiResponse" (
+    "id" TEXT NOT NULL,
+    "image" TEXT NOT NULL,
+    "image_key" TEXT,
+    "evaluation" TEXT NOT NULL,
+    "ocr_output" TEXT,
+    "question_title" TEXT,
+    "verdict" TEXT,
+    "hint" TEXT,
+    "is_finished" BOOLEAN,
+    "next_step_count" INTEGER,
+    "chat_history" TEXT,
+    "question_id" TEXT,
+
+    CONSTRAINT "AiResponse_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "History" (
+    "id" TEXT NOT NULL,
+    "chat_history" TEXT,
+    "evaluation" TEXT,
+    "extracted_text" TEXT,
+    "hint" TEXT,
+    "verdict" BOOLEAN,
+    "outdated" BOOLEAN,
+    "canvas_json" TEXT,
+    "user_id" TEXT NOT NULL,
+    "question_id" TEXT,
+    "module_id" TEXT,
+    "subtopic_id" TEXT,
+
+    CONSTRAINT "History_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "ExamLog" (
+    "id" TEXT NOT NULL,
+    "description" TEXT,
+    "exam_id" TEXT NOT NULL,
+    "user_id" TEXT NOT NULL,
+    "logged_at" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "ExamLog_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "GuardianStudentMap" (
+    "id" TEXT NOT NULL,
+    "guardian_id" TEXT NOT NULL,
+    "student_id" TEXT NOT NULL,
+    "relationship" TEXT NOT NULL,
+
+    CONSTRAINT "GuardianStudentMap_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "GoalLevel" (
+    "id" TEXT NOT NULL,
+    "goal_id" TEXT NOT NULL,
+    "board_age_level_id" TEXT NOT NULL,
+
+    CONSTRAINT "GoalLevel_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "QuestionLevel" (
+    "id" TEXT NOT NULL,
+    "question_id" TEXT NOT NULL,
+    "board_age_level_id" TEXT NOT NULL,
+
+    CONSTRAINT "QuestionLevel_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "StudentTopicProgress" (
+    "id" TEXT NOT NULL,
+    "student_id" TEXT NOT NULL,
+    "topic_id" TEXT NOT NULL,
+    "status" "SubmissionStatus",
+    "questions_attempted" INTEGER,
+    "questions_correct" INTEGER,
+    "is_favorite" BOOLEAN NOT NULL DEFAULT false,
+    "time_spent_in_seconds" INTEGER NOT NULL DEFAULT 0,
+    "ai_generated_notes_url" TEXT,
+    "last_accessed_at" TIMESTAMP(3),
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "StudentTopicProgress_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
@@ -361,9 +550,6 @@ CREATE UNIQUE INDEX "SolutionDescriptive_solution_base_id_key" ON "SolutionDescr
 
 -- CreateIndex
 CREATE UNIQUE INDEX "SubmittedMcq_submission_id_solution_id_key" ON "SubmittedMcq"("submission_id", "solution_id");
-
--- CreateIndex
-CREATE UNIQUE INDEX "SubmittedDescriptive_submission_id_solution_id_key" ON "SubmittedDescriptive"("submission_id", "solution_id");
 
 -- AddForeignKey
 ALTER TABLE "Auth" ADD CONSTRAINT "Auth_role_id_fkey" FOREIGN KEY ("role_id") REFERENCES "Role"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -432,10 +618,85 @@ ALTER TABLE "SubmittedMcq" ADD CONSTRAINT "SubmittedMcq_submission_id_fkey" FORE
 ALTER TABLE "SubmittedDescriptive" ADD CONSTRAINT "SubmittedDescriptive_submission_id_fkey" FOREIGN KEY ("submission_id") REFERENCES "Submission"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "exam_subtopics" ADD CONSTRAINT "exam_subtopics_exam_id_fkey" FOREIGN KEY ("exam_id") REFERENCES "exams"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "SolutionMatchingPair" ADD CONSTRAINT "SolutionMatchingPair_solution_base_id_fkey" FOREIGN KEY ("solution_base_id") REFERENCES "SolutionBase"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "exam_subtopics" ADD CONSTRAINT "exam_subtopics_topic_id_fkey" FOREIGN KEY ("topic_id") REFERENCES "Topic"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "StudentSchedule" ADD CONSTRAINT "StudentSchedule_student_id_fkey" FOREIGN KEY ("student_id") REFERENCES "Student"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "exam_subtopics" ADD CONSTRAINT "exam_subtopics_subtopic_id_fkey" FOREIGN KEY ("subtopic_id") REFERENCES "Subtopic"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "StudentSchedule" ADD CONSTRAINT "StudentSchedule_module_id_fkey" FOREIGN KEY ("module_id") REFERENCES "Module"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "ExamSubtopic" ADD CONSTRAINT "ExamSubtopic_exam_id_fkey" FOREIGN KEY ("exam_id") REFERENCES "Exam"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "ExamSubtopic" ADD CONSTRAINT "ExamSubtopic_topic_id_fkey" FOREIGN KEY ("topic_id") REFERENCES "Topic"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "ExamSubtopic" ADD CONSTRAINT "ExamSubtopic_subtopic_id_fkey" FOREIGN KEY ("subtopic_id") REFERENCES "Subtopic"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Assignment" ADD CONSTRAINT "Assignment_subtopic_id_fkey" FOREIGN KEY ("subtopic_id") REFERENCES "Subtopic"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "QuestionSet" ADD CONSTRAINT "QuestionSet_question_id_fkey" FOREIGN KEY ("question_id") REFERENCES "Question"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "QuestionSet" ADD CONSTRAINT "QuestionSet_exam_id_fkey" FOREIGN KEY ("exam_id") REFERENCES "Exam"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "QuestionSet" ADD CONSTRAINT "QuestionSet_module_id_fkey" FOREIGN KEY ("module_id") REFERENCES "Module"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "QuestionSet" ADD CONSTRAINT "QuestionSet_assignmentId_fkey" FOREIGN KEY ("assignmentId") REFERENCES "Assignment"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "SubmittedMatchingPair" ADD CONSTRAINT "SubmittedMatchingPair_submission_id_solution_id_fkey" FOREIGN KEY ("submission_id", "solution_id") REFERENCES "SubmittedAnswer"("submission_id", "solution_id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "RunningCanvas" ADD CONSTRAINT "RunningCanvas_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "Auth"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "RunningCanvas" ADD CONSTRAINT "RunningCanvas_question_id_fkey" FOREIGN KEY ("question_id") REFERENCES "Question"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "AiResponse" ADD CONSTRAINT "AiResponse_question_id_fkey" FOREIGN KEY ("question_id") REFERENCES "Question"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "History" ADD CONSTRAINT "History_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "Auth"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "History" ADD CONSTRAINT "History_question_id_fkey" FOREIGN KEY ("question_id") REFERENCES "Question"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "History" ADD CONSTRAINT "History_module_id_fkey" FOREIGN KEY ("module_id") REFERENCES "Module"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "History" ADD CONSTRAINT "History_subtopic_id_fkey" FOREIGN KEY ("subtopic_id") REFERENCES "Subtopic"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "ExamLog" ADD CONSTRAINT "ExamLog_exam_id_fkey" FOREIGN KEY ("exam_id") REFERENCES "Exam"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "ExamLog" ADD CONSTRAINT "ExamLog_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "Auth"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "GuardianStudentMap" ADD CONSTRAINT "GuardianStudentMap_guardian_id_fkey" FOREIGN KEY ("guardian_id") REFERENCES "Guardian"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "GuardianStudentMap" ADD CONSTRAINT "GuardianStudentMap_student_id_fkey" FOREIGN KEY ("student_id") REFERENCES "Student"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "GoalLevel" ADD CONSTRAINT "GoalLevel_board_age_level_id_fkey" FOREIGN KEY ("board_age_level_id") REFERENCES "BoardAgeLevel"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "QuestionLevel" ADD CONSTRAINT "QuestionLevel_question_id_fkey" FOREIGN KEY ("question_id") REFERENCES "Question"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "QuestionLevel" ADD CONSTRAINT "QuestionLevel_board_age_level_id_fkey" FOREIGN KEY ("board_age_level_id") REFERENCES "BoardAgeLevel"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "StudentTopicProgress" ADD CONSTRAINT "StudentTopicProgress_student_id_fkey" FOREIGN KEY ("student_id") REFERENCES "Student"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "StudentTopicProgress" ADD CONSTRAINT "StudentTopicProgress_topic_id_fkey" FOREIGN KEY ("topic_id") REFERENCES "Topic"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
