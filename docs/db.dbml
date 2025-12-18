@@ -1,0 +1,624 @@
+// DBML schema for ILM Learning Management System
+// Generated from Prisma schema
+
+Table roles {
+  id varchar [pk]
+  name varchar [unique, not null]
+  description varchar
+  created_at timestamp [not null]
+  updated_at timestamp [not null]
+  voided boolean [default: false]
+}
+
+Enum auth_provider {
+  Email
+  Google
+}
+
+Table auth {
+  id varchar [pk]
+  email varchar [unique]
+  username varchar [unique]
+  password_hashed text [not null]
+  auth_provider auth_provider
+  google_id varchar
+  is_active boolean [default: true]
+  role_id varchar [ref: > roles.id]
+  password_reset_token varchar [unique]
+  password_reset_expires timestamp
+  last_updated_pass timestamp
+  created_at timestamp [not null]
+  updated_at timestamp [not null]
+}
+
+Table guardians {
+  id varchar [pk]
+  full_name varchar [not null]
+  auth_id varchar [ref: > auth.id, not null]
+  created_at timestamp [not null]
+  updated_at timestamp [not null]
+  voided boolean [default: false]
+}
+
+Table students {
+  id varchar [pk]
+  full_name varchar [not null]
+  auth_id varchar [ref: > auth.id, not null]
+  age_group_id varchar [ref: > age_groups.id]
+  board_id varchar [ref: > boards.id]
+  level_id varchar [ref: > levels.id]
+  country varchar
+  current_streak int
+  longest_streak int
+  total_xp int
+  last_activity timestamp
+  created_by varchar [ref: > auth.id]
+  created_at timestamp [not null]
+  updated_at timestamp [not null]
+  voided boolean [default: false]
+}
+
+Table age_groups {
+  id varchar [pk]
+  name varchar [unique, not null]
+  description varchar
+  created_at timestamp [not null]
+  updated_at timestamp [not null]
+  voided boolean [default: false]
+}
+
+enum institution_type {
+  School
+  University
+}
+
+Table institutions {
+  id varchar [pk]
+  name varchar [not null]
+  description varchar
+  type institution_type
+  auth_id varchar [ref: > auth.id, not null]
+  created_at timestamp [not null]
+  updated_at timestamp [not null]
+  voided boolean [default: false] 
+}
+
+Table teachers {
+  id varchar [pk]
+  full_name varchar [not null]
+  auth_id varchar [ref: > auth.id, not null]
+  institution_id varchar [ref: > institutions.id, unique]
+  created_at timestamp [not null]
+  updated_at timestamp [not null]
+  voided boolean [default: false] 
+}
+
+Table teacher_expertise {
+  teacher_id varchar [pk, ref: > teachers.id]
+  module_id varchar [pk, ref: > modules.id]
+}
+
+Table classrooms {
+  id varchar [pk]
+  name varchar [not null]
+  description varchar
+  start_date timestamp
+  end_date timestamp
+  created_at timestamp [not null]
+  updated_at timestamp [not null]
+  archived_at timestamp
+  archived boolean [default: false]
+  voided boolean [default: false]
+}
+
+table class_enrollments {
+  student_id varchar [pk, ref: > students.id]
+  class_id varchar [pk, ref: > classrooms.id]
+  enrolled_at timestamp [not null]
+  updated_at timestamp [not null]
+  suspended boolean [default: false]
+  voided boolean [default: false]
+}
+
+enum teacher_role {
+  Admin
+  Assistant
+}
+
+Table classTeachers {
+  teacher_id varchar [pk, ref: > teachers.id]
+  class_id varchar [pk, ref: > classrooms.id]
+  role teacher_role [not null]
+  assigned_on timestamp [not null]
+  assigned_by varchar [ref: > auth.id]
+  voided_by varchar [ref: > auth.id]
+  voided_at timestamp
+  voided boolean
+}
+
+Table boards {
+  id varchar [pk]
+  name varchar [unique, not null]
+  description varchar
+  country varchar [not null]
+  created_at timestamp [not null]
+  updated_at timestamp [not null]
+  voided boolean [default: false]
+}
+
+Table levels {
+  id varchar [pk]
+  name varchar [unique, not null]
+  description varchar
+  board_id varchar [ref: > boards.id]
+  created_at timestamp [not null]
+  updated_at timestamp [not null]
+  voided boolean [default: false]
+}
+
+Enum Subject {
+  Mathematics
+}
+
+Table modules {
+  id varchar [pk]
+  name varchar [not null]
+  description varchar
+  board_id varchar [ref: > boards.id]
+  subject Subject
+  formula_book_url varchar [note: "Only for 'Mathematics' subject where each module can have its own formula book that can be accesses via the provided URL"]
+  logo_file_name varchar
+  created_at timestamp [not null]
+  updated_at timestamp [not null]
+  voided boolean [default: false]
+}
+
+Table topics {
+  id varchar [pk]
+  name varchar [not null]
+  description varchar
+  logo_file_name varchar
+  module_id varchar [ref: > modules.id]
+  serial_number int [not null]
+  paper_number int [not null]
+  created_at timestamp [not null]
+  updated_at timestamp [not null]
+  voided boolean [default: false]
+}
+
+Table subtopics {
+  id varchar [pk]
+  name varchar [not null]
+  logo_file_name varchar
+  serial_number int [not null]
+  content text
+  topic_id varchar [ref: > topics.id]
+  institution_id varchar [ref: > institutions.id]
+  board_id varchar [ref: > boards.id]
+  created_at timestamp [not null]
+  updated_at timestamp [not null]
+  voided boolean [default: false]
+}
+
+Table goals {
+  id varchar [pk]
+  name varchar [not null]
+  serial_number int [not null]
+  description varchar
+  logo_file_name varchar
+  subtopic_id varchar [ref: > subtopics.id]
+  created_at timestamp [not null]
+  updated_at timestamp [not null]
+  voided boolean [default: false]
+}
+
+Table sub_goals {
+  id varchar [pk]
+  name varchar [not null]
+  serial_number int [not null]
+  description varchar
+  logo_file_name varchar
+  content text
+  goal_id varchar [ref: > goals.id]
+  created_at timestamp [not null]
+  updated_at timestamp [not null]
+  voided boolean [default: false]
+}
+
+Table question_types {
+  id varchar [pk]
+  name varchar [unique, not null]
+  description varchar
+  created_at timestamp [not null]
+  updated_at timestamp [not null]
+  voided boolean [default: false]
+}
+
+Enum content_by {
+  HUMAN
+  AI
+}
+
+Table questions {
+  id varchar [pk]
+  title varchar [not null]
+  question_content_link varchar [not null]
+  content_by content_by [default: "HUMAN"]
+  difficulty int [default: 0]
+  total_marks int
+  hint varchar [not null]
+  explanation varchar
+  given_context varchar [note: "Example: A ball is thrown vertically upward with an initial velocity of 20 m/s."]
+  find_objective varchar [note: "Example: Calculate the maximum height reached by the ball and the time taken to reach that height."]
+  step_count number [not null]
+  serial_no number [not null]
+  question_type_id varchar [ref: > question_types.id]
+  module_id varchar [ref: > modules.id]
+  topic_id varchar [ref: > topics.id]
+  subtopic_id varchar [ref: > subtopics.id]
+  goal_id varchar [ref: > goals.id]
+  sub_goal_id varchar [ref: > sub_goals.id]
+  created_at timestamp [not null]
+  updated_at timestamp [not null]
+  voided boolean [default: false]
+
+  note: "Each record in the table represents an individual question with its correct pre-determined solutions stored via the 'solution_base' table"
+}
+
+Table solution_base {
+  id varchar [pk]
+  question_id varchar [ref: - questions.id, not null]
+
+  note: "Helps ensure that each question has at least one solution"
+}
+
+Table solution_mcq {
+  mcq_option_id varchar [pk]
+  solution_base_id varchar [ref: > solution_base.id, not null]
+  option_text varchar [not null]
+  is_correct boolean [default: false]
+  mark int
+  created_at timestamp [not null]
+  updated_at timestamp [not null]
+  voided boolean [default: false]
+
+  note: "The table handles multiple choices and also handles true-false questions with their options being 'True' and 'False'"
+}
+
+Table solution_descriptive {
+  descriptive_id varchar [pk]
+  solution_base_id varchar [ref: - solution_base.id, not null]
+  descriptive_solution varchar
+  marking_steps_json json
+  max_marks int
+  created_at timestamp [not null]
+  updated_at timestamp [not null]
+  voided boolean [default: false]
+
+  note: "Descriptive questions with descriptive answers where answer is evaluated and marked contextually instead of by exact match"
+}
+
+Table solution_matching_pair {
+  match_pair_id varchar [pk]
+  solution_base_id varchar [ref: > solution_base.id, not null]
+  column_left_text varchar [not null]
+  column_right_text varchar [not null]
+  mark int
+  created_at timestamp [not null]
+  updated_at timestamp [not null]
+  voided boolean [default: false]
+
+  note: "For matching two different columns of options. Not necessary for now but planned for in advance"
+}
+
+Table student_schedules {
+  id varchar [pk]
+  student_id varchar [ref: > students.id]
+  module_id varchar [ref: > modules.id]
+  day varchar [not null]
+  start_time varchar [not null]
+  end_time varchar [not null]
+  created_at timestamp [not null]
+  updated_at timestamp [not null]
+  voided boolean [default: false]
+}
+
+enum review_status {
+  Scheduled
+  InProgress
+  InReview
+  Graded
+}
+
+enum ExamType {
+  Competitive
+  Normal
+  Mock
+}
+
+enum ExamDifficulty {
+  Beginner
+  Intermediate
+  Advanced
+}
+
+Table exams {
+  id int [pk, increment]
+  name varchar [not null]
+  start_time timestamp [not null]
+  end_time timestamp [not null]
+  type ExamType [not null]
+  difficulty ExamDifficulty [note: "Only for competitive exams"]
+  time_limit int
+  max_number_of_questions int
+  status review_status
+  total_marks int
+  class_id varchar [ref: > classrooms.id, null, note: "Only for exams assigned for a class"]
+  created_at timestamp [not null]
+  updated_at timestamp [not null]
+  voided boolean [default: false]
+}
+
+Table exam_subtopics {
+  exam_id varchar [pk, ref: > exams.id, not null]
+  topic_id varchar [pk, ref: > topics.id, not null]
+  subtopic_id varchar [pk, ref: > subtopics.id, not null]
+
+  Note: "Maintains the many to many relationship between exams and topics and subtopics"
+}
+
+Enum grading_type {
+  GRADED
+  PRACTISE
+}
+
+Enum assignment_type {
+  HOMEWORK
+  PRACTICE
+}
+
+Table assignments {
+  id int [pk, increment]
+  name varchar [not null]
+  due_date timestamp
+  type assignment_type [not null]
+  grading_type grading_type [not null]
+  status review_status
+  class_id varchar [ref: > classrooms.id]
+  teacher_id varchar [ref: > teachers.id]
+  subtopic_id varchar [ref: > subtopics.id]
+  created_at timestamp [not null]
+  updated_at timestamp [not null]
+  voided boolean [default: false]
+}
+
+Table question_sets {
+  id varchar [pk]
+  serial_id int
+  question_id varchar [ref: > questions.id]
+  exam_id varchar [ref: > exams.id]
+  homework_id varchar [ref: > assignments.id]
+  name varchar [note: "For Mock Only. Example: General Mathematics"]
+  year int [note: "For Mock Only. Example: 2020"]
+  season varchar [note: "For Mock Only. Example: Summer"]
+  mark_scheme_url varchar [note: "URL to access mark scheme associated with any set of mock questions"]
+  module_id varchar [ref: > modules.id, not null, note: "Board for the question is also determined by its associated module"]
+  created_at timestamp [not null]
+  updated_at timestamp [not null]
+  voided boolean [default: false]
+
+  note: "Maintains sets of questions to be used for exams and homeworks"
+}
+
+enum submission_status {
+  Started
+  InProgress
+  Completed
+}
+
+enum submission_type {
+  Exam
+  Homework
+  Practice
+}
+
+Table submissions {
+  id int [pk, increment]
+  student_id varchar [ref: > students.id]
+  teacher_id varchar [ref: > teachers.id]
+  question_id varchar [ref: > questions.id]
+  type submission_type
+  status submission_status
+  awarded_marks int
+  correct_answers_count int [note: "Number of questions answered correctly (full marks)"]
+  exam_id varchar [ref: > exams.id]
+  homework_id varchar [ref: > assignments.id]
+  began_at timestamp [not null]
+  ended_at timestamp [not null]
+  updated_at timestamp [not null]
+  voided boolean [default: false]
+
+  note: "Tracks student performance based on submission against exams. For now storage of submitted answers against questions is not yet added"
+}
+
+Table submitted_answers {
+  submission_id int [pk, ref: > submissions.id]
+  solution_id int [pk, ref: > solution_base.id]
+  time_taken_in_seconds int [note: "Total time taken to solve this question"]
+}
+
+Table submitted_mcq {
+  mcq_option_id varchar [pk]
+  submission_id varchar [ref: - submitted_answers.submission_id, not null]
+  solution_id varchar [ref: - submitted_answers.solution_id, not null]
+  submitted_option varchar [not null]
+  is_correct boolean [default: false]
+  awarded_mark int
+  created_at timestamp [not null]
+  updated_at timestamp [not null]
+  voided boolean [default: false]
+
+  note: "Stores a single answered option against each submission"
+}
+
+Table submitted_descriptive {
+  descriptive_id varchar [pk]
+  submission_id varchar [ref: - submitted_answers.submission_id, not null]
+  solution_id varchar [ref: - submitted_answers.solution_id, not null]
+  descriptive_submitted_answer varchar
+  awarded_marks int
+  created_at timestamp [not null]
+  updated_at timestamp [not null]
+  voided boolean [default: false]
+
+  note: "Descriptive solution to a descriptive question submitted by a student"
+}
+
+Table submitted_matching_pair {
+  match_pair_id varchar [pk]
+  submission_id varchar [ref: > submitted_answers.submission_id, not null]
+  solution_id varchar [ref: > submitted_answers.solution_id, not null]
+  column_left_text varchar [not null]
+  column_right_text varchar [not null]
+  awarded_mark int
+  created_at timestamp [not null]
+  updated_at timestamp [not null]
+  voided boolean [default: false]
+
+  note: "Submission for matching two different columns of options. Not necessary for now but planned for in advance"
+}
+
+Table simulations {
+  id varchar [pk]
+  title varchar [not null]
+  description varchar
+  type SimulationType [not null]
+  url varchar [not null]
+  thumbnail_url varchar
+  for_dark_mode boolean [default: false]
+  created_at timestamp [not null]
+  updated_at timestamp [not null]
+  voided boolean [default: false]
+}
+
+Table active_canvas {
+  id varchar [pk]
+  hint varchar
+  canvas_json varchar
+  user_id varchar [ref: > auth.id]
+  question_id varchar [ref: > questions.id]
+}
+
+Table ai_responses {
+  id varchar [pk]
+  image varchar [not null]
+  image_key varchar
+  evaluation varchar [not null]
+  ocr_output varchar
+  question_title varchar
+  verdict varchar
+  hint varchar
+  is_finished boolean
+  next_step_count number
+  chat_history string
+  question_id varchar [ref: > questions.id]
+}
+
+Table histories {
+  id varchar [pk]
+  chat_history varchar
+  evaluation varchar
+  extracted_text varchar
+  hint varchar
+  verdict boolean 
+  outdated boolean
+  canvas_json varchar
+  user_id varchar [ref: > auth.id]
+  question_id varchar [ref: > questions.id]
+  module_id varchar [ref: > modules.id]
+  subtopic_id varchar [ref: > subtopics.id]
+}
+
+// Table to keep logs for any disconnections 
+// or incidents occured during a student's exams
+Table exam_logs {
+  id varchar [pk]
+  description varchar
+  exam_id varchar [ref: > exams.id]
+  user_id varchar [ref: > auth.id]
+  logged_at timestamp [not null]
+
+  note: "Keep track of user activity during an exam to track events such as disconnect, that could affect performance and may need to be considered"
+}
+
+// Many-to-many relationships
+Table guardian_student_map {
+  guardian_id varchar [pk, ref: > guardians.id]
+  student_id varchar [pk, ref: > students.id]
+  relationship varchar [not null, note: "WILL BE ENUM AFTER CONFIRMING TYPES"]
+}
+
+Table goal_simulations {
+  goal_id varchar [ref: > goals.id]
+  simulation_id varchar [ref: > simulations.id]
+  
+  indexes {
+    (goal_id, simulation_id) [pk]
+  }
+}
+
+Table sub_goal_simulations {
+  sub_goal_id varchar [ref: > sub_goals.id]
+  simulation_id varchar [ref: > simulations.id]
+  
+  indexes {
+    (sub_goal_id, simulation_id) [pk]
+  }
+}
+
+Table goal_levels {
+  goal_id varchar [ref: > goals.id]
+  level_id varchar [ref: > levels.id]
+  
+  indexes {
+    (goal_id, level_id) [pk]
+  }
+}
+
+Table question_levels {
+  question_id varchar [ref: > questions.id]
+  level_id varchar [ref: > levels.id]
+  
+  indexes {
+    (question_id, level_id) [pk]
+  }
+}
+
+Table student_topic_progress {
+  student_id varchar [pk, ref: > students.id]
+  topic_id varchar [pk, ref: > topics.id]
+  status submission_status [note: "Only Started and Completed for this table"]
+  questions_attempted int
+  questions_correct int
+  is_favorite bool [default: false]
+  time_spent_in_seconds int [default: 0]
+  ai_generated_notes_url varchar [note: "URL to access AI generate notes for a topic tailored to each individual student"]
+  last_accessed_at timestamp
+  created_at timestamp
+  updated_at timestamp
+
+  note: "Table to efficiently store student progress data against topic to help with analytics"
+}
+
+// Enums
+Enum ResponseStatus {
+  STARTED
+  IN_PROGRESS
+  COMPLETED
+}
+
+Enum SimulationType {
+  Simulation
+  YouTube
+  Animation
+}
