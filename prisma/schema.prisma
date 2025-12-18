@@ -14,17 +14,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Role {
-  id          String   @id @default(uuid())
-  name        String   @unique
-  description String?
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
-  voided      Boolean  @default(false)
-
-  auths Auth[]
-}
-
+//------------------ Enums --------------------//
 enum AuthProvider {
   Email
   Google
@@ -42,6 +32,74 @@ enum AgeLevelName {
   GCSE
 }
 
+enum Subject {
+  Mathematics
+}
+
+enum ContentBy {
+  HUMAN
+  AI
+}
+
+enum QuestionFor {
+  Test
+  Practice
+}
+
+enum DifficultyLevel {
+  Easy
+  Medium
+  Hard
+}
+
+enum SubmissionType {
+  Exam
+  Homework
+  Practice
+}
+
+enum SubmissionStatus {
+  InProgress
+  Submitted
+  Graded
+}
+
+enum ReviewStatus {
+  Scheduled
+  InProgress
+  InReview
+  Graded
+}
+
+enum ExamType {
+  Competitive
+  Normal
+  Mock
+}
+
+enum GradingType {
+  Graded
+  Practise
+}
+
+enum AssignmentType {
+  Homework
+  Practice
+}
+
+// ----------------- Models -------------------- //
+
+model Role {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  voided      Boolean  @default(false)
+
+  auths Auth[]
+}
+
 model Auth {
   id                   String        @id @default(uuid())
   email                String?       @unique
@@ -56,10 +114,13 @@ model Auth {
   createdAt            DateTime      @default(now()) @map("created_at")
   updatedAt            DateTime      @updatedAt @map("updated_at")
 
-  role            Role      @relation(fields: [roleId], references: [id])
+  role            Role            @relation(fields: [roleId], references: [id])
   guardian        Guardian?
   student         Student?
-  createdStudents Student[] @relation("CreatedStudents")
+  createdStudents Student[]       @relation("CreatedStudents")
+  runningCanvases RunningCanvas[]
+  histories       History[]
+  examLogs        ExamLog[]
 }
 
 model Guardian {
@@ -70,7 +131,8 @@ model Guardian {
   updatedAt DateTime @updatedAt @map("updated_at")
   voided    Boolean  @default(false)
 
-  auth Auth @relation(fields: [authId], references: [id])
+  auth                Auth                 @relation(fields: [authId], references: [id])
+  guardianStudentMaps GuardianStudentMap[]
 }
 
 model Student {
@@ -88,9 +150,13 @@ model Student {
   updatedAt       DateTime @updatedAt @map("updated_at")
   voided          Boolean  @default(false)
 
-  auth          Auth           @relation(fields: [authId], references: [id])
-  boardAgeLevel BoardAgeLevel? @relation(fields: [boardAgeLevelId], references: [id])
-  creator       Auth?          @relation("CreatedStudents", fields: [createdBy], references: [id])
+  auth                Auth                  @relation(fields: [authId], references: [id])
+  boardAgeLevel       BoardAgeLevel?        @relation(fields: [boardAgeLevelId], references: [id])
+  creator             Auth?                 @relation("CreatedStudents", fields: [createdBy], references: [id])
+  submissions         Submission[]
+  studentSchedules    StudentSchedule[]
+  guardianStudentMaps GuardianStudentMap[]
+  studentTopicDetails StudentTopicDetails[]
 }
 
 model BoardAgeLevel {
@@ -102,7 +168,74 @@ model BoardAgeLevel {
   voided       Boolean      @default(false)
   students     Student[]
 
+  modules        Module[]
+  subtopics      Subtopic[]
+  goalLevels     GoalLevel[]
+  questionLevels QuestionLevel[]
+
   @@unique([boardName, ageLevelName])
+}
+
+model Module {
+  id              String   @id @default(uuid())
+  name            String
+  description     String?
+  boardAgeLevelId String   @map("board_age_level_id")
+  subject         Subject
+  formulaBookUrl  String?  @map("formula_book_url")
+  logoFileName    String?  @map("logo_file_name")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+  voided          Boolean  @default(false)
+
+  boardAgeLevel    BoardAgeLevel     @relation(fields: [boardAgeLevelId], references: [id])
+  topics           Topic[]
+  questions        Question[]
+  studentSchedules StudentSchedule[]
+  questionSets     QuestionSet[]
+  histories        History[]
+
+  @@unique([name, subject, boardAgeLevelId])
+}
+
+model Topic {
+  id           String   @id @default(uuid())
+  name         String
+  description  String?
+  logoFileName String?  @map("logo_file_name")
+  moduleId     String   @map("module_id")
+  serialNumber Int      @map("serial_number")
+  paperNumber  Int      @map("paper_number")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+  voided       Boolean  @default(false)
+
+  module              Module                @relation(fields: [moduleId], references: [id])
+  subtopics           Subtopic[]
+  questions           Question[]
+  examSubtopics       ExamSubtopic[]
+  studentTopicDetails StudentTopicDetails[]
+}
+
+model Subtopic {
+  id              String   @id @default(uuid())
+  name            String
+  logoFileName    String?  @map("logo_file_name")
+  serialNumber    Int      @map("serial_number")
+  content         String?
+  topicId         String   @map("topic_id")
+  institutionId   String?  @map("institution_id")
+  boardAgeLevelId String?  @map("board_age_level_id")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+  voided          Boolean  @default(false)
+
+  topic         Topic          @relation(fields: [topicId], references: [id])
+  boardAgeLevel BoardAgeLevel? @relation(fields: [boardAgeLevelId], references: [id])
+  questions     Question[]
+  examSubtopics ExamSubtopic[]
+  assignments   Assignment[]
+  histories     History[]
 }
 
 model QuestionType {
@@ -118,22 +251,6 @@ model QuestionType {
   @@map("question_types")
 }
 
-enum ContentBy {
-  HUMAN
-  AI
-}
-
-enum QuestionFor {
-  Test
-  Practice
-}
-
-enum DifficultyLevel {
-  Beginner
-  Intermediate
-  Advanced
-}
-
 model Question {
   id                  String          @id @default(uuid())
   name                String
@@ -141,27 +258,35 @@ model Question {
   questionContentLink String          @map("question_content_link")
   contentBy           ContentBy       @default(HUMAN) @map("content_by")
   questionFor         QuestionFor     @default(Practice) @map("question_for")
-  difficulty          Int             @default(0)
   totalMarks          Int?            @map("total_marks")
   timeLimit           Int?            @map("time_limit")
   hint                String
   explanation         String?
-  givenContext        String? // Example: A ball is thrown vertically upward with an initial velocity of 20 m/s.
-  findObjective       String? // Example: Calculate the maximum height reached by the ball and the time taken to reach that height.
+  givenContext        String?
+  findObjective       String?
   imageUrl            String?         @map("image_url")
-  difficulty_level    DifficultyLevel @default(Beginner) @map("difficulty_level")
+  difficulty_level    DifficultyLevel @default(Easy) @map("difficulty_level")
   stepCount           Int             @map("step_count")
   serialNo            Int             @map("serial_no")
   questionTypeId      String          @map("question_type_id")
-  // module_id varchar [ref: > modules.id]
-  // topic_id varchar [ref: > topics.id]
-  // subtopic_id varchar [ref: > subtopics.id]
+  moduleId            String?         @map("module_id")
+  topicId             String?         @map("topic_id")
+  subtopicId          String?         @map("subtopic_id")
   createdAt           DateTime        @default(now()) @map("created_at")
   updatedAt           DateTime        @updatedAt @map("updated_at")
   voided              Boolean         @default(false)
 
-  questionType  QuestionType   @relation(fields: [questionTypeId], references: [id])
-  solutionBases SolutionBase[]
+  questionType    QuestionType    @relation(fields: [questionTypeId], references: [id])
+  module          Module?         @relation(fields: [moduleId], references: [id])
+  topic           Topic?          @relation(fields: [topicId], references: [id])
+  subtopic        Subtopic?       @relation(fields: [subtopicId], references: [id])
+  solutionBases   SolutionBase[]
+  submissions     Submission[]
+  questionSets    QuestionSet[]
+  runningCanvases RunningCanvas[]
+  aiResponses     AiResponse[]
+  histories       History[]
+  questionLevels  QuestionLevel[]
 }
 
 model SolutionBase {
@@ -170,13 +295,17 @@ model SolutionBase {
   createdAt  DateTime @default(now()) @map("created_at")
   updatedAt  DateTime @updatedAt @map("updated_at")
 
-  question             Question              @relation(fields: [questionId], references: [id])
-  solutionMCQs         SolutionMcq[]
-  solutionDescriptives SolutionDescriptive[]
+  question              Question               @relation(fields: [questionId], references: [id])
+  solutionMCQs          SolutionMcq[]
+  solutionDescriptives  SolutionDescriptive[]
+  submittedAnswers      SubmittedAnswer[]
+  solutionMatchingPairs SolutionMatchingPair[]
+  submittedMcqs         SubmittedMcq[]
+  submittedDescriptives SubmittedDescriptive[]
 }
 
 model SolutionMcq {
-  id             String   @id @default(uuid()) @map("mcq_option_id")
+  id             String   @id @default(uuid())
   solutionBaseId String   @map("solution_base_id")
   optionText     String   @map("option_text")
   isCorrect      Boolean  @default(false) @map("is_correct")
@@ -201,93 +330,296 @@ model SolutionDescriptive {
   solutionBase SolutionBase @relation(fields: [solutionBaseId], references: [id])
 }
 
-enum ReviewStatus {
-  Scheduled
-  InProgress
-  InReview
-  Graded
+model Submission {
+  id                  String           @id @default(uuid())
+  studentId           String           @map("student_id")
+  // teacherId         String?          @map("teacher_id") // Commented: teachers table not available
+  questionId          String           @map("question_id")
+  type                SubmissionType
+  status              SubmissionStatus
+  awardedMarks        Int?             @map("awarded_marks")
+  correctAnswersCount Int?             @map("correct_answers_count")
+  examId              String?          @map("exam_id") // Commented: exams table not available
+  // homeworkId        String?          @map("homework_id") // Commented: assignments table not available
+  beganAt             DateTime         @map("began_at")
+  endedAt             DateTime?        @map("ended_at")
+  updatedAt           DateTime         @updatedAt @map("updated_at")
+  voided              Boolean          @default(false)
+
+  student               Student                @relation(fields: [studentId], references: [id])
+  question              Question               @relation(fields: [questionId], references: [id])
+  submittedAnswers      SubmittedAnswer[]
+  submittedMcqs         SubmittedMcq[]
+  submittedDescriptives SubmittedDescriptive[]
 }
 
-enum ExamType {
-  Competitive
-  Normal
-  Mock
+model SubmittedAnswer {
+  id                 String @id @default(uuid())
+  submissionId       String @map("submission_id")
+  solutionId         String @map("solution_id")
+  timeTakenInSeconds Int?   @map("time_taken_in_seconds")
+
+  submission             Submission              @relation(fields: [submissionId], references: [id])
+  solutionBase           SolutionBase            @relation(fields: [solutionId], references: [id])
+  submittedMatchingPairs SubmittedMatchingPair[]
+
+  @@unique([submissionId, solutionId])
 }
 
-enum ExamDifficulty {
-  Easy
-  Medium
-  Hard
+model SubmittedMcq {
+  id              String   @id @default(uuid())
+  submissionId    String   @map("submission_id")
+  solutionId      String   @map("solution_id")
+  submittedOption String   @map("submitted_option")
+  isCorrect       Boolean  @default(false) @map("is_correct")
+  awardedMark     Int?     @map("awarded_mark")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+  voided          Boolean  @default(false)
+
+  submission Submission @relation(fields: [submissionId], references: [id])
+  solution SolutionBase @relation(fields: [solutionId], references: [id])
+
+  @@unique([submissionId, solutionId])
 }
 
-model Topic {
-  id           String   @id @default(uuid())
-  name         String
-  description  String?
-  logoFileName String?  @map("logo_file_name")
-  // moduleId     String  @map("module_id")
-  serialNumber Int      @map("serial_number")
-  paperNumber  Int      @map("paper_number")
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
-  voided       Boolean  @default(false)
+model SubmittedDescriptive {
+  id                         String   @id @default(uuid())
+  submissionId               String   @map("submission_id")
+  solutionId                 String   @map("solution_id")
+  descriptiveSubmittedAnswer String?  @map("descriptive_submitted_answer")
+  solutionImageUrl           String?  @map("solution_image_url")
+  awardedMarks               Int?     @map("awarded_marks")
+  createdAt                  DateTime @default(now()) @map("created_at")
+  updatedAt                  DateTime @updatedAt @map("updated_at")
+  voided                     Boolean  @default(false)
 
-  subtopics     Subtopic[]
-  examSubtopics ExamSubtopic[]
-
-  @@map("topics")
-}
-
-model Subtopic {
-  id           String   @id @default(uuid())
-  name         String
-  logoFileName String?  @map("logo_file_name")
-  serialNumber Int      @map("serial_number")
-  content      String?
-  topicId      String   @map("topic_id")
-  // institutionId   String   @map("institution_id") // [ref: > institutions.id]
-  // boardAgeLevelId String   @map("board_age_level_id") // [ref: > boardAgeLevels.id]
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
-  voided       Boolean  @default(false)
-
-  topic         Topic          @relation(fields: [topicId], references: [id])
-  examSubtopics ExamSubtopic[]
-
-  @@map("subtopics")
+  submission Submission @relation(fields: [submissionId], references: [id])
+  solution SolutionBase @relation(fields: [solutionId], references: [id])
 }
 
 model Exam {
-  id                   Int             @id @default(autoincrement())
+  id                   String           @id @default(uuid())
   name                 String
-  startTime            DateTime        @map("start_time")
-  endTime              DateTime        @map("end_time")
+  startTime            DateTime         @map("start_time")
+  endTime              DateTime         @map("end_time")
   type                 ExamType
-  difficulty           ExamDifficulty? // Will be called Beginner, Intermediate, Advanced for competitive exams
-  timeLimit            Int?            @map("time_limit")
-  maxNumberOfQuestions Int?            @map("max_number_of_questions")
+  difficulty           DifficultyLevel? // Will be called Beginner, Intermediate, Advanced for competitive exams
+  timeLimit            Int?             @map("time_limit")
+  maxNumberOfQuestions Int?             @map("max_number_of_questions")
   status               ReviewStatus?
-  totalMarks           Int?            @map("total_marks")
-  classId              String?         @map("class_id") // Only for exams assigned for a class
-  createdAt            DateTime        @default(now()) @map("created_at")
-  updatedAt            DateTime        @updatedAt @map("updated_at")
-  voided               Boolean         @default(false)
+  totalMarks           Int?             @map("total_marks")
+  classId              String?          @map("class_id") // Only for exams assigned for a class
+  createdAt            DateTime         @default(now()) @map("created_at")
+  updatedAt            DateTime         @updatedAt @map("updated_at")
+  voided               Boolean          @default(false)
 
   subtopics ExamSubtopic[]
 
-  @@map("exams")
+  questionSets QuestionSet[]
+  examLogs     ExamLog[]
+}
+
+model SolutionMatchingPair {
+  id              String   @id @default(uuid())
+  solutionBaseId  String   @map("solution_base_id")
+  columnLeftText  String   @map("column_left_text")
+  columnRightText String   @map("column_right_text")
+  mark            Int?
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+  voided          Boolean  @default(false)
+
+  solutionBase SolutionBase @relation(fields: [solutionBaseId], references: [id])
+}
+
+model StudentSchedule {
+  id        String   @id @default(uuid())
+  studentId String   @map("student_id")
+  moduleId  String   @map("module_id")
+  day       String
+  startTime String   @map("start_time")
+  endTime   String   @map("end_time")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  voided    Boolean  @default(false)
+
+  student Student @relation(fields: [studentId], references: [id])
+  module  Module  @relation(fields: [moduleId], references: [id])
 }
 
 // Maintains the many to many relationship between exams and topics and subtopics
 model ExamSubtopic {
-  examId     Int    @map("exam_id")
+  id         String @id @default(uuid())
+  examId     String @map("exam_id")
   topicId    String @map("topic_id")
   subtopicId String @map("subtopic_id")
 
   exam     Exam     @relation(fields: [examId], references: [id])
   topic    Topic    @relation(fields: [topicId], references: [id])
   subtopic Subtopic @relation(fields: [subtopicId], references: [id])
+}
 
-  @@id([examId, topicId, subtopicId])
-  @@map("exam_subtopics")
+model Assignment {
+  id          String         @id @default(uuid())
+  name        String
+  dueDate     DateTime?      @map("due_date")
+  type        AssignmentType
+  gradingType GradingType    @map("grading_type")
+  status      ReviewStatus?
+  // classId  String?          @map("class_id") // Commented: classrooms table not available
+  // teacherId String?         @map("teacher_id") // Commented: teachers table not available
+  subtopicId  String?        @map("subtopic_id")
+  createdAt   DateTime       @default(now()) @map("created_at")
+  updatedAt   DateTime       @updatedAt @map("updated_at")
+  voided      Boolean        @default(false)
+
+  subtopic     Subtopic?     @relation(fields: [subtopicId], references: [id])
+  questionSets QuestionSet[]
+}
+
+model QuestionSet {
+  id            String   @id @default(uuid())
+  serialNo      Int?     @map("serial_no")
+  questionId    String?  @map("question_id")
+  examId        String?  @map("exam_id")
+  // homeworkId    String?     @map("homework_id")
+  name          String?
+  year          Int?
+  season        String?
+  markSchemeUrl String?  @map("mark_scheme_url")
+  moduleId      String   @map("module_id")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+  voided        Boolean  @default(false)
+
+  question     Question?   @relation(fields: [questionId], references: [id])
+  exam         Exam?       @relation(fields: [examId], references: [id])
+  // assignment Assignment? @relation(fields: [homeworkId], references: [id])
+  module       Module      @relation(fields: [moduleId], references: [id])
+  // homework Assignment? @relation(fields: [homeworkId], references: [id])
+  assignment   Assignment? @relation(fields: [assignmentId], references: [id])
+  assignmentId String?
+}
+
+model SubmittedMatchingPair {
+  id              String   @id @default(uuid())
+  submissionId    String   @map("submission_id")
+  solutionId      String   @map("solution_id")
+  columnLeftText  String   @map("column_left_text")
+  columnRightText String   @map("column_right_text")
+  awardedMark     Int?     @map("awarded_mark")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+  voided          Boolean  @default(false)
+
+  submittedAnswer SubmittedAnswer @relation(fields: [submissionId, solutionId], references: [submissionId, solutionId])
+}
+
+// TODO: Rename to ActiveCanvas
+model RunningCanvas {
+  id         String  @id @default(uuid())
+  hint       String?
+  canvasJson String? @map("canvas_json")
+  userId     String  @map("user_id")
+  questionId String  @map("question_id")
+
+  user     Auth     @relation(fields: [userId], references: [id])
+  question Question @relation(fields: [questionId], references: [id])
+}
+
+model AiResponse {
+  id            String   @id @default(uuid())
+  image         String
+  imageKey      String?  @map("image_key")
+  evaluation    String
+  ocrOutput     String?  @map("ocr_output")
+  questionTitle String?  @map("question_title")
+  verdict       String?
+  hint          String?
+  isFinished    Boolean? @map("is_finished")
+  nextStepCount Int?     @map("next_step_count")
+  chatHistory   String?  @map("chat_history")
+  questionId    String?  @map("question_id")
+
+  question Question? @relation(fields: [questionId], references: [id])
+}
+
+model History {
+  id            String   @id @default(uuid())
+  chatHistory   String?  @map("chat_history")
+  evaluation    String?
+  extractedText String?  @map("extracted_text")
+  hint          String?
+  verdict       Boolean?
+  outdated      Boolean?
+  canvasJson    String?  @map("canvas_json")
+  userId        String   @map("user_id")
+  questionId    String?  @map("question_id")
+  moduleId      String?  @map("module_id")
+  subtopicId    String?  @map("subtopic_id")
+
+  user     Auth      @relation(fields: [userId], references: [id])
+  question Question? @relation(fields: [questionId], references: [id])
+  module   Module?   @relation(fields: [moduleId], references: [id])
+  subtopic Subtopic? @relation(fields: [subtopicId], references: [id])
+}
+
+model ExamLog {
+  id          String   @id @default(uuid())
+  description String?
+  examId      String   @map("exam_id")
+  userId      String   @map("user_id")
+  loggedAt    DateTime @map("logged_at")
+
+  exam Exam @relation(fields: [examId], references: [id])
+  user Auth @relation(fields: [userId], references: [id])
+}
+
+model GuardianStudentMap {
+  id           String @id @default(uuid())
+  guardianId   String @map("guardian_id")
+  studentId    String @map("student_id")
+  relationship String
+
+  guardian Guardian @relation(fields: [guardianId], references: [id])
+  student  Student  @relation(fields: [studentId], references: [id])
+
+  @@unique([guardianId, studentId])
+}
+
+model GoalLevel {
+  id              String @id @default(uuid())
+  goalId          String @map("goal_id")
+  boardAgeLevelId String @map("board_age_level_id")
+
+  // goal       Goal     @relation(fields: [goalId], references: [id]) // Commented: goals table not available
+  boardAgeLevel BoardAgeLevel @relation(fields: [boardAgeLevelId], references: [id])
+}
+
+model QuestionLevel {
+  id              String @id @default(uuid())
+  questionId      String @map("question_id")
+  boardAgeLevelId String @map("board_age_level_id")
+
+  question      Question      @relation(fields: [questionId], references: [id])
+  boardAgeLevel BoardAgeLevel @relation(fields: [boardAgeLevelId], references: [id])
+}
+
+model StudentTopicDetails {
+  id                  String            @id @default(uuid())
+  studentId           String            @map("student_id")
+  topicId             String            @map("topic_id")
+  status              SubmissionStatus?
+  questionsAttempted  Int?              @map("questions_attempted")
+  questionsCorrect    Int?              @map("questions_correct")
+  isFavorite          Boolean           @default(false) @map("is_favorite")
+  timeSpentInSeconds  Int               @default(0) @map("time_spent_in_seconds")
+  aiGeneratedNotesUrl String?           @map("ai_generated_notes_url")
+  lastAccessedAt      DateTime?         @map("last_accessed_at")
+  createdAt           DateTime          @default(now()) @map("created_at")
+  updatedAt           DateTime          @updatedAt @map("updated_at")
+
+  student Student @relation(fields: [studentId], references: [id])
+  topic   Topic   @relation(fields: [topicId], references: [id])
 }

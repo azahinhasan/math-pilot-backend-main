@@ -19,14 +19,15 @@ export class GetBoardsByAgeLevelHandler
         voided: false,
       },
       select: {
-        boardName: true,
+        id:true,
+        boardName: true
       },
     });
 
     return {
       message: 'Boards retrieved successfully',
       ageLevelName,
-      data: boards.map((item) => item.boardName),
+      data: boards,
     };
   }
 }
