@@ -516,6 +516,7 @@ model SubmittedMatchingPair {
   submittedAnswer SubmittedAnswer @relation(fields: [submissionId, solutionId], references: [submissionId, solutionId])
 }
 
+// TODO: Rename to ActiveCanvas
 model RunningCanvas {
   id         String  @id @default(uuid())
   hint       String?
