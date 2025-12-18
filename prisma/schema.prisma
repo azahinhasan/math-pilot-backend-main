@@ -300,6 +300,8 @@ model SolutionBase {
   solutionDescriptives  SolutionDescriptive[]
   submittedAnswers      SubmittedAnswer[]
   solutionMatchingPairs SolutionMatchingPair[]
+  submittedMcqs         SubmittedMcq[]
+  submittedDescriptives SubmittedDescriptive[]
 }
 
 model SolutionMcq {
