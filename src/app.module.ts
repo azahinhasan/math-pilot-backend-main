@@ -8,6 +8,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { PracticeModeModule } from './modules/practice-mode/practice-mode.module';
 import { RoleModule } from './modules/role/role.module';
 import { BoardAgeLevelModule } from './modules/board-age-level/board-age-level.module';
+import { ModulesModule } from './modules/modules/modules.module';
 import { ExamsModule } from './modules/exams/exams.module';
 
 @Module({
@@ -19,6 +20,7 @@ import { ExamsModule } from './modules/exams/exams.module';
     PracticeModeModule,
     RoleModule,
     BoardAgeLevelModule,
+    ModulesModule,
     ExamsModule
   ], // Read .env file for environment variables
   controllers: [AppController],

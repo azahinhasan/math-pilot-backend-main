@@ -37,6 +37,7 @@ export class RegisterUserHandler
    */
   async execute(command: RegisterUserCommand) {
     const { email, name, role, password, additionalInfo } = command;
+    let clerkUserId: string | null = null;
 
     try {
       const user = await clerkClient.users.createUser({
@@ -51,6 +52,8 @@ export class RegisterUserHandler
         skipPasswordChecks: !password,
         skipPasswordRequirement: !password,
       });
+
+      clerkUserId = user.id;
 
       const roleId = this.roles.get(role.toUpperCase());
       if (!roleId) {
@@ -99,6 +102,18 @@ export class RegisterUserHandler
         'Clerk Registration Error:',
         JSON.stringify(error, null, 2),
       );
+
+      if (clerkUserId) {
+        try {
+          await clerkClient.users.deleteUser(clerkUserId);
+          console.log(`Rolled back: Deleted Clerk user ${clerkUserId}`);
+        } catch (deleteError) {
+          console.error(
+            `Failed to rollback Clerk user ${clerkUserId}:`,
+            deleteError,
+          );
+        }
+      }
 
       if (error.errors?.[0]?.code === 'form_identifier_exists') {
         throw new ConflictException('User with this email already exists');
