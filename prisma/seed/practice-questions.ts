@@ -25,9 +25,9 @@ async function main() {
 
   for (const [index, questionData] of practiceQusData.practice.entries()) {
     const difficultyMap: { [key: string]: DifficultyLevel } = {
-      Easy: DifficultyLevel.Beginner,
-      Medium: DifficultyLevel.Intermediate,
-      Hard: DifficultyLevel.Advanced,
+      Easy: DifficultyLevel.Easy,
+      Medium: DifficultyLevel.Medium,
+      Hard: DifficultyLevel.Hard,
     };
 
     const newQuestion = await prisma.question.create({
@@ -39,7 +39,7 @@ async function main() {
         totalMarks: questionData.total_marks,
         timeLimit: questionData.time_Limit,
         imageUrl: questionData.image,
-        difficulty_level: difficultyMap[questionData.difficulty_level] || DifficultyLevel.Beginner,
+        difficulty_level: difficultyMap[questionData.difficulty_level] || DifficultyLevel.Easy,
         stepCount: 1, // Default value
         serialNo: index + 1,
         questionTypeId: descriptiveQuestionType.id,

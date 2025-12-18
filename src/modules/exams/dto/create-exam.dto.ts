@@ -10,15 +10,15 @@ import {
   Min,
   ValidateNested,
 } from 'class-validator';
-import { ExamDifficulty, ExamType } from '@prisma/client';
+import { DifficultyLevel, ExamType } from '@prisma/client';
 
-function normalizeDifficulty(value: unknown): ExamDifficulty | unknown {
+function normalizeDifficulty(value: unknown): DifficultyLevel | unknown {
   if (typeof value !== 'string') return value;
   const v = value.trim().toLowerCase();
 
-  if (v === 'beginner') return ExamDifficulty.Easy;
-  if (v === 'intermediate') return ExamDifficulty.Medium;
-  if (v === 'advanced') return ExamDifficulty.Hard;
+  if (v === 'beginner') return DifficultyLevel.Easy;
+  if (v === 'intermediate') return DifficultyLevel.Medium;
+  if (v === 'advanced') return DifficultyLevel.Hard;
 
   return value;
 }
@@ -54,12 +54,12 @@ export class CreateExamDto {
   type?: ExamType;
 
   @Transform(({ value }) => normalizeDifficulty(value))
-  @IsEnum(ExamDifficulty, {
+  @IsEnum(DifficultyLevel, {
     message:
       'difficulty must be one of: Beginner, Intermediate, Advanced (case-insensitive accepted)',
   })
   @IsOptional()
-  difficulty?: ExamDifficulty;
+  difficulty?: DifficultyLevel;
 
   @IsInt()
   @Min(1)
