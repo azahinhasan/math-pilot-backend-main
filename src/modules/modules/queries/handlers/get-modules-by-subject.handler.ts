@@ -1,6 +1,6 @@
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { GetModulesBySubjectQuery } from '../get-modules-by-subject.query';
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
@@ -33,7 +33,7 @@ export class GetModulesBySubjectHandler
       authData?.student?.boardAgeLevel?.id;
 
     if (!studentBoardAgeLevelId) {
-      throw new Error('No board found for student');
+      throw new BadRequestException('No board found for student');
     }
 
     const modules = await this.prisma.module.findMany({

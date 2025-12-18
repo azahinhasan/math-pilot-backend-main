@@ -118,7 +118,7 @@ model Auth {
   guardian        Guardian?
   student         Student?
   createdStudents Student[]       @relation("CreatedStudents")
-  runningCanvases RunningCanvas[]
+  activeCanvas ActiveCanvas[]
   histories       History[]
   examLogs        ExamLog[]
 }
@@ -283,7 +283,7 @@ model Question {
   solutionBases   SolutionBase[]
   submissions     Submission[]
   questionSets    QuestionSet[]
-  runningCanvases RunningCanvas[]
+  activeCanvas ActiveCanvas[]
   aiResponses     AiResponse[]
   histories       History[]
   questionLevels  QuestionLevel[]
@@ -516,8 +516,7 @@ model SubmittedMatchingPair {
   submittedAnswer SubmittedAnswer @relation(fields: [submissionId, solutionId], references: [submissionId, solutionId])
 }
 
-// TODO: Rename to ActiveCanvas
-model RunningCanvas {
+model ActiveCanvas {
   id         String  @id @default(uuid())
   hint       String?
   canvasJson String? @map("canvas_json")
