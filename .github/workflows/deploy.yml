@@ -36,10 +36,6 @@ jobs:
         run: |
           npm ci
 
-      - name: Generate Prisma Client
-        run: |
-          npx prisma generate
-
       - name: Run linter
         run: |
           npm run lint || echo "Linting issues found, proceeding anyway."
