@@ -37,7 +37,7 @@ enum Subject {
 }
 
 enum ContentBy {
-  HUMAN
+  Human
   AI
 }
 
@@ -114,11 +114,11 @@ model Auth {
   createdAt            DateTime      @default(now()) @map("created_at")
   updatedAt            DateTime      @updatedAt @map("updated_at")
 
-  role            Role            @relation(fields: [roleId], references: [id])
+  role            Role           @relation(fields: [roleId], references: [id])
   guardian        Guardian?
   student         Student?
-  createdStudents Student[]       @relation("CreatedStudents")
-  activeCanvas ActiveCanvas[]
+  createdStudents Student[]      @relation("CreatedStudents")
+  activeCanvas    ActiveCanvas[]
   histories       History[]
   examLogs        ExamLog[]
 }
@@ -255,12 +255,12 @@ model Question {
   id                  String          @id @default(uuid())
   name                String
   questionText        String          @map("question_text")
-  questionContentLink String          @map("question_content_link")
-  contentBy           ContentBy       @default(HUMAN) @map("content_by")
+  questionContentLink String?         @map("question_content_link")
+  contentBy           ContentBy       @default(AI) @map("content_by")
   questionFor         QuestionFor     @default(Practice) @map("question_for")
   totalMarks          Int?            @map("total_marks")
   timeLimit           Int?            @map("time_limit")
-  hint                String
+  hint                String?
   explanation         String?
   givenContext        String?
   findObjective       String?
@@ -269,24 +269,24 @@ model Question {
   stepCount           Int             @map("step_count")
   serialNo            Int             @map("serial_no")
   questionTypeId      String          @map("question_type_id")
-  moduleId            String?         @map("module_id")
-  topicId             String?         @map("topic_id")
-  subtopicId          String?         @map("subtopic_id")
+  moduleId            String          @map("module_id")
+  topicId             String          @map("topic_id")
+  subtopicId          String          @map("subtopic_id")
   createdAt           DateTime        @default(now()) @map("created_at")
   updatedAt           DateTime        @updatedAt @map("updated_at")
   voided              Boolean         @default(false)
 
-  questionType    QuestionType    @relation(fields: [questionTypeId], references: [id])
-  module          Module?         @relation(fields: [moduleId], references: [id])
-  topic           Topic?          @relation(fields: [topicId], references: [id])
-  subtopic        Subtopic?       @relation(fields: [subtopicId], references: [id])
-  solutionBases   SolutionBase[]
-  submissions     Submission[]
-  questionSets    QuestionSet[]
-  activeCanvas ActiveCanvas[]
-  aiResponses     AiResponse[]
-  histories       History[]
-  questionLevels  QuestionLevel[]
+  questionType   QuestionType    @relation(fields: [questionTypeId], references: [id])
+  module         Module          @relation(fields: [moduleId], references: [id])
+  topic          Topic           @relation(fields: [topicId], references: [id])
+  subtopic       Subtopic        @relation(fields: [subtopicId], references: [id])
+  solutionBases  SolutionBase[]
+  submissions    Submission[]
+  questionSets   QuestionSet[]
+  activeCanvas   ActiveCanvas[]
+  aiResponses    AiResponse[]
+  histories      History[]
+  questionLevels QuestionLevel[]
 }
 
 model SolutionBase {
@@ -377,8 +377,8 @@ model SubmittedMcq {
   updatedAt       DateTime @updatedAt @map("updated_at")
   voided          Boolean  @default(false)
 
-  submission Submission @relation(fields: [submissionId], references: [id])
-  solution SolutionBase @relation(fields: [solutionId], references: [id])
+  submission Submission   @relation(fields: [submissionId], references: [id])
+  solution   SolutionBase @relation(fields: [solutionId], references: [id])
 
   @@unique([submissionId, solutionId])
 }
@@ -394,8 +394,8 @@ model SubmittedDescriptive {
   updatedAt                  DateTime @updatedAt @map("updated_at")
   voided                     Boolean  @default(false)
 
-  submission Submission @relation(fields: [submissionId], references: [id])
-  solution SolutionBase @relation(fields: [solutionId], references: [id])
+  submission Submission   @relation(fields: [submissionId], references: [id])
+  solution   SolutionBase @relation(fields: [solutionId], references: [id])
 }
 
 model Exam {
