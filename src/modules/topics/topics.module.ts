@@ -6,6 +6,8 @@ import { TopicsController } from './topics.controller';
 import { CreateTopicHandler } from './commands/handlers/create-topic.handler';
 import { DeleteTopicHandler } from './commands/handlers/delete-topic.handler';
 import { GetTopicsByModuleHandler } from './queries/handlers/get-topics-by-module.handler';
+import { GetTopicsByUserBoardHandler } from './queries/handlers/get-topics-by-user-board.handler';
+import { GetSubtopicsByTopicsHandler } from './queries/handlers/get-subtopics-by-topics.handler';
 
 @Module({
   imports: [CqrsModule, ConfigModule, PrismaModule],
@@ -14,6 +16,8 @@ import { GetTopicsByModuleHandler } from './queries/handlers/get-topics-by-modul
     CreateTopicHandler,
     DeleteTopicHandler,
     GetTopicsByModuleHandler,
+    GetTopicsByUserBoardHandler,
+    GetSubtopicsByTopicsHandler,
   ],
 })
 export class TopicsModule {}

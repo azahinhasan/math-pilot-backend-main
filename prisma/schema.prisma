@@ -215,6 +215,7 @@ model Topic {
   questions           Question[]
   examSubtopics       ExamSubtopic[]
   studentTopicDetails StudentTopicDetails[]
+  submissions         Submission[]
 }
 
 model Subtopic {
@@ -335,6 +336,7 @@ model Submission {
   studentId           String           @map("student_id")
   // teacherId         String?          @map("teacher_id") // Commented: teachers table not available
   questionId          String           @map("question_id")
+  topicId             String?          @map("topic_id")
   type                SubmissionType
   status              SubmissionStatus
   awardedMarks        Int?             @map("awarded_marks")
@@ -350,6 +352,7 @@ model Submission {
   question              Question               @relation(fields: [questionId], references: [id])
   submittedAnswers      SubmittedAnswer[]
   submittedMcqs         SubmittedMcq[]
+  topic                 Topic?                 @relation(fields: [topicId], references: [id])
   submittedDescriptives SubmittedDescriptive[]
 }
 
