@@ -13,6 +13,7 @@ export class GetTopicsByModuleHandler
   async execute(query: GetTopicsByModuleQuery) {
     const { moduleId, clerkId, paperNumber } = query;
 
+    // Fetch authenticated user data with student and board information
     const authData = await this.prisma.auth.findUnique({
       where: {
         clerkId,
@@ -26,6 +27,7 @@ export class GetTopicsByModuleHandler
       },
     });
 
+    // Extract student's board age level ID from auth data
     const studentBoardAgeLevelId =
       authData?.student?.boardAgeLevelId ??
       authData?.student?.boardAgeLevel?.id;
@@ -34,6 +36,7 @@ export class GetTopicsByModuleHandler
       throw new BadRequestException('No board found for student');
     }
 
+    // Verify module exists and retrieve its board age level
     const module = await this.prisma.module.findUnique({
       where: {
         id: moduleId,
@@ -48,10 +51,12 @@ export class GetTopicsByModuleHandler
       throw new NotFoundException('Module not found');
     }
 
+    // Ensure module belongs to the student's board
     if (module.boardAgeLevelId !== studentBoardAgeLevelId) {
       throw new BadRequestException('Module does not belong to student board');
     }
 
+    // Build query filter for topics (with optional paper number filter)
     const whereClause: any = {
       moduleId,
       voided: false,
@@ -61,6 +66,7 @@ export class GetTopicsByModuleHandler
       whereClause.paperNumber = paperNumber;
     }
 
+    // Fetch topics with module details and practice questions
     const topics = await this.prisma.topic.findMany({
       where: whereClause,
       include: {
@@ -92,14 +98,17 @@ export class GetTopicsByModuleHandler
 
     const studentId = authData?.student?.id;
 
+    // Calculate progress for each topic based on completed practice questions
     const topicsWithProgress = await Promise.all(
       topics.map(async (topic) => {
         const totalPracticeQuestions = topic.questions.length;
         
         let progress = 0;
+        // Calculate progress only if student exists and has practice questions
         if (studentId && totalPracticeQuestions > 0) {
           const practiceQuestionIds = topic.questions.map(q => q.id);
           
+          // Find all completed submissions for this topic's practice questions
           const completedSubmissions = await this.prisma.submission.findMany({
             where: {
               studentId,
@@ -118,6 +127,7 @@ export class GetTopicsByModuleHandler
             distinct: ['questionId'],
           });
 
+          // Calculate progress percentage based on completed vs total questions
           const completedQuestionsCount = completedSubmissions.length;
           progress = Math.round((completedQuestionsCount / totalPracticeQuestions) * 100);
         }

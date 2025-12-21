@@ -13,6 +13,7 @@ export class GetTopicsByUserBoardHandler
   async execute(query: GetTopicsByUserBoardQuery) {
     const { clerkId } = query;
 
+    // Fetch user authentication data along with student profile and board/age level information
     const authData = await this.prisma.auth.findUnique({
       where: {
         clerkId,
@@ -26,12 +27,16 @@ export class GetTopicsByUserBoardHandler
       },
     });
 
+    // Validate that the student has an assigned board and age level
     if (!authData?.student?.boardAgeLevel) {
       throw new BadRequestException('No board and age level found for student');
     }
 
+    // Extract board and age level information for filtering topics
     const { boardName, ageLevelName } = authData.student.boardAgeLevel;
 
+    // Retrieve all non-voided topics that match the student's board and age level
+    // Also ensures the parent module is not voided
     const topics = await this.prisma.topic.findMany({
       where: {
         voided: false,
@@ -43,6 +48,7 @@ export class GetTopicsByUserBoardHandler
           voided: false,
         },
       },
+      // Include related module information with selected fields
       include: {
         module: {
           select: {
@@ -57,16 +63,8 @@ export class GetTopicsByUserBoardHandler
             },
           },
         },
-        questions: {
-          where: {
-            questionFor: 'Practice',
-            voided: false,
-          },
-          select: {
-            id: true,
-          },
-        },
       },
+      // Sort topics first by paper number, then by serial number in ascending order
       orderBy: [
         {
           paperNumber: 'asc',
@@ -77,55 +75,12 @@ export class GetTopicsByUserBoardHandler
       ],
     });
 
-    const studentId = authData.student.id;
-
-    const topicsWithProgress = await Promise.all(
-      topics.map(async (topic) => {
-        const totalPracticeQuestions = topic.questions.length;
-
-        let progress = 0;
-        if (studentId && totalPracticeQuestions > 0) {
-          const practiceQuestionIds = topic.questions.map((q) => q.id);
-
-          const completedSubmissions = await this.prisma.submission.findMany({
-            where: {
-              studentId,
-              questionId: {
-                in: practiceQuestionIds,
-              },
-              type: 'Practice',
-              status: {
-                in: ['Submitted', 'Graded'],
-              },
-              voided: false,
-            },
-            select: {
-              questionId: true,
-            },
-            distinct: ['questionId'],
-          });
-
-          const completedQuestionsCount = completedSubmissions.length;
-          progress = Math.round(
-            (completedQuestionsCount / totalPracticeQuestions) * 100,
-          );
-        }
-
-        const { questions, ...topicData } = topic;
-
-        return {
-          ...topicData,
-          progress,
-        };
-      }),
-    );
-
     return {
       message: 'Topics retrieved successfully',
       boardName,
       ageLevelName,
-      totalTopics: topicsWithProgress.length,
-      data: topicsWithProgress,
+      totalTopics: topics.length,
+      data: topics,
     };
   }
 }

@@ -17,6 +17,7 @@ export class GetSubtopicsByTopicsHandler
       throw new BadRequestException('At least one topic ID is required');
     }
 
+    // Fetch user authentication data and verify student has board and age level configured
     const authData = await this.prisma.auth.findUnique({
       where: {
         clerkId,
@@ -34,6 +35,7 @@ export class GetSubtopicsByTopicsHandler
       throw new BadRequestException('No board and age level found for student');
     }
 
+    // Validate that the provided topic IDs exist and are not voided
     const topics = await this.prisma.topic.findMany({
       where: {
         id: {
@@ -51,6 +53,7 @@ export class GetSubtopicsByTopicsHandler
       throw new BadRequestException('No valid topics found');
     }
 
+    // Fetch all subtopics for the given topics with related data (topic info, module, practice questions)
     const subtopics = await this.prisma.subtopic.findMany({
       where: {
         topicId: {
@@ -94,52 +97,10 @@ export class GetSubtopicsByTopicsHandler
       ],
     });
 
-    const studentId = authData.student.id;
-
-    const subtopicsWithProgress = await Promise.all(
-      subtopics.map(async (subtopic) => {
-        const totalPracticeQuestions = subtopic.questions.length;
-
-        let progress = 0;
-        if (studentId && totalPracticeQuestions > 0) {
-          const practiceQuestionIds = subtopic.questions.map((q) => q.id);
-
-          const completedSubmissions = await this.prisma.submission.findMany({
-            where: {
-              studentId,
-              questionId: {
-                in: practiceQuestionIds,
-              },
-              type: 'Practice',
-              status: {
-                in: ['Submitted', 'Graded'],
-              },
-              voided: false,
-            },
-            select: {
-              questionId: true,
-            },
-            distinct: ['questionId'],
-          });
-
-          const completedQuestionsCount = completedSubmissions.length;
-          progress = Math.round(
-            (completedQuestionsCount / totalPracticeQuestions) * 100,
-          );
-        }
-
-        const { questions, ...subtopicData } = subtopic;
-
-        return {
-          ...subtopicData,
-          progress,
-          totalPracticeQuestions,
-        };
-      }),
-    );
-
-    const groupedByTopic = subtopicsWithProgress.reduce((acc, subtopic) => {
+    // Group subtopics by their parent topic, organizing data hierarchically
+    const groupedByTopic = subtopics.reduce((acc, subtopic) => {
       const topicId = subtopic.topic.id;
+      // Initialize topic group if it doesn't exist
       if (!acc[topicId]) {
         acc[topicId] = {
           topicId: subtopic.topic.id,
@@ -150,14 +111,13 @@ export class GetSubtopicsByTopicsHandler
           subtopics: [],
         };
       }
+      // Add subtopic to its parent topic group
       acc[topicId].subtopics.push({
         id: subtopic.id,
         name: subtopic.name,
         logoFileName: subtopic.logoFileName,
         serialNumber: subtopic.serialNumber,
         content: subtopic.content,
-        progress: subtopic.progress,
-        totalPracticeQuestions: subtopic.totalPracticeQuestions,
         createdAt: subtopic.createdAt,
         updatedAt: subtopic.updatedAt,
       });
@@ -167,7 +127,7 @@ export class GetSubtopicsByTopicsHandler
     return {
       message: 'Subtopics retrieved successfully',
       totalTopics: topics.length,
-      totalSubtopics: subtopicsWithProgress.length,
+      totalSubtopics: subtopics.length,
       data: Object.values(groupedByTopic),
     };
   }
