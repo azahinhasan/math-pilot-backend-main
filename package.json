@@ -22,7 +22,9 @@
     "db:migrate:deploy": "prisma migrate deploy --skip-seed",
     "db:generate": "prisma generate",
     "db:seed": "prisma db seed",
-    "db:seed:practice": "ts-node prisma/seed/practice-questions.ts"
+    "db:seed:practice": "ts-node prisma/seed/practice-questions.ts",
+    "db:seed:performance": "ts-node prisma/seed/performance-data.ts",
+    "db:seed:submission-types": "ts-node prisma/seed/add-submission-types.ts"
   },
   "dependencies": {
     "@clerk/backend": "^2.24.0",

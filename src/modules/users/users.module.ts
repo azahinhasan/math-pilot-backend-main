@@ -8,6 +8,7 @@ import { GetUserHandler } from './queries/handlers/get-user.handler';
 import { RegisterUserHandler } from './commands/handlers/register-user.handler';
 import { DeleteUserHandler } from './commands/handlers/delete-user.handler';
 import { OnboardingHandler } from './commands/handlers/onboarding.handler';
+import { GetPerformanceAnalyticsHandler } from './queries/handlers/get-performance-analytics.handler';
 
 @Module({
   imports: [CqrsModule, ConfigModule, PrismaModule],
@@ -18,6 +19,7 @@ import { OnboardingHandler } from './commands/handlers/onboarding.handler';
     RegisterUserHandler,
     DeleteUserHandler,
     OnboardingHandler,
+    GetPerformanceAnalyticsHandler,
   ],
 })
 export class UsersModule {}

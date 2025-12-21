@@ -8,6 +8,9 @@ import {
   InternalServerErrorException,
   Delete,
   Param,
+  Query,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { GetUsersQuery } from './queries/get-users.query';
@@ -20,6 +23,8 @@ import { DeleteUserCommand } from './commands/delete-user.command';
 import { RegisterUserDto } from './dto/register-user.dto';
 import { OnboardingDto } from './dto/onboarding.dto';
 import { OnboardingCommand } from './commands/onboarding.command';
+import { GetPerformanceAnalyticsDto } from './dto/get-performance-analytics.dto';
+import { GetPerformanceAnalyticsQuery } from './queries/get-performance-analytics.query';
 
 @Controller('users')
 export class UsersController {
@@ -62,7 +67,9 @@ export class UsersController {
       const clerkId = req.user.sub;
 
       // Execute Query to fetch user profile details including student/guardian info
-      const userProfile = await this.queryBus.execute(new GetUserQuery(clerkId));
+      const userProfile = await this.queryBus.execute(
+        new GetUserQuery(clerkId),
+      );
 
       return {
         message: 'User profile retrieved successfully',
@@ -71,6 +78,94 @@ export class UsersController {
     } catch (error) {
       throw new InternalServerErrorException(
         `Failed to fetch user profile: ${error.message}`,
+      );
+    }
+  }
+
+  @Get('performance/analytics')
+  @UseGuards(ClerkAuthGuard)
+  async getPerformanceAnalytics(
+    @Req() req,
+    @Query() filters: GetPerformanceAnalyticsDto,
+  ) {
+    try {
+      const clerkId = req.user.sub;
+
+      const auth = await this.queryBus.execute(new GetUserQuery(clerkId));
+
+      if (!auth.student) {
+        throw new HttpException(
+          'User is not a student',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
+      const studentId = auth.student.id;
+
+      const startDate = filters.startDate
+        ? new Date(filters.startDate)
+        : undefined;
+      const endDate = filters.endDate ? new Date(filters.endDate) : undefined;
+
+      const analytics = await this.queryBus.execute(
+        new GetPerformanceAnalyticsQuery(
+          studentId,
+          startDate,
+          endDate,
+          filters.submissionType,
+          filters.difficulty,
+          filters.topicId,
+          filters.moduleId,
+        ),
+      );
+
+      return {
+        message: 'Performance analytics retrieved successfully',
+        data: analytics,
+      };
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        `Failed to fetch performance analytics: ${error.message}`,
+      );
+    }
+  }
+
+  @Get('test-analytics/:studentId')
+  async getStudentPerformanceAnalytics(
+    @Param('studentId') studentId: string,
+    @Query() filters: GetPerformanceAnalyticsDto,
+  ) {
+    try {
+      const startDate = filters.startDate
+        ? new Date(filters.startDate)
+        : undefined;
+      const endDate = filters.endDate ? new Date(filters.endDate) : undefined;
+
+      const analytics = await this.queryBus.execute(
+        new GetPerformanceAnalyticsQuery(
+          studentId,
+          startDate,
+          endDate,
+          filters.submissionType,
+          filters.difficulty,
+          filters.topicId,
+          filters.moduleId,
+        ),
+      );
+
+      return {
+        message: 'Performance analytics retrieved successfully',
+        data: analytics,
+      };
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        `Failed to fetch performance analytics: ${error.message}`,
       );
     }
   }

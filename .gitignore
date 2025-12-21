@@ -12,6 +12,14 @@ yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
 
+# md 
+*.md
+!README.md
+
+# testing scripts 
+*.py
+*.html
+
 # OS
 .DS_Store
 
