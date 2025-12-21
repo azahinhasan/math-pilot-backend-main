@@ -1,17 +1,17 @@
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
-import { GetTopicsByModuleQuery } from '../get-topics-by-module.query';
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { GetTopicsByUserBoardQuery } from '../get-topics-by-user-board.query';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
-@QueryHandler(GetTopicsByModuleQuery)
-export class GetTopicsByModuleHandler
-  implements IQueryHandler<GetTopicsByModuleQuery>
+@QueryHandler(GetTopicsByUserBoardQuery)
+export class GetTopicsByUserBoardHandler
+  implements IQueryHandler<GetTopicsByUserBoardQuery>
 {
   constructor(private readonly prisma: PrismaService) {}
 
-  async execute(query: GetTopicsByModuleQuery) {
-    const { moduleId, clerkId, paperNumber } = query;
+  async execute(query: GetTopicsByUserBoardQuery) {
+    const { clerkId } = query;
 
     const authData = await this.prisma.auth.findUnique({
       where: {
@@ -26,48 +26,35 @@ export class GetTopicsByModuleHandler
       },
     });
 
-    const studentBoardAgeLevelId =
-      authData?.student?.boardAgeLevelId ??
-      authData?.student?.boardAgeLevel?.id;
-
-    if (!studentBoardAgeLevelId) {
-      throw new BadRequestException('No board found for student');
+    if (!authData?.student?.boardAgeLevel) {
+      throw new BadRequestException('No board and age level found for student');
     }
 
-    const module = await this.prisma.module.findUnique({
-      where: {
-        id: moduleId,
-      },
-      select: {
-        boardAgeLevelId: true,
-        voided: true,
-      },
-    });
-
-    if (!module) {
-      throw new NotFoundException('Module not found');
-    }
-
-    if (module.boardAgeLevelId !== studentBoardAgeLevelId) {
-      throw new BadRequestException('Module does not belong to student board');
-    }
-
-    const whereClause: any = {
-      moduleId,
-      voided: false,
-    };
-
-    if (paperNumber) {
-      whereClause.paperNumber = paperNumber;
-    }
+    const { boardName, ageLevelName } = authData.student.boardAgeLevel;
 
     const topics = await this.prisma.topic.findMany({
-      where: whereClause,
+      where: {
+        voided: false,
+        module: {
+          boardAgeLevel: {
+            boardName,
+            ageLevelName,
+          },
+          voided: false,
+        },
+      },
       include: {
         module: {
           select: {
+            id: true,
             name: true,
             subject: true,
+            boardAgeLevel: {
+              select: {
+                boardName: true,
+                ageLevelName: true,
+              },
+            },
           },
         },
         questions: {
@@ -90,16 +77,16 @@ export class GetTopicsByModuleHandler
       ],
     });
 
-    const studentId = authData?.student?.id;
+    const studentId = authData.student.id;
 
     const topicsWithProgress = await Promise.all(
       topics.map(async (topic) => {
         const totalPracticeQuestions = topic.questions.length;
-        
+
         let progress = 0;
         if (studentId && totalPracticeQuestions > 0) {
-          const practiceQuestionIds = topic.questions.map(q => q.id);
-          
+          const practiceQuestionIds = topic.questions.map((q) => q.id);
+
           const completedSubmissions = await this.prisma.submission.findMany({
             where: {
               studentId,
@@ -119,11 +106,13 @@ export class GetTopicsByModuleHandler
           });
 
           const completedQuestionsCount = completedSubmissions.length;
-          progress = Math.round((completedQuestionsCount / totalPracticeQuestions) * 100);
+          progress = Math.round(
+            (completedQuestionsCount / totalPracticeQuestions) * 100,
+          );
         }
 
         const { questions, ...topicData } = topic;
-        
+
         return {
           ...topicData,
           progress,
@@ -133,8 +122,9 @@ export class GetTopicsByModuleHandler
 
     return {
       message: 'Topics retrieved successfully',
-      moduleId,
-      paperNumber: paperNumber ?? 'all',
+      boardName,
+      ageLevelName,
+      totalTopics: topicsWithProgress.length,
       data: topicsWithProgress,
     };
   }

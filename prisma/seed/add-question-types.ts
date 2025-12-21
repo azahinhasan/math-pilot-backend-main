@@ -2,6 +2,7 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
+// Run with: npx ts-node prisma/seed/add-question-types.ts
 async function seedQuestionTypes() {
   const questionTypes = [
     {
