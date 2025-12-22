@@ -1102,6 +1102,383 @@ async function main() {
     `✅ Created ${student1Submissions.length} submissions for ${student1.fullName}`,
   );
 
+  // ==================== STEP 7B: Create EXAM submissions for Alice (test performance tracking) ====================
+  console.log(
+    '\n🎓 Creating EXAM (Test Mode) submissions for performance tracking...',
+  );
+
+  // Alice - Test submissions over the past 30 days with varied performance
+  const student1ExamSubmissions = [
+    // Day 30 - Starting strong
+    {
+      questionId: q1.id,
+      daysBack: 30,
+      correct: true,
+      marks: 2,
+      totalMarks: 2,
+      timeTaken: 40,
+    },
+    // Day 29
+    {
+      questionId: q2.id,
+      daysBack: 29,
+      correct: true,
+      marks: 2,
+      totalMarks: 2,
+      timeTaken: 55,
+    },
+    // Day 28
+    {
+      questionId: q6.id,
+      daysBack: 28,
+      correct: true,
+      marks: 1,
+      totalMarks: 1,
+      timeTaken: 25,
+    },
+    // Day 27
+    {
+      questionId: q8.id,
+      daysBack: 27,
+      correct: true,
+      marks: 2,
+      totalMarks: 2,
+      timeTaken: 35,
+    },
+    // Day 26
+    {
+      questionId: q1.id,
+      daysBack: 26,
+      correct: true,
+      marks: 2,
+      totalMarks: 2,
+      timeTaken: 38,
+    },
+    // Day 25 - Medium difficulty starts
+    {
+      questionId: q4.id,
+      daysBack: 25,
+      correct: true,
+      marks: 2,
+      totalMarks: 2,
+      timeTaken: 65,
+    },
+    // Day 24
+    {
+      questionId: q2.id,
+      daysBack: 24,
+      correct: true,
+      marks: 2,
+      totalMarks: 2,
+      timeTaken: 50,
+    },
+    // Day 23
+    {
+      questionId: q3.id,
+      daysBack: 23,
+      correct: true,
+      marks: 4,
+      totalMarks: 4,
+      timeTaken: 140,
+    },
+    // Day 22
+    {
+      questionId: q7.id,
+      daysBack: 22,
+      correct: true,
+      marks: 3,
+      totalMarks: 3,
+      timeTaken: 110,
+    },
+    // Day 21
+    {
+      questionId: q6.id,
+      daysBack: 21,
+      correct: true,
+      marks: 1,
+      totalMarks: 1,
+      timeTaken: 28,
+    },
+    // Day 20 - Hard questions appear
+    {
+      questionId: q5.id,
+      daysBack: 20,
+      correct: true,
+      marks: 5,
+      totalMarks: 5,
+      timeTaken: 190,
+    },
+    // Day 19
+    {
+      questionId: q1.id,
+      daysBack: 19,
+      correct: true,
+      marks: 2,
+      totalMarks: 2,
+      timeTaken: 42,
+    },
+    // Day 18
+    {
+      questionId: q4.id,
+      daysBack: 18,
+      correct: true,
+      marks: 2,
+      totalMarks: 2,
+      timeTaken: 70,
+    },
+    // Day 17
+    {
+      questionId: q9.id,
+      daysBack: 17,
+      correct: true,
+      marks: 3,
+      totalMarks: 3,
+      timeTaken: 85,
+    },
+    // Day 16
+    {
+      questionId: q3.id,
+      daysBack: 16,
+      correct: true,
+      marks: 4,
+      totalMarks: 4,
+      timeTaken: 135,
+    },
+    // Day 15 - Perfect day
+    {
+      questionId: q2.id,
+      daysBack: 15,
+      correct: true,
+      marks: 2,
+      totalMarks: 2,
+      timeTaken: 48,
+    },
+    {
+      questionId: q6.id,
+      daysBack: 15,
+      correct: true,
+      marks: 1,
+      totalMarks: 1,
+      timeTaken: 30,
+    },
+    {
+      questionId: q8.id,
+      daysBack: 15,
+      correct: true,
+      marks: 2,
+      totalMarks: 2,
+      timeTaken: 38,
+    },
+    // Day 14
+    {
+      questionId: q7.id,
+      daysBack: 14,
+      correct: true,
+      marks: 3,
+      totalMarks: 3,
+      timeTaken: 105,
+    },
+    // Day 13
+    {
+      questionId: q1.id,
+      daysBack: 13,
+      correct: true,
+      marks: 2,
+      totalMarks: 2,
+      timeTaken: 35,
+    },
+    // Day 12
+    {
+      questionId: q5.id,
+      daysBack: 12,
+      correct: true,
+      marks: 5,
+      totalMarks: 5,
+      timeTaken: 200,
+    },
+    // Day 11
+    {
+      questionId: q4.id,
+      daysBack: 11,
+      correct: true,
+      marks: 2,
+      totalMarks: 2,
+      timeTaken: 68,
+    },
+    // Day 10 - Starting to make mistakes
+    {
+      questionId: q10.id,
+      daysBack: 10,
+      correct: false,
+      marks: 3,
+      totalMarks: 6,
+      timeTaken: 290,
+    },
+    // Day 9
+    {
+      questionId: q2.id,
+      daysBack: 9,
+      correct: true,
+      marks: 2,
+      totalMarks: 2,
+      timeTaken: 52,
+    },
+    // Day 8
+    {
+      questionId: q3.id,
+      daysBack: 8,
+      correct: true,
+      marks: 4,
+      totalMarks: 4,
+      timeTaken: 145,
+    },
+    // Day 7
+    {
+      questionId: q9.id,
+      daysBack: 7,
+      correct: false,
+      marks: 0,
+      totalMarks: 3,
+      timeTaken: 120,
+    },
+    // Day 6
+    {
+      questionId: q6.id,
+      daysBack: 6,
+      correct: true,
+      marks: 1,
+      totalMarks: 1,
+      timeTaken: 32,
+    },
+    // Day 5
+    {
+      questionId: q1.id,
+      daysBack: 5,
+      correct: true,
+      marks: 2,
+      totalMarks: 2,
+      timeTaken: 40,
+    },
+    // Day 4
+    {
+      questionId: q7.id,
+      daysBack: 4,
+      correct: true,
+      marks: 3,
+      totalMarks: 3,
+      timeTaken: 115,
+    },
+    // Day 3
+    {
+      questionId: q5.id,
+      daysBack: 3,
+      correct: true,
+      marks: 5,
+      totalMarks: 5,
+      timeTaken: 185,
+    },
+    // Day 2
+    {
+      questionId: q4.id,
+      daysBack: 2,
+      correct: true,
+      marks: 2,
+      totalMarks: 2,
+      timeTaken: 72,
+    },
+    // Day 1 - Recent performance
+    {
+      questionId: q2.id,
+      daysBack: 1,
+      correct: true,
+      marks: 2,
+      totalMarks: 2,
+      timeTaken: 45,
+    },
+    {
+      questionId: q8.id,
+      daysBack: 1,
+      correct: true,
+      marks: 2,
+      totalMarks: 2,
+      timeTaken: 37,
+    },
+    // Today
+    {
+      questionId: q10.id,
+      daysBack: 0,
+      correct: true,
+      marks: 6,
+      totalMarks: 6,
+      timeTaken: 270,
+    },
+  ];
+
+  for (const sub of student1ExamSubmissions) {
+    const beganAt = daysAgo(sub.daysBack);
+    const endedAt = addSeconds(beganAt, sub.timeTaken);
+
+    const submission = await prisma.submission.create({
+      data: {
+        studentId: student1.id,
+        questionId: sub.questionId,
+        type: SubmissionType.Exam, // EXAM TYPE FOR TEST PERFORMANCE
+        status: SubmissionStatus.Graded,
+        awardedMarks: sub.marks,
+        correctAnswersCount: sub.correct ? 1 : 0,
+        beganAt: beganAt,
+        endedAt: endedAt,
+      },
+    });
+    submissions.push(submission);
+
+    // Get solution base for this question
+    const solutionBase = await prisma.solutionBase.findUnique({
+      where: { questionId: sub.questionId },
+      include: { solutionMCQs: true, solutionDescriptives: true },
+    });
+
+    if (solutionBase) {
+      // Create submitted answer
+      if (solutionBase.solutionMCQs.length > 0) {
+        // MCQ submission
+        const correctOption = solutionBase.solutionMCQs.find(
+          (mcq) => mcq.isCorrect,
+        );
+        const incorrectOption = solutionBase.solutionMCQs.find(
+          (mcq) => !mcq.isCorrect,
+        );
+        const selectedOption = sub.correct ? correctOption : incorrectOption;
+
+        await prisma.submittedMcq.create({
+          data: {
+            submissionId: submission.id,
+            solutionId: solutionBase.id,
+            submittedOption: selectedOption?.optionText || '',
+            isCorrect: sub.correct,
+            awardedMark: sub.marks,
+          },
+        });
+      } else if (solutionBase.solutionDescriptives.length > 0) {
+        // Descriptive submission
+        await prisma.submittedDescriptive.create({
+          data: {
+            submissionId: submission.id,
+            solutionId: solutionBase.id,
+            descriptiveSubmittedAnswer: sub.correct
+              ? 'Correct solution provided'
+              : 'Partially correct solution',
+            awardedMarks: sub.marks,
+          },
+        });
+      }
+    }
+  }
+
+  console.log(
+    `✅ Created ${student1ExamSubmissions.length} EXAM submissions for ${student1.fullName} (Test Mode)`,
+  );
+
   // Student 2 (Average Performer) - Mixed performance
   const student2Submissions = [
     // Easy questions - mostly correct
@@ -1250,6 +1627,305 @@ async function main() {
 
   console.log(
     `✅ Created ${student2Submissions.length} submissions for ${student2.fullName}`,
+  );
+
+  // Bob - Test submissions over the past 30 days with average performance
+  const student2ExamSubmissions = [
+    // Day 30
+    {
+      questionId: q1.id,
+      daysBack: 30,
+      correct: true,
+      marks: 2,
+      totalMarks: 2,
+      timeTaken: 50,
+    },
+    // Day 29
+    {
+      questionId: q2.id,
+      daysBack: 29,
+      correct: false,
+      marks: 0,
+      totalMarks: 2,
+      timeTaken: 95,
+    },
+    // Day 27
+    {
+      questionId: q6.id,
+      daysBack: 27,
+      correct: true,
+      marks: 1,
+      totalMarks: 1,
+      timeTaken: 40,
+    },
+    // Day 26
+    {
+      questionId: q8.id,
+      daysBack: 26,
+      correct: true,
+      marks: 2,
+      totalMarks: 2,
+      timeTaken: 55,
+    },
+    // Day 24
+    {
+      questionId: q1.id,
+      daysBack: 24,
+      correct: true,
+      marks: 2,
+      totalMarks: 2,
+      timeTaken: 48,
+    },
+    // Day 23
+    {
+      questionId: q4.id,
+      daysBack: 23,
+      correct: false,
+      marks: 0,
+      totalMarks: 2,
+      timeTaken: 100,
+    },
+    // Day 22
+    {
+      questionId: q2.id,
+      daysBack: 22,
+      correct: true,
+      marks: 2,
+      totalMarks: 2,
+      timeTaken: 60,
+    },
+    // Day 20
+    {
+      questionId: q3.id,
+      daysBack: 20,
+      correct: false,
+      marks: 2,
+      totalMarks: 4,
+      timeTaken: 175,
+    },
+    // Day 19
+    {
+      questionId: q7.id,
+      daysBack: 19,
+      correct: true,
+      marks: 3,
+      totalMarks: 3,
+      timeTaken: 130,
+    },
+    // Day 18
+    {
+      questionId: q6.id,
+      daysBack: 18,
+      correct: true,
+      marks: 1,
+      totalMarks: 1,
+      timeTaken: 38,
+    },
+    // Day 16
+    {
+      questionId: q5.id,
+      daysBack: 16,
+      correct: false,
+      marks: 2,
+      totalMarks: 5,
+      timeTaken: 230,
+    },
+    // Day 15
+    {
+      questionId: q1.id,
+      daysBack: 15,
+      correct: true,
+      marks: 2,
+      totalMarks: 2,
+      timeTaken: 52,
+    },
+    // Day 14
+    {
+      questionId: q4.id,
+      daysBack: 14,
+      correct: true,
+      marks: 2,
+      totalMarks: 2,
+      timeTaken: 75,
+    },
+    // Day 13
+    {
+      questionId: q9.id,
+      daysBack: 13,
+      correct: false,
+      marks: 0,
+      totalMarks: 3,
+      timeTaken: 115,
+    },
+    // Day 12
+    {
+      questionId: q3.id,
+      daysBack: 12,
+      correct: true,
+      marks: 4,
+      totalMarks: 4,
+      timeTaken: 165,
+    },
+    // Day 11
+    {
+      questionId: q2.id,
+      daysBack: 11,
+      correct: true,
+      marks: 2,
+      totalMarks: 2,
+      timeTaken: 58,
+    },
+    // Day 10
+    {
+      questionId: q10.id,
+      daysBack: 10,
+      correct: false,
+      marks: 2,
+      totalMarks: 6,
+      timeTaken: 290,
+    },
+    // Day 9
+    {
+      questionId: q6.id,
+      daysBack: 9,
+      correct: true,
+      marks: 1,
+      totalMarks: 1,
+      timeTaken: 35,
+    },
+    // Day 8
+    {
+      questionId: q8.id,
+      daysBack: 8,
+      correct: false,
+      marks: 1,
+      totalMarks: 2,
+      timeTaken: 70,
+    },
+    // Day 7
+    {
+      questionId: q7.id,
+      daysBack: 7,
+      correct: true,
+      marks: 3,
+      totalMarks: 3,
+      timeTaken: 140,
+    },
+    // Day 6
+    {
+      questionId: q1.id,
+      daysBack: 6,
+      correct: true,
+      marks: 2,
+      totalMarks: 2,
+      timeTaken: 45,
+    },
+    // Day 5
+    {
+      questionId: q5.id,
+      daysBack: 5,
+      correct: false,
+      marks: 3,
+      totalMarks: 5,
+      timeTaken: 240,
+    },
+    // Day 4
+    {
+      questionId: q4.id,
+      daysBack: 4,
+      correct: true,
+      marks: 2,
+      totalMarks: 2,
+      timeTaken: 78,
+    },
+    // Day 3
+    {
+      questionId: q2.id,
+      daysBack: 3,
+      correct: true,
+      marks: 2,
+      totalMarks: 2,
+      timeTaken: 62,
+    },
+    // Day 2
+    {
+      questionId: q9.id,
+      daysBack: 2,
+      correct: false,
+      marks: 0,
+      totalMarks: 3,
+      timeTaken: 120,
+    },
+    // Day 1
+    {
+      questionId: q3.id,
+      daysBack: 1,
+      correct: true,
+      marks: 4,
+      totalMarks: 4,
+      timeTaken: 155,
+    },
+  ];
+
+  for (const sub of student2ExamSubmissions) {
+    const beganAt = daysAgo(sub.daysBack);
+    const endedAt = addSeconds(beganAt, sub.timeTaken);
+
+    const submission = await prisma.submission.create({
+      data: {
+        studentId: student2.id,
+        questionId: sub.questionId,
+        type: SubmissionType.Exam,
+        status: SubmissionStatus.Graded,
+        awardedMarks: sub.marks,
+        correctAnswersCount: sub.correct ? 1 : 0,
+        beganAt: beganAt,
+        endedAt: endedAt,
+      },
+    });
+    submissions.push(submission);
+
+    const solutionBase = await prisma.solutionBase.findUnique({
+      where: { questionId: sub.questionId },
+      include: { solutionMCQs: true, solutionDescriptives: true },
+    });
+
+    if (solutionBase) {
+      if (solutionBase.solutionMCQs.length > 0) {
+        const correctOption = solutionBase.solutionMCQs.find(
+          (mcq) => mcq.isCorrect,
+        );
+        const incorrectOption = solutionBase.solutionMCQs.find(
+          (mcq) => !mcq.isCorrect,
+        );
+        const selectedOption = sub.correct ? correctOption : incorrectOption;
+
+        await prisma.submittedMcq.create({
+          data: {
+            submissionId: submission.id,
+            solutionId: solutionBase.id,
+            submittedOption: selectedOption?.optionText || '',
+            isCorrect: sub.correct,
+            awardedMark: sub.marks,
+          },
+        });
+      } else if (solutionBase.solutionDescriptives.length > 0) {
+        await prisma.submittedDescriptive.create({
+          data: {
+            submissionId: submission.id,
+            solutionId: solutionBase.id,
+            descriptiveSubmittedAnswer: sub.correct
+              ? 'Correct answer'
+              : 'Incorrect attempt',
+            awardedMarks: sub.marks,
+          },
+        });
+      }
+    }
+  }
+
+  console.log(
+    `✅ Created ${student2ExamSubmissions.length} EXAM submissions for ${student2.fullName} (Test Mode)`,
   );
 
   // Student 3 (Struggling Learner) - Mostly incorrect
@@ -1403,15 +2079,15 @@ async function main() {
   // ==================== STEP 8: Create StudentTopicProgress ====================
   console.log('\n📊 Creating student topic progress records...');
 
-  // Student 1 Topic Progress
+  // Student 1 Topic Progress (High Performer - Should have completed topics)
   await prisma.studentTopicProgress.create({
     data: {
       studentId: student1.id,
       topicId: linearEquationsTopic.id,
       status: SubmissionStatus.Graded,
-      questionsAttempted: 3,
-      questionsCorrect: 3,
-      timeSpentInSeconds: 115,
+      questionsAttempted: 15,      // Increased for completion
+      questionsCorrect: 14,         // 93% accuracy
+      timeSpentInSeconds: 900,
       lastAccessedAt: daysAgo(1),
     },
   });
@@ -1421,9 +2097,9 @@ async function main() {
       studentId: student1.id,
       topicId: quadraticTopic.id,
       status: SubmissionStatus.Graded,
-      questionsAttempted: 3,
-      questionsCorrect: 2,
-      timeSpentInSeconds: 550,
+      questionsAttempted: 12,      // Increased for completion
+      questionsCorrect: 10,         // 83% accuracy
+      timeSpentInSeconds: 1850,
       isFavorite: true,
       lastAccessedAt: daysAgo(1),
     },
@@ -1434,22 +2110,35 @@ async function main() {
       studentId: student1.id,
       topicId: trianglesTopic.id,
       status: SubmissionStatus.Graded,
-      questionsAttempted: 2,
-      questionsCorrect: 2,
-      timeSpentInSeconds: 290,
+      questionsAttempted: 10,      // Exactly at minimum
+      questionsCorrect: 9,          // 90% accuracy
+      timeSpentInSeconds: 720,
       lastAccessedAt: daysAgo(2),
     },
   });
 
-  // Student 2 Topic Progress
+  // Add more topics for Alice to increase coverage
+  await prisma.studentTopicProgress.create({
+    data: {
+      studentId: student1.id,
+      topicId: anglesTopic.id,
+      status: SubmissionStatus.Graded,
+      questionsAttempted: 7,       // In progress
+      questionsCorrect: 6,          // 86% accuracy
+      timeSpentInSeconds: 420,
+      lastAccessedAt: daysAgo(3),
+    },
+  });
+
+  // Student 2 Topic Progress (Average Performer - Mixed completion)
   await prisma.studentTopicProgress.create({
     data: {
       studentId: student2.id,
       topicId: linearEquationsTopic.id,
       status: SubmissionStatus.Graded,
-      questionsAttempted: 3,
-      questionsCorrect: 2,
-      timeSpentInSeconds: 150,
+      questionsAttempted: 12,      // Enough attempts
+      questionsCorrect: 9,          // 75% accuracy - just completed!
+      timeSpentInSeconds: 950,
       lastAccessedAt: daysAgo(3),
     },
   });
@@ -1459,22 +2148,35 @@ async function main() {
       studentId: student2.id,
       topicId: quadraticTopic.id,
       status: SubmissionStatus.Graded,
-      questionsAttempted: 2,
-      questionsCorrect: 0,
-      timeSpentInSeconds: 471,
+      questionsAttempted: 10,      // At minimum
+      questionsCorrect: 5,          // 50% accuracy - not completed
+      timeSpentInSeconds: 1471,
+      isFavorite: true,
       lastAccessedAt: daysAgo(3),
     },
   });
 
-  // Student 3 Topic Progress
+  await prisma.studentTopicProgress.create({
+    data: {
+      studentId: student2.id,
+      topicId: anglesTopic.id,
+      status: SubmissionStatus.Graded,
+      questionsAttempted: 8,       // In progress
+      questionsCorrect: 4,          // 50% accuracy
+      timeSpentInSeconds: 650,
+      lastAccessedAt: daysAgo(4),
+    },
+  });
+
+  // Student 3 Topic Progress (Struggling Learner - Low completion, low accuracy)
   await prisma.studentTopicProgress.create({
     data: {
       studentId: student3.id,
       topicId: linearEquationsTopic.id,
       status: SubmissionStatus.Graded,
-      questionsAttempted: 3,
-      questionsCorrect: 1,
-      timeSpentInSeconds: 215,
+      questionsAttempted: 10,      // Enough attempts
+      questionsCorrect: 3,          // 30% accuracy - not completed
+      timeSpentInSeconds: 1215,
       lastAccessedAt: daysAgo(6),
     },
   });
@@ -1484,10 +2186,22 @@ async function main() {
       studentId: student3.id,
       topicId: quadraticTopic.id,
       status: SubmissionStatus.Graded,
-      questionsAttempted: 2,
-      questionsCorrect: 0,
-      timeSpentInSeconds: 380,
+      questionsAttempted: 8,       // In progress
+      questionsCorrect: 1,          // 12.5% accuracy - struggling
+      timeSpentInSeconds: 1380,
       lastAccessedAt: daysAgo(9),
+    },
+  });
+
+  await prisma.studentTopicProgress.create({
+    data: {
+      studentId: student3.id,
+      topicId: anglesTopic.id,
+      status: SubmissionStatus.Graded,
+      questionsAttempted: 5,       // Few attempts
+      questionsCorrect: 1,          // 20% accuracy
+      timeSpentInSeconds: 520,
+      lastAccessedAt: daysAgo(10),
     },
   });
 

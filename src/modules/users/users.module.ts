@@ -9,6 +9,9 @@ import { RegisterUserHandler } from './commands/handlers/register-user.handler';
 import { DeleteUserHandler } from './commands/handlers/delete-user.handler';
 import { OnboardingHandler } from './commands/handlers/onboarding.handler';
 import { GetPerformanceAnalyticsHandler } from './queries/handlers/get-performance-analytics.handler';
+import { GetTestPerformanceByIntervalHandler } from './queries/handlers/get-test-performance-by-interval.handler';
+import { GetActivityAnalyticsHandler } from './queries/handlers/get-activity-analytics.handler';
+import { GetProgressAnalyticsHandler } from './queries/handlers/get-progress-analytics.handler';
 
 @Module({
   imports: [CqrsModule, ConfigModule, PrismaModule],
@@ -20,6 +23,9 @@ import { GetPerformanceAnalyticsHandler } from './queries/handlers/get-performan
     DeleteUserHandler,
     OnboardingHandler,
     GetPerformanceAnalyticsHandler,
+    GetTestPerformanceByIntervalHandler,
+    GetActivityAnalyticsHandler,
+    GetProgressAnalyticsHandler,
   ],
 })
 export class UsersModule {}
