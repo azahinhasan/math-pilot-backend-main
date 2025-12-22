@@ -34,6 +34,12 @@ export class GetQuestionsByTopicHandler
       throw new BadRequestException('No board found for student');
     }
 
+    if (!authData?.student?.id) {
+      throw new BadRequestException('Student not found');
+    }
+
+    const studentId = authData.student.id;
+
     const topic = await this.prisma.topic.findUnique({
       where: {
         id: topicId,
@@ -77,16 +83,31 @@ export class GetQuestionsByTopicHandler
             },
           },
         },
+        submissions: {
+          where: {
+            studentId: studentId,
+            status: 'Submitted'
+          },
+          select: {
+            id: true,
+          },
+        },
       },
       orderBy: {
         serialNo: 'asc',
       },
     });
 
+    const questionsWithCompletionStatus = questions.map((question) => ({
+      ...question,
+      isCompleted: question.submissions.length > 0,
+      submissions: undefined,
+    }));
+
     return {
       message: 'Questions retrieved successfully',
       topicId,
-      data: questions,
+      data: questionsWithCompletionStatus,
     };
   }
 }
