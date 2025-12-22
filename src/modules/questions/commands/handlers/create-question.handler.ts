@@ -128,7 +128,6 @@ export class CreateQuestionHandler
       questionContentLink: dto.questionContentLink.trim(),
       contentBy: dto.contentBy,
       questionFor: dto.questionFor,
-      difficulty: dto.difficulty,
       totalMarks: dto.totalMarks,
       timeLimit: dto.timeLimit,
       hint: dto.hint.trim(),

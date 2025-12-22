@@ -116,9 +116,9 @@ export class CreateQuestionDto {
 
   @IsOptional()
   @IsIn([
-    DifficultyLevel.Beginner,
-    DifficultyLevel.Intermediate,
-    DifficultyLevel.Advanced,
+    DifficultyLevel.Easy,
+    DifficultyLevel.Medium,
+    DifficultyLevel.Hard,
   ])
   difficultyLevel?: DifficultyLevel;
 

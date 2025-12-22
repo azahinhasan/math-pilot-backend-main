@@ -16,9 +16,14 @@ function normalizeDifficulty(value: unknown): DifficultyLevel | unknown {
   if (typeof value !== 'string') return value;
   const v = value.trim().toLowerCase();
 
+  // Accept common aliases/synonyms (case-insensitive)
   if (v === 'beginner') return DifficultyLevel.Easy;
   if (v === 'intermediate') return DifficultyLevel.Medium;
   if (v === 'advanced') return DifficultyLevel.Hard;
+
+  if (v === 'easy') return DifficultyLevel.Easy;
+  if (v === 'medium') return DifficultyLevel.Medium;
+  if (v === 'hard') return DifficultyLevel.Hard;
 
   return value;
 }
@@ -56,7 +61,7 @@ export class CreateExamDto {
   @Transform(({ value }) => normalizeDifficulty(value))
   @IsEnum(DifficultyLevel, {
     message:
-      'difficulty must be one of: Beginner, Intermediate, Advanced (case-insensitive accepted)',
+      'difficulty must be one of: Easy, Medium, Hard (aliases: Beginner/Intermediate/Advanced accepted)',
   })
   @IsOptional()
   difficulty?: DifficultyLevel;
