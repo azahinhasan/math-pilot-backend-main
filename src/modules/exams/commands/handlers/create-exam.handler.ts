@@ -40,6 +40,8 @@ export class CreateExamHandler implements ICommandHandler<CreateExamCommand> {
 
     try {
       const result = await this.prisma.$transaction(async (tx) => {
+        const moduleId = await this.assertSingleModuleForTopics(tx, uniqueTopicIds);
+
         const exam = await tx.exam.create({
           data: {
             name: name?.trim() ? name.trim() : 'Competitive Test - Mathematics',
@@ -73,6 +75,7 @@ export class CreateExamHandler implements ICommandHandler<CreateExamCommand> {
             examId: exam.id,
             questionId,
             serialId: idx + 1,
+            moduleId,
           })),
           skipDuplicates: true,
         });
@@ -99,6 +102,23 @@ export class CreateExamHandler implements ICommandHandler<CreateExamCommand> {
         `Failed to create exam: ${error.message}`,
       );
     }
+  }
+
+  private async assertSingleModuleForTopics(
+    db: DbClient,
+    topicIds: string[],
+  ): Promise<string> {
+    const topics = await db.topic.findMany({
+      where: { id: { in: topicIds } },
+      select: { moduleId: true },
+    });
+    const moduleIds = [...new Set(topics.map((t) => t.moduleId))];
+    if (moduleIds.length !== 1) {
+      throw new BadRequestException(
+        'Selected topics must belong to the same module.',
+      );
+    }
+    return moduleIds[0];
   }
 
   private getExamType(type?: ExamType): ExamType {

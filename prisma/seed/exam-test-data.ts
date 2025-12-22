@@ -1,4 +1,11 @@
-import { PrismaClient, DifficultyLevel, QuestionFor } from '@prisma/client';
+import {
+  AgeLevelName,
+  BoardName,
+  DifficultyLevel,
+  PrismaClient,
+  QuestionFor,
+  Subject,
+} from '@prisma/client';
 
 // Run with: npx ts-node prisma/seed/exam-test-data.ts
 // or: npm run db:seed:exam-test (added in package.json)
@@ -7,6 +14,49 @@ const prisma = new PrismaClient();
 
 async function main() {
   console.log('Seeding exam test data (topic/subtopics/questions)...');
+
+  // Topic requires a module; reuse an existing module if possible, otherwise create a minimal one.
+  const existingModule = await prisma.module.findFirst({
+    where: { voided: false },
+    select: { id: true },
+  });
+
+  const moduleRecord =
+    existingModule ??
+    (await (async () => {
+      const boardAgeLevel = await prisma.boardAgeLevel.upsert({
+        where: {
+          boardName_ageLevelName: {
+            boardName: BoardName.AQA,
+            ageLevelName: AgeLevelName.GCSE,
+          },
+        },
+        update: {},
+        create: {
+          boardName: BoardName.AQA,
+          ageLevelName: AgeLevelName.GCSE,
+        },
+        select: { id: true },
+      });
+
+      return prisma.module.upsert({
+        where: {
+          name_subject_boardAgeLevelId: {
+            name: 'Mathematics (Seeded)',
+            subject: Subject.Mathematics,
+            boardAgeLevelId: boardAgeLevel.id,
+          },
+        },
+        update: {},
+        create: {
+          name: 'Mathematics (Seeded)',
+          description: 'Seed module for exam test data',
+          subject: Subject.Mathematics,
+          boardAgeLevelId: boardAgeLevel.id,
+        },
+        select: { id: true },
+      });
+    })());
 
   // Ensure a question type exists to attach to questions
   const descriptive = await prisma.questionType.upsert({
@@ -22,6 +72,7 @@ async function main() {
     data: {
       name: 'Algebra (Seeded)',
       description: 'Seed topic for testing exam question sets',
+      moduleId: moduleRecord.id,
       serialNumber: 1,
       paperNumber: 1,
     },
@@ -52,7 +103,7 @@ async function main() {
       hint: 'Rearrange to isolate x.',
       totalMarks: 1,
       timeLimit: 1,
-      difficulty_level: DifficultyLevel.Beginner,
+      difficulty_level: DifficultyLevel.Easy,
       stepCount: 1,
       serialNo: 100 + i + 1,
       questionTypeId: descriptive.id,
@@ -67,7 +118,7 @@ async function main() {
       hint: 'Find two numbers that multiply to the constant term and add to the coefficient of x.',
       totalMarks: 1,
       timeLimit: 2,
-      difficulty_level: DifficultyLevel.Intermediate,
+      difficulty_level: DifficultyLevel.Medium,
       stepCount: 1,
       serialNo: 200 + i + 1,
       questionTypeId: descriptive.id,

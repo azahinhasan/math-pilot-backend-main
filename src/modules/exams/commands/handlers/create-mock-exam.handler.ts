@@ -40,6 +40,12 @@ export class CreateMockExamHandler
       const result = await this.prisma.$transaction(async (tx) => {
         await this.assertQuestionsExist(tx, uniqueQuestionIds);
 
+        const resolvedModuleId = await this.resolveModuleIdForQuestionSet(
+          tx,
+          uniqueQuestionIds,
+          moduleId,
+        );
+
         const totalMarks = await this.sumTotalMarksForQuestions(
           tx,
           uniqueQuestionIds,
@@ -68,7 +74,7 @@ export class CreateMockExamHandler
             year,
             season,
             markSchemeUrl,
-            moduleId,
+            moduleId: resolvedModuleId,
           })),
           skipDuplicates: true,
         });
@@ -114,6 +120,32 @@ export class CreateMockExamHandler
       _sum: { totalMarks: true },
     });
     return agg._sum.totalMarks ?? 0;
+  }
+
+  private async resolveModuleIdForQuestionSet(
+    db: DbClient,
+    questionIds: string[],
+    moduleId?: string,
+  ): Promise<string> {
+    if (moduleId) return moduleId;
+
+    const questions = await db.question.findMany({
+      where: { id: { in: questionIds } },
+      select: { moduleId: true, topic: { select: { moduleId: true } } },
+    });
+
+    const inferred = questions
+      .map((q) => q.moduleId ?? q.topic?.moduleId)
+      .filter((id): id is string => Boolean(id));
+
+    const unique = [...new Set(inferred)];
+    if (unique.length !== 1) {
+      throw new BadRequestException(
+        'moduleId is required (or all questions must belong to the same module).',
+      );
+    }
+
+    return unique[0];
   }
 }
 
