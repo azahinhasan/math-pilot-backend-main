@@ -177,7 +177,7 @@ export class GetSubjectProgressHandler
     }
 
     // Get time spent from StudentTopicProgress
-    const topicProgressData = await this.prisma.studentTopicProgress.findMany({
+    const topicProgressData = await this.prisma.studentTopicDetails.findMany({
       where: {
         studentId,
         ...(startDate || endDate

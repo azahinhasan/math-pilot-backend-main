@@ -27,8 +27,7 @@
     "db:seed:performance": "ts-node prisma/seed/performance-data.ts",
     "db:seed:exams": "ts-node prisma/seed/exam-data.ts",
     "db:seed:comprehensive": "ts-node prisma/seed/comprehensive-seed.ts",
-    "db:seed:submission-types": "ts-node prisma/seed/add-submission-types.ts"
-    "db:seed:question-types": "ts-node prisma/seed/question-types.ts"
+    "db:seed:submission-types": "ts-node prisma/seed/add-submission-types.ts",
     "db:seed:exam-test": "ts-node prisma/seed/exam-test-data.ts"
   },
   "dependencies": {

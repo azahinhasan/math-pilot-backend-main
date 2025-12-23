@@ -283,7 +283,7 @@ export class GetActivityAnalyticsHandler
           beganAt: 'desc',
         },
       }),
-      this.prisma.studentTopicProgress.findMany({
+      this.prisma.studentTopicDetails.findMany({
         where: {
           studentId,
           ...(topicId && { topicId }),
