@@ -84,7 +84,7 @@ export class GetDashboardAnalyticsHandler
     ] = await Promise.all([
       this.getSubmissions(studentId, currentStart, currentEnd),
       this.getSubmissions(studentId, previousStart, previousEnd),
-      this.prisma.studentTopicProgress.findMany({
+      this.prisma.studentTopicDetails.findMany({
         where: { studentId },
         include: {
           topic: {

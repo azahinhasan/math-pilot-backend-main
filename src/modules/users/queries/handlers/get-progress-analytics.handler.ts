@@ -302,7 +302,7 @@ export class GetProgressAnalyticsHandler
           beganAt: 'asc', // Ascending for time series
         },
       }),
-      this.prisma.studentTopicProgress.findMany({
+      this.prisma.studentTopicDetails.findMany({
         where: {
           studentId,
           ...(topicId && { topicId }),

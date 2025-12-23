@@ -186,7 +186,7 @@ export class GetPerformanceAnalyticsHandler
       topicProgressFilter.topicId = topicId;
     }
 
-    const topicProgress = await this.prisma.studentTopicProgress.findMany({
+    const topicProgress = await this.prisma.studentTopicDetails.findMany({
       where: topicProgressFilter,
       include: {
         topic: {

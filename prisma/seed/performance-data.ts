@@ -40,7 +40,7 @@ async function main() {
 
   if (testAuthIds.length > 0) {
     // Delete student-related data
-    await prisma.studentTopicProgress.deleteMany({
+    await prisma.studentTopicDetails.deleteMany({
       where: { student: { authId: { in: testAuthIds } } },
     });
 
@@ -114,7 +114,7 @@ async function main() {
           });
         }
 
-        await prisma.runningCanvas.deleteMany({
+        await prisma.activeCanvas.deleteMany({
           where: { questionId: { in: questionIds } },
         });
         await prisma.aiResponse.deleteMany({
@@ -161,7 +161,7 @@ async function main() {
     await prisma.history.deleteMany({
       where: { userId: { in: testAuthIds } },
     });
-    await prisma.runningCanvas.deleteMany({
+    await prisma.activeCanvas.deleteMany({
       where: { userId: { in: testAuthIds } },
     });
     await prisma.examLog.deleteMany({
@@ -538,7 +538,6 @@ async function main() {
       questionContentLink: '',
       contentBy: ContentBy.HUMAN,
       questionFor: QuestionFor.Practice,
-      difficulty: 1,
       totalMarks: 2,
       timeLimit: 60,
       hint: 'Subtract 5 from both sides first',
@@ -575,7 +574,6 @@ async function main() {
       questionContentLink: '',
       contentBy: ContentBy.HUMAN,
       questionFor: QuestionFor.Practice,
-      difficulty: 1,
       totalMarks: 2,
       timeLimit: 90,
       hint: 'Find a common denominator',
@@ -613,7 +611,6 @@ async function main() {
       questionContentLink: '',
       contentBy: ContentBy.HUMAN,
       questionFor: QuestionFor.Practice,
-      difficulty: 2,
       totalMarks: 4,
       timeLimit: 180,
       hint: 'Factor into (x - a)(x - b) = 0',
@@ -657,7 +654,6 @@ async function main() {
       questionContentLink: '',
       contentBy: ContentBy.HUMAN,
       questionFor: QuestionFor.Practice,
-      difficulty: 2,
       totalMarks: 2,
       timeLimit: 90,
       hint: 'Corresponding angles are equal',
@@ -695,7 +691,6 @@ async function main() {
       questionContentLink: '',
       contentBy: ContentBy.HUMAN,
       questionFor: QuestionFor.Practice,
-      difficulty: 3,
       totalMarks: 5,
       timeLimit: 240,
       hint: 'Use a^2 + b^2 = c^2',
@@ -737,7 +732,6 @@ async function main() {
       questionContentLink: '',
       contentBy: ContentBy.HUMAN,
       questionFor: QuestionFor.Practice,
-      difficulty: 1,
       totalMarks: 1,
       timeLimit: 60,
       hint: 'The y-intercept is the constant term',
@@ -775,7 +769,6 @@ async function main() {
       questionContentLink: '',
       contentBy: ContentBy.HUMAN,
       questionFor: QuestionFor.Practice,
-      difficulty: 2,
       totalMarks: 3,
       timeLimit: 150,
       hint: 'Check the discriminant b^2 - 4ac',
@@ -820,7 +813,6 @@ async function main() {
       questionContentLink: '',
       contentBy: ContentBy.HUMAN,
       questionFor: QuestionFor.Practice,
-      difficulty: 1,
       totalMarks: 2,
       timeLimit: 60,
       hint: 'Divide both sides by 3',
@@ -860,7 +852,6 @@ async function main() {
       questionContentLink: '',
       contentBy: ContentBy.HUMAN,
       questionFor: QuestionFor.Practice,
-      difficulty: 3,
       totalMarks: 3,
       timeLimit: 120,
       hint: 'Sum of angles in a triangle is 180 degrees',
@@ -898,7 +889,6 @@ async function main() {
       questionContentLink: '',
       contentBy: ContentBy.HUMAN,
       questionFor: QuestionFor.Practice,
-      difficulty: 3,
       totalMarks: 6,
       timeLimit: 300,
       hint: 'Let width = x, then length = x + 3. Area = x(x + 3) = 40',
@@ -2080,7 +2070,7 @@ async function main() {
   console.log('\n📊 Creating student topic progress records...');
 
   // Student 1 Topic Progress (High Performer - Should have completed topics)
-  await prisma.studentTopicProgress.create({
+  await prisma.studentTopicDetails.create({
     data: {
       studentId: student1.id,
       topicId: linearEquationsTopic.id,
@@ -2092,7 +2082,7 @@ async function main() {
     },
   });
 
-  await prisma.studentTopicProgress.create({
+  await prisma.studentTopicDetails.create({
     data: {
       studentId: student1.id,
       topicId: quadraticTopic.id,
@@ -2105,7 +2095,7 @@ async function main() {
     },
   });
 
-  await prisma.studentTopicProgress.create({
+  await prisma.studentTopicDetails.create({
     data: {
       studentId: student1.id,
       topicId: trianglesTopic.id,
@@ -2118,7 +2108,7 @@ async function main() {
   });
 
   // Add more topics for Alice to increase coverage
-  await prisma.studentTopicProgress.create({
+  await prisma.studentTopicDetails.create({
     data: {
       studentId: student1.id,
       topicId: anglesTopic.id,
@@ -2131,7 +2121,7 @@ async function main() {
   });
 
   // Student 2 Topic Progress (Average Performer - Mixed completion)
-  await prisma.studentTopicProgress.create({
+  await prisma.studentTopicDetails.create({
     data: {
       studentId: student2.id,
       topicId: linearEquationsTopic.id,
@@ -2143,7 +2133,7 @@ async function main() {
     },
   });
 
-  await prisma.studentTopicProgress.create({
+  await prisma.studentTopicDetails.create({
     data: {
       studentId: student2.id,
       topicId: quadraticTopic.id,
@@ -2156,7 +2146,7 @@ async function main() {
     },
   });
 
-  await prisma.studentTopicProgress.create({
+  await prisma.studentTopicDetails.create({
     data: {
       studentId: student2.id,
       topicId: anglesTopic.id,
@@ -2169,7 +2159,7 @@ async function main() {
   });
 
   // Student 3 Topic Progress (Struggling Learner - Low completion, low accuracy)
-  await prisma.studentTopicProgress.create({
+  await prisma.studentTopicDetails.create({
     data: {
       studentId: student3.id,
       topicId: linearEquationsTopic.id,
@@ -2181,7 +2171,7 @@ async function main() {
     },
   });
 
-  await prisma.studentTopicProgress.create({
+  await prisma.studentTopicDetails.create({
     data: {
       studentId: student3.id,
       topicId: quadraticTopic.id,
@@ -2193,7 +2183,7 @@ async function main() {
     },
   });
 
-  await prisma.studentTopicProgress.create({
+  await prisma.studentTopicDetails.create({
     data: {
       studentId: student3.id,
       topicId: anglesTopic.id,
