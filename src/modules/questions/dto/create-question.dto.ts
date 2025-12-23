@@ -71,8 +71,20 @@ export class CreateQuestionDto {
   @IsUrl()
   questionContentLink!: string;
 
+  @IsString()
+  @IsNotEmpty()
+  moduleId:string;
+
+  @IsString()
+  @IsNotEmpty()
+  topicId: string;
+
+  @IsString()
+  @IsNotEmpty()
+  subtopicId: string;
+
   @IsOptional()
-  @IsIn([ContentBy.HUMAN, ContentBy.AI])
+  @IsIn([ContentBy.Human, ContentBy.AI])
   contentBy?: ContentBy;
 
   @IsOptional()

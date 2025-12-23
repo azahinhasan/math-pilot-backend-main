@@ -16,15 +16,15 @@ type QuestionTypeName = 'MCQ' | 'TrueFalse' | 'Descriptive';
 
 @Injectable()
 @CommandHandler(CreateQuestionCommand)
-export class CreateQuestionHandler
-  implements ICommandHandler<CreateQuestionCommand>
-{
+export class CreateQuestionHandler implements ICommandHandler<CreateQuestionCommand> {
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(command: CreateQuestionCommand) {
     const dto = command.payload;
 
-    const questionType = await this.getQuestionTypeOrThrow(dto.questionTypeName);
+    const questionType = await this.getQuestionTypeOrThrow(
+      dto.questionTypeName,
+    );
     this.validateSolutionPayload(dto, questionType.name as QuestionTypeName);
 
     try {
@@ -37,7 +37,12 @@ export class CreateQuestionHandler
           data: { questionId: question.id },
         });
 
-        await this.createSolutionForQuestionType(tx, dto, questionType.name as QuestionTypeName, solutionBase.id);
+        await this.createSolutionForQuestionType(
+          tx,
+          dto,
+          questionType.name as QuestionTypeName,
+          solutionBase.id,
+        );
 
         return tx.question.findUnique({
           where: { id: question.id },
@@ -74,7 +79,10 @@ export class CreateQuestionHandler
     return qt;
   }
 
-  private validateSolutionPayload(dto: CreateQuestionDto, typeName: QuestionTypeName) {
+  private validateSolutionPayload(
+    dto: CreateQuestionDto,
+    typeName: QuestionTypeName,
+  ) {
     if (typeName === 'Descriptive') {
       if (!dto.descriptive?.descriptiveSolution?.trim()) {
         throw new BadRequestException(
@@ -114,7 +122,9 @@ export class CreateQuestionHandler
     }
     const correctCount = options.filter((o) => o.isCorrect === true).length;
     if (correctCount < 1) {
-      throw new BadRequestException('At least one option must be marked isCorrect=true.');
+      throw new BadRequestException(
+        'At least one option must be marked isCorrect=true.',
+      );
     }
   }
 
@@ -130,6 +140,9 @@ export class CreateQuestionHandler
       questionFor: dto.questionFor,
       totalMarks: dto.totalMarks,
       timeLimit: dto.timeLimit,
+      module: { connect: { id: dto.moduleId } },
+      topic: { connect: { id: dto.topicId } },
+      subtopic: { connect: { id: dto.subtopicId } },
       hint: dto.hint.trim(),
       explanation: dto.explanation?.trim(),
       givenContext: dto.givenContext?.trim(),
@@ -198,5 +211,3 @@ export class CreateQuestionHandler
     });
   }
 }
-
-

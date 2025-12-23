@@ -11,8 +11,10 @@ import { BoardAgeLevelModule } from './modules/board-age-level/board-age-level.m
 import { ModulesModule } from './modules/modules/modules.module';
 import { ExamsModule } from './modules/exams/exams.module';
 import { TopicsModule } from './modules/topics/topics.module';
-import { AnalyticsModule } from './modules/analytics/analytics.module';
 import { QuestionsModule } from './modules/questions/questions.module';
+import { ActiveCanvasModule } from './modules/active-canvas/active-canvas.module';
+import { HealthModule } from './modules/health/health.module';
+import { AnalyticsModule } from './modules/analytics/analytics.module';
 
 @Module({
   imports: [
@@ -27,7 +29,10 @@ import { QuestionsModule } from './modules/questions/questions.module';
     ModulesModule,
     ExamsModule,
     TopicsModule,
-    AnalyticsModule
+    QuestionsModule,
+    ActiveCanvasModule,
+    HealthModule,
+    AnalyticsModule,
   ], // Read .env file for environment variables
   controllers: [AppController],
   providers: [AppService],

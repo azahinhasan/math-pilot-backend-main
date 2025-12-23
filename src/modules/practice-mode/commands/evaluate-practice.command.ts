@@ -7,6 +7,7 @@ export class EvaluatePracticeCommand implements ICommand {
     public readonly canvas_data: CanvasDataItem[],
     public readonly files: Express.Multer.File[],
     public readonly current_step_count: string,
+    public readonly clerkId: string,
     public readonly chat_history?: string,
   ) {}
 }
