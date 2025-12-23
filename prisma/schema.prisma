@@ -38,7 +38,7 @@ enum Subject {
 }
 
 enum ContentBy {
-  HUMAN
+  Human
   AI
 }
 
@@ -257,12 +257,12 @@ model Question {
   id                  String          @id @default(uuid())
   name                String
   questionText        String          @map("question_text")
-  questionContentLink String          @map("question_content_link")
-  contentBy           ContentBy       @default(HUMAN) @map("content_by")
+  questionContentLink String?         @map("question_content_link")
+  contentBy           ContentBy       @default(AI) @map("content_by")
   questionFor         QuestionFor     @default(Practice) @map("question_for")
   totalMarks          Int?            @map("total_marks")
   timeLimit           Int?            @map("time_limit")
-  hint                String
+  hint                String?
   explanation         String?
   givenContext        String?
   findObjective       String?
@@ -271,17 +271,17 @@ model Question {
   stepCount           Int             @map("step_count")
   serialNo            Int             @map("serial_no")
   questionTypeId      String          @map("question_type_id")
-  moduleId            String?         @map("module_id")
-  topicId             String?         @map("topic_id")
-  subtopicId          String?         @map("subtopic_id")
+  moduleId            String          @map("module_id")
+  topicId             String          @map("topic_id")
+  subtopicId          String          @map("subtopic_id")
   createdAt           DateTime        @default(now()) @map("created_at")
   updatedAt           DateTime        @updatedAt @map("updated_at")
   voided              Boolean         @default(false)
 
   questionType   QuestionType    @relation(fields: [questionTypeId], references: [id])
-  module         Module?         @relation(fields: [moduleId], references: [id])
-  topic          Topic?          @relation(fields: [topicId], references: [id])
-  subtopic       Subtopic?       @relation(fields: [subtopicId], references: [id])
+  module         Module          @relation(fields: [moduleId], references: [id])
+  topic          Topic           @relation(fields: [topicId], references: [id])
+  subtopic       Subtopic        @relation(fields: [subtopicId], references: [id])
   solutionBases  SolutionBase[]
   submissions    Submission[]
   questionSets   QuestionSet[]
@@ -393,7 +393,12 @@ model SubmittedDescriptive {
   solutionId                 String   @map("solution_id")
   descriptiveSubmittedAnswer String?  @map("descriptive_submitted_answer")
   solutionImageUrl           String?  @map("solution_image_url")
+  canvasJson                 Json     @map("canvas_json")
+  isCorrect                  Boolean  @default(false) @map("is_correct")
   awardedMarks               Int?     @map("awarded_marks")
+  hint                       String?  @map("hint")
+  chatHistory                String?  @map("chat_history")
+  verdict                    String?  @map("verdict") //on track, correct, incorrect
   createdAt                  DateTime @default(now()) @map("created_at")
   updatedAt                  DateTime @updatedAt @map("updated_at")
   voided                     Boolean  @default(false)
@@ -523,7 +528,7 @@ model SubmittedMatchingPair {
 model ActiveCanvas {
   id         String  @id @default(uuid())
   hint       String?
-  canvasJson String? @map("canvas_json")
+  canvasJson String  @map("canvas_json")
   userId     String  @map("user_id")
   questionId String  @map("question_id")
 
