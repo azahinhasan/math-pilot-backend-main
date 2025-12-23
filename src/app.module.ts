@@ -13,6 +13,7 @@ import { ExamsModule } from './modules/exams/exams.module';
 import { TopicsModule } from './modules/topics/topics.module';
 import { QuestionsModule } from './modules/questions/questions.module';
 import { ActiveCanvasModule } from './modules/active-canvas/active-canvas.module';
+import { HealthModule } from './modules/health/health.module';
 
 @Module({
   imports: [
@@ -27,7 +28,8 @@ import { ActiveCanvasModule } from './modules/active-canvas/active-canvas.module
     ExamsModule,
     TopicsModule,
     QuestionsModule,
-    ActiveCanvasModule
+    ActiveCanvasModule,
+    HealthModule
   ], // Read .env file for environment variables
   controllers: [AppController],
   providers: [AppService],

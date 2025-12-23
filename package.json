@@ -1,7 +1,7 @@
 {
   "name": "ilm-math-pilot-v2",
-  "version": "0.0.1",
-  "description": "",
+  "version": "$APP_VERSION",
+  "description": "$APP_DESCRIPTION",
   "author": "",
   "private": true,
   "license": "UNLICENSED",
