@@ -7,6 +7,7 @@
 generator client {
   provider        = "prisma-client-js"
   previewFeatures = ["prismaSchemaFolder"]
+  binaryTargets   = ["native", "linux-musl-openssl-3.0.x"]
 }
 
 datasource db {
@@ -78,13 +79,13 @@ enum ExamType {
 }
 
 enum GradingType {
-  GRADED
-  PRACTISE
+  Graded
+  Practise
 }
 
 enum AssignmentType {
-  HOMEWORK
-  PRACTICE
+  Homework
+  Practice
 }
 
 // ----------------- Models -------------------- //
@@ -150,13 +151,13 @@ model Student {
   updatedAt       DateTime @updatedAt @map("updated_at")
   voided          Boolean  @default(false)
 
-  auth                 Auth                   @relation(fields: [authId], references: [id])
-  boardAgeLevel        BoardAgeLevel?         @relation(fields: [boardAgeLevelId], references: [id])
-  creator              Auth?                  @relation("CreatedStudents", fields: [createdBy], references: [id])
-  submissions          Submission[]
-  studentSchedules     StudentSchedule[]
-  guardianStudentMaps  GuardianStudentMap[]
-  studentTopicProgress StudentTopicProgress[]
+  auth                Auth                  @relation(fields: [authId], references: [id])
+  boardAgeLevel       BoardAgeLevel?        @relation(fields: [boardAgeLevelId], references: [id])
+  creator             Auth?                 @relation("CreatedStudents", fields: [createdBy], references: [id])
+  submissions         Submission[]
+  studentSchedules    StudentSchedule[]
+  guardianStudentMaps GuardianStudentMap[]
+  studentTopicDetails StudentTopicDetails[]
 }
 
 model BoardAgeLevel {
@@ -210,11 +211,11 @@ model Topic {
   updatedAt    DateTime @updatedAt @map("updated_at")
   voided       Boolean  @default(false)
 
-  module               Module                 @relation(fields: [moduleId], references: [id])
-  subtopics            Subtopic[]
-  questions            Question[]
-  examSubtopics        ExamSubtopic[]
-  studentTopicProgress StudentTopicProgress[]
+  module              Module                @relation(fields: [moduleId], references: [id])
+  subtopics           Subtopic[]
+  questions           Question[]
+  examSubtopics       ExamSubtopic[]
+  studentTopicDetails StudentTopicDetails[]
 }
 
 model Subtopic {
@@ -258,7 +259,6 @@ model Question {
   questionContentLink String          @map("question_content_link")
   contentBy           ContentBy       @default(HUMAN) @map("content_by")
   questionFor         QuestionFor     @default(Practice) @map("question_for")
-  difficulty          Int             @default(0)
   totalMarks          Int?            @map("total_marks")
   timeLimit           Int?            @map("time_limit")
   hint                String
@@ -301,6 +301,8 @@ model SolutionBase {
   solutionDescriptives  SolutionDescriptive[]
   submittedAnswers      SubmittedAnswer[]
   solutionMatchingPairs SolutionMatchingPair[]
+  submittedMcqs         SubmittedMcq[]
+  submittedDescriptives SubmittedDescriptive[]
 }
 
 model SolutionMcq {
@@ -377,6 +379,7 @@ model SubmittedMcq {
   voided          Boolean  @default(false)
 
   submission Submission @relation(fields: [submissionId], references: [id])
+  solution SolutionBase @relation(fields: [solutionId], references: [id])
 
   @@unique([submissionId, solutionId])
 }
@@ -393,6 +396,7 @@ model SubmittedDescriptive {
   voided                     Boolean  @default(false)
 
   submission Submission @relation(fields: [submissionId], references: [id])
+  solution SolutionBase @relation(fields: [solutionId], references: [id])
 }
 
 model Exam {
@@ -417,7 +421,6 @@ model Exam {
   examLogs     ExamLog[]
 }
 
-// Maintains the many to many relationship between exams and topics and subtopics
 model SolutionMatchingPair {
   id              String   @id @default(uuid())
   solutionBaseId  String   @map("solution_base_id")
@@ -446,6 +449,7 @@ model StudentSchedule {
   module  Module  @relation(fields: [moduleId], references: [id])
 }
 
+// Maintains the many to many relationship between exams and topics and subtopics
 model ExamSubtopic {
   id         String @id @default(uuid())
   examId     String @map("exam_id")
@@ -513,6 +517,7 @@ model SubmittedMatchingPair {
   submittedAnswer SubmittedAnswer @relation(fields: [submissionId, solutionId], references: [submissionId, solutionId])
 }
 
+// TODO: Rename to ActiveCanvas
 model RunningCanvas {
   id         String  @id @default(uuid())
   hint       String?
@@ -580,6 +585,8 @@ model GuardianStudentMap {
 
   guardian Guardian @relation(fields: [guardianId], references: [id])
   student  Student  @relation(fields: [studentId], references: [id])
+
+  @@unique([guardianId, studentId])
 }
 
 model GoalLevel {
@@ -600,7 +607,7 @@ model QuestionLevel {
   boardAgeLevel BoardAgeLevel @relation(fields: [boardAgeLevelId], references: [id])
 }
 
-model StudentTopicProgress {
+model StudentTopicDetails {
   id                  String            @id @default(uuid())
   studentId           String            @map("student_id")
   topicId             String            @map("topic_id")
