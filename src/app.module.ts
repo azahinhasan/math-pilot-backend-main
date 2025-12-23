@@ -14,6 +14,7 @@ import { TopicsModule } from './modules/topics/topics.module';
 import { QuestionsModule } from './modules/questions/questions.module';
 import { ActiveCanvasModule } from './modules/active-canvas/active-canvas.module';
 import { HealthModule } from './modules/health/health.module';
+import { AnalyticsModule } from './modules/analytics/analytics.module';
 
 @Module({
   imports: [
@@ -24,12 +25,14 @@ import { HealthModule } from './modules/health/health.module';
     PracticeModeModule,
     RoleModule,
     BoardAgeLevelModule,
+    QuestionsModule,
     ModulesModule,
     ExamsModule,
     TopicsModule,
     QuestionsModule,
     ActiveCanvasModule,
-    HealthModule
+    HealthModule,
+    AnalyticsModule,
   ], // Read .env file for environment variables
   controllers: [AppController],
   providers: [AppService],

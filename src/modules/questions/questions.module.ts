@@ -4,12 +4,11 @@ import { ConfigModule } from '@nestjs/config';
 import { PrismaModule } from 'src/prisma/prisma.module';
 import { QuestionsController } from './questions.controller';
 import { GetQuestionsByTopicHandler } from './queries/handlers/get-questions-by-topic.handler';
+import { CreateQuestionHandler } from './commands/handlers/create-question.handler';
 
 @Module({
   imports: [CqrsModule, ConfigModule, PrismaModule],
   controllers: [QuestionsController],
-  providers: [
-    GetQuestionsByTopicHandler,
-  ],
+  providers: [GetQuestionsByTopicHandler, CreateQuestionHandler],
 })
 export class QuestionsModule {}
