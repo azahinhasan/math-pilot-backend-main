@@ -536,7 +536,7 @@ async function main() {
       name: 'Solve for x: 2x + 5 = 13',
       questionText: 'Solve the equation: 2x + 5 = 13',
       questionContentLink: '',
-      contentBy: ContentBy.HUMAN,
+      contentBy: ContentBy.Human,
       questionFor: QuestionFor.Practice,
       totalMarks: 2,
       timeLimit: 60,
@@ -572,7 +572,7 @@ async function main() {
       name: 'What is 1/2 + 1/4?',
       questionText: 'Calculate: 1/2 + 1/4',
       questionContentLink: '',
-      contentBy: ContentBy.HUMAN,
+      contentBy: ContentBy.Human,
       questionFor: QuestionFor.Practice,
       totalMarks: 2,
       timeLimit: 90,
@@ -609,7 +609,7 @@ async function main() {
       questionText:
         'Solve the quadratic equation by factoring: x^2 - 5x + 6 = 0',
       questionContentLink: '',
-      contentBy: ContentBy.HUMAN,
+      contentBy: ContentBy.Human,
       questionFor: QuestionFor.Practice,
       totalMarks: 4,
       timeLimit: 180,
@@ -652,7 +652,7 @@ async function main() {
       questionText:
         'Two parallel lines are cut by a transversal. If one angle is 65 degrees, what is the corresponding angle?',
       questionContentLink: '',
-      contentBy: ContentBy.HUMAN,
+      contentBy: ContentBy.Human,
       questionFor: QuestionFor.Practice,
       totalMarks: 2,
       timeLimit: 90,
@@ -689,7 +689,7 @@ async function main() {
       questionText:
         'A right-angled triangle has sides of 5cm and 12cm. Calculate the hypotenuse.',
       questionContentLink: '',
-      contentBy: ContentBy.HUMAN,
+      contentBy: ContentBy.Human,
       questionFor: QuestionFor.Practice,
       totalMarks: 5,
       timeLimit: 240,
@@ -730,7 +730,7 @@ async function main() {
       name: 'Identify y-intercept',
       questionText: 'What is the y-intercept of the line y = 2x + 3?',
       questionContentLink: '',
-      contentBy: ContentBy.HUMAN,
+      contentBy: ContentBy.Human,
       questionFor: QuestionFor.Practice,
       totalMarks: 1,
       timeLimit: 60,
@@ -767,7 +767,7 @@ async function main() {
       questionText:
         'Using the quadratic formula, how many solutions does x^2 - 4x + 4 = 0 have?',
       questionContentLink: '',
-      contentBy: ContentBy.HUMAN,
+      contentBy: ContentBy.Human,
       questionFor: QuestionFor.Practice,
       totalMarks: 3,
       timeLimit: 150,
@@ -811,7 +811,7 @@ async function main() {
       name: 'Simple linear equation',
       questionText: 'Solve for x: 3x = 15',
       questionContentLink: '',
-      contentBy: ContentBy.HUMAN,
+      contentBy: ContentBy.Human,
       questionFor: QuestionFor.Practice,
       totalMarks: 2,
       timeLimit: 60,
@@ -850,7 +850,7 @@ async function main() {
       questionText:
         'In a triangle, if two angles are 45 degrees and 65 degrees, what is the third angle?',
       questionContentLink: '',
-      contentBy: ContentBy.HUMAN,
+      contentBy: ContentBy.Human,
       questionFor: QuestionFor.Practice,
       totalMarks: 3,
       timeLimit: 120,
@@ -887,7 +887,7 @@ async function main() {
       questionText:
         'A rectangle has a length that is 3cm more than its width. If the area is 40cm^2, find the dimensions.',
       questionContentLink: '',
-      contentBy: ContentBy.HUMAN,
+      contentBy: ContentBy.Human,
       questionFor: QuestionFor.Practice,
       totalMarks: 6,
       timeLimit: 300,
@@ -1082,6 +1082,7 @@ async function main() {
               ? 'Correct solution provided'
               : 'Partially correct solution',
             awardedMarks: sub.marks,
+            canvasJson:""
           },
         });
       }
@@ -1459,6 +1460,7 @@ async function main() {
               ? 'Correct solution provided'
               : 'Partially correct solution',
             awardedMarks: sub.marks,
+            canvasJson:""
           },
         });
       }
@@ -1609,6 +1611,7 @@ async function main() {
               ? 'Correct answer'
               : 'Incorrect attempt',
             awardedMarks: sub.marks,
+            canvasJson:""
           },
         });
       }
@@ -1908,6 +1911,7 @@ async function main() {
               ? 'Correct answer'
               : 'Incorrect attempt',
             awardedMarks: sub.marks,
+            canvasJson:""
           },
         });
       }
@@ -2056,6 +2060,7 @@ async function main() {
             solutionId: solutionBase.id,
             descriptiveSubmittedAnswer: 'Attempted solution',
             awardedMarks: sub.marks,
+            canvasJson:""
           },
         });
       }
