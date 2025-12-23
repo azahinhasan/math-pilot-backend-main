@@ -8,6 +8,9 @@ import {
   InternalServerErrorException,
   Delete,
   Param,
+  Query,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { GetUsersQuery } from './queries/get-users.query';
@@ -20,6 +23,8 @@ import { DeleteUserCommand } from './commands/delete-user.command';
 import { RegisterUserDto } from './dto/register-user.dto';
 import { OnboardingDto } from './dto/onboarding.dto';
 import { OnboardingCommand } from './commands/onboarding.command';
+import { GetSubjectProgressQuery } from './queries/get-subject-progress.query';
+import { GetSubjectPerformanceQuery } from './queries/get-subject-performance.query';
 
 @Controller('users')
 export class UsersController {
@@ -62,7 +67,9 @@ export class UsersController {
       const clerkId = req.user.sub;
 
       // Execute Query to fetch user profile details including student/guardian info
-      const userProfile = await this.queryBus.execute(new GetUserQuery(clerkId));
+      const userProfile = await this.queryBus.execute(
+        new GetUserQuery(clerkId),
+      );
 
       return {
         message: 'User profile retrieved successfully',
@@ -78,5 +85,93 @@ export class UsersController {
   @Get(':id')
   async getUser(@Param('id') id: string) {
     return this.queryBus.execute(new GetUserQuery(id));
+  }
+
+  /**
+   * GET /users/:studentId/subject-progress
+   * Get subject-wise progress (completion ratio from practice mode)
+   * 
+   * Query params:
+   * - subject: Filter by specific subject (optional)
+   * - startDate: Start date for filtering (optional)
+   * - endDate: End date for filtering (optional)
+   */
+  @Get(':studentId/subject-progress')
+  async getSubjectProgress(
+    @Param('studentId') studentId: string,
+    @Query('subject') subject?: string,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+  ) {
+    try {
+      const parsedStartDate = startDate ? new Date(startDate) : undefined;
+      const parsedEndDate = endDate ? new Date(endDate) : undefined;
+
+      const result = await this.queryBus.execute(
+        new GetSubjectProgressQuery(
+          studentId,
+          subject,
+          parsedStartDate,
+          parsedEndDate,
+        ),
+      );
+
+      return {
+        success: true,
+        message: 'Subject progress retrieved successfully',
+        data: result,
+      };
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        `Failed to fetch subject progress: ${error.message}`,
+      );
+    }
+  }
+
+  /**
+   * GET /users/:studentId/subject-performance
+   * Get subject-wise performance (marks ratio from test/exam mode)
+   * 
+   * Query params:
+   * - subject: Filter by specific subject (optional)
+   * - startDate: Start date for filtering (optional)
+   * - endDate: End date for filtering (optional)
+   */
+  @Get(':studentId/subject-performance')
+  async getSubjectPerformance(
+    @Param('studentId') studentId: string,
+    @Query('subject') subject?: string,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+  ) {
+    try {
+      const parsedStartDate = startDate ? new Date(startDate) : undefined;
+      const parsedEndDate = endDate ? new Date(endDate) : undefined;
+
+      const result = await this.queryBus.execute(
+        new GetSubjectPerformanceQuery(
+          studentId,
+          subject,
+          parsedStartDate,
+          parsedEndDate,
+        ),
+      );
+
+      return {
+        success: true,
+        message: 'Subject performance retrieved successfully',
+        data: result,
+      };
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        `Failed to fetch subject performance: ${error.message}`,
+      );
+    }
   }
 }
