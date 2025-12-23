@@ -3,13 +3,18 @@ import { CqrsModule } from '@nestjs/cqrs';
 import { PrismaModule } from 'src/prisma/prisma.module';
 import { QuestionsController } from './questions.controller';
 import { CreateQuestionHandler } from './commands/handlers/create-question.handler';
+import { GetQuestionSolutionHandler } from './queries/handlers/get-question-solution.handler';
 
+// List of all Command Handlers to be registered as providers
 export const CommandHandlers = [CreateQuestionHandler];
+
+// List of all Query Handlers to be registered as providers
+export const QueryHandlers = [GetQuestionSolutionHandler];
 
 @Module({
   imports: [CqrsModule, PrismaModule],
   controllers: [QuestionsController],
-  providers: [...CommandHandlers],
+  providers: [...CommandHandlers, ...QueryHandlers],
 })
 export class QuestionsModule {}
 
