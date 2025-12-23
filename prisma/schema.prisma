@@ -392,12 +392,12 @@ model SubmittedDescriptive {
   solutionId                 String   @map("solution_id")
   descriptiveSubmittedAnswer String?  @map("descriptive_submitted_answer")
   solutionImageUrl           String?  @map("solution_image_url")
-  canvasJson                 Json?    @map("canvas_json")
+  canvasJson                 Json     @map("canvas_json")
   isCorrect                  Boolean  @default(false) @map("is_correct")
   awardedMarks               Int?     @map("awarded_marks")
   hint                       String?  @map("hint")
   chatHistory                String?  @map("chat_history")
-  verdict                    String?  @map("verdict")  //on track, correct, incorrect
+  verdict                    String?  @map("verdict") //on track, correct, incorrect
   createdAt                  DateTime @default(now()) @map("created_at")
   updatedAt                  DateTime @updatedAt @map("updated_at")
   voided                     Boolean  @default(false)
@@ -527,7 +527,7 @@ model SubmittedMatchingPair {
 model ActiveCanvas {
   id         String  @id @default(uuid())
   hint       String?
-  canvasJson String? @map("canvas_json")
+  canvasJson String  @map("canvas_json")
   userId     String  @map("user_id")
   questionId String  @map("question_id")
 

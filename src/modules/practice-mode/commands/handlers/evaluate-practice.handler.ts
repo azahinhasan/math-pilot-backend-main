@@ -28,7 +28,8 @@ export class EvaluatePracticeHandler
   ) {}
 
   async execute(command: EvaluatePracticeCommand): Promise<any> {
-    const { question_id, chat_history, current_step_count, files, clerkId } = command;
+    const { question_id, chat_history, current_step_count, files, clerkId } =
+      command;
 
     // Fetch the question with its type and solution details
 
@@ -170,6 +171,13 @@ export class EvaluatePracticeHandler
             },
           });
         }
+
+        // Delete the active canvas for this question if submission submitted
+        await this.prisma.activeCanvas.deleteMany({
+          where: {
+            questionId: question_id,
+          },
+        });
 
         // Store the submitted descriptive answer with AI evaluation results
         // Includes extracted text, canvas data, verdict, hint, and chat history
