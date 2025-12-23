@@ -5,12 +5,10 @@ import { ExamsController } from './exams.controller';
 import { CreateExamHandler } from './commands/handlers/create-exam.handler';
 import { CreateMockExamHandler } from './commands/handlers/create-mock-exam.handler';
 
-export const CommandHandlers = [CreateExamHandler, CreateMockExamHandler];
-
 @Module({
   imports: [CqrsModule, PrismaModule],
   controllers: [ExamsController],
-  providers: [...CommandHandlers],
+  providers: [CreateExamHandler,CreateMockExamHandler],
 })
 export class ExamsModule {}
 

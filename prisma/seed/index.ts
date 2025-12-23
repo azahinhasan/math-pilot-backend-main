@@ -1,6 +1,6 @@
 import { PrismaClient, BoardName, AgeLevelName } from '@prisma/client';
-import seedQuestionTypes from './question-types';
-
+import seedQuestionTypes from './add-question-types';
+import seedModules from './add-modules';
 const prisma = new PrismaClient();
 
 async function main() {
@@ -32,62 +32,79 @@ async function main() {
     {
       board_name: BoardName.AQA,
       level_name: AgeLevelName.GCSE,
-      description: "AQA GCSE"
+      description: 'AQA GCSE',
     },
     {
       board_name: BoardName.AQA,
       level_name: AgeLevelName.A_Level,
-      description: "AQA A Level"
+      description: 'AQA A Level',
     },
     {
       board_name: BoardName.Edexcel,
       level_name: AgeLevelName.A_Level,
-      description: "Edexcel A Level"
+      description: 'Edexcel A Level',
     },
     {
-      board_name: BoardName.Pearson_Edexcel,
+      board_name: BoardName.Edexcel,
       level_name: AgeLevelName.GCSE,
-      description: "Pearson Edexcel GCSE"
+      description: 'Edexcel GCSE',
     },
-    {
-      board_name: BoardName.Pearson_Edexcel,
-      level_name: AgeLevelName.A_Level,
-      description: "Pearson Edexcel A Level"
-    },
+    // {
+    //   board_name: BoardName.Pearson_Edexcel,
+    //   level_name: AgeLevelName.GCSE,
+    //   description: 'Pearson Edexcel GCSE',
+    // },
+    // {
+    //   board_name: BoardName.Pearson_Edexcel,
+    //   level_name: AgeLevelName.A_Level,
+    //   description: 'Pearson Edexcel A Level',
+    // },
     {
       board_name: BoardName.OCR,
       level_name: AgeLevelName.GCSE,
-      description: "OCR GCSE"
+      description: 'OCR GCSE',
     },
     {
       board_name: BoardName.OCR,
       level_name: AgeLevelName.A_Level,
-      description: "OCR A Level"
-    }
+      description: 'OCR A Level',
+    },
   ];
 
   for (const boardAgeLevel of boardAgeLevels) {
-    const newBoardAgeLevel = await prisma.boardAgeLevel.upsert({
-      where: { 
+    const existingBoardAgeLevel = await prisma.boardAgeLevel.findUnique({
+      where: {
         boardName_ageLevelName: {
           boardName: boardAgeLevel.board_name,
-          ageLevelName: boardAgeLevel.level_name
-        }
+          ageLevelName: boardAgeLevel.level_name,
+        },
       },
-      update: {},
-      create: {
+    });
+
+    if (existingBoardAgeLevel) {
+      console.log(
+        `Skipped board-age level (already exists): ${boardAgeLevel.board_name} - ${boardAgeLevel.level_name}`,
+      );
+      continue;
+    }
+
+    const newBoardAgeLevel = await prisma.boardAgeLevel.create({
+      data: {
         boardName: boardAgeLevel.board_name,
         ageLevelName: boardAgeLevel.level_name,
       },
     });
-    console.log(`Created board-age level with id: ${newBoardAgeLevel.id} (${boardAgeLevel.board_name} - ${boardAgeLevel.level_name})`);
+    console.log(
+      `Created board-age level with id: ${newBoardAgeLevel.id} (${boardAgeLevel.board_name} - ${boardAgeLevel.level_name})`,
+    );
   }
 
-    console.log(`Seeding finished BoardAgeLevel.`);
+  console.log(`Seeding finished BoardAgeLevel.`);
+
 
   await seedQuestionTypes();
+  await seedModules();
 
-  
 }
 
 main()
