@@ -4,11 +4,21 @@ import { PrismaModule } from 'src/prisma/prisma.module';
 import { ExamsController } from './exams.controller';
 import { CreateExamHandler } from './commands/handlers/create-exam.handler';
 import { CreateMockExamHandler } from './commands/handlers/create-mock-exam.handler';
+import { GetExamSolutionsHandler } from './queries/handlers/get-exam-solutions.handler';
+
+// List of all Command Handlers to be registered as providers
+export const CommandHandlers = [CreateExamHandler, CreateMockExamHandler];
+
+// List of all Query Handlers to be registered as providers
+export const QueryHandlers = [GetExamSolutionsHandler];
 
 @Module({
   imports: [CqrsModule, PrismaModule],
   controllers: [ExamsController],
-  providers: [CreateExamHandler,CreateMockExamHandler],
+  providers: [
+    ...CommandHandlers,
+    ...QueryHandlers,
+  ],
 })
 export class ExamsModule {}
 
