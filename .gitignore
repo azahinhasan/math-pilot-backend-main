@@ -28,7 +28,7 @@ lerna-debug.log*
 .settings/
 *.sublime-workspace
 AGENTS.md
-
+.yarn.lock
 # IDE - VSCode
 .vscode/*
 !.vscode/settings.json

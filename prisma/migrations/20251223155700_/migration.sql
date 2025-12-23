@@ -17,7 +17,7 @@ CREATE TYPE "ContentBy" AS ENUM ('HUMAN', 'AI');
 CREATE TYPE "QuestionFor" AS ENUM ('Test', 'Practice');
 
 -- CreateEnum
-CREATE TYPE "DifficultyLevel" AS ENUM ('Beginner', 'Intermediate', 'Advanced');
+CREATE TYPE "DifficultyLevel" AS ENUM ('Easy', 'Medium', 'Hard');
 
 -- CreateEnum
 CREATE TYPE "SubmissionType" AS ENUM ('Exam', 'Homework', 'Practice');
@@ -32,13 +32,10 @@ CREATE TYPE "ReviewStatus" AS ENUM ('Scheduled', 'InProgress', 'InReview', 'Grad
 CREATE TYPE "ExamType" AS ENUM ('Competitive', 'Normal', 'Mock');
 
 -- CreateEnum
-CREATE TYPE "ExamDifficulty" AS ENUM ('Easy', 'Medium', 'Hard');
+CREATE TYPE "GradingType" AS ENUM ('Graded', 'Practise');
 
 -- CreateEnum
-CREATE TYPE "GradingType" AS ENUM ('GRADED', 'PRACTISE');
-
--- CreateEnum
-CREATE TYPE "AssignmentType" AS ENUM ('HOMEWORK', 'PRACTICE');
+CREATE TYPE "AssignmentType" AS ENUM ('Homework', 'Practice');
 
 -- CreateTable
 CREATE TABLE "Role" (
@@ -182,7 +179,6 @@ CREATE TABLE "Question" (
     "question_content_link" TEXT NOT NULL,
     "content_by" "ContentBy" NOT NULL DEFAULT 'HUMAN',
     "question_for" "QuestionFor" NOT NULL DEFAULT 'Practice',
-    "difficulty" INTEGER NOT NULL DEFAULT 0,
     "total_marks" INTEGER,
     "time_limit" INTEGER,
     "hint" TEXT NOT NULL,
@@ -190,7 +186,7 @@ CREATE TABLE "Question" (
     "givenContext" TEXT,
     "findObjective" TEXT,
     "image_url" TEXT,
-    "difficulty_level" "DifficultyLevel" NOT NULL DEFAULT 'Beginner',
+    "difficulty_level" "DifficultyLevel" NOT NULL DEFAULT 'Easy',
     "step_count" INTEGER NOT NULL,
     "serial_no" INTEGER NOT NULL,
     "question_type_id" TEXT NOT NULL,
@@ -247,6 +243,7 @@ CREATE TABLE "Submission" (
     "id" TEXT NOT NULL,
     "student_id" TEXT NOT NULL,
     "question_id" TEXT NOT NULL,
+    "topic_id" TEXT,
     "type" "SubmissionType" NOT NULL,
     "status" "SubmissionStatus" NOT NULL,
     "awarded_marks" INTEGER,
@@ -307,7 +304,7 @@ CREATE TABLE "Exam" (
     "start_time" TIMESTAMP(3) NOT NULL,
     "end_time" TIMESTAMP(3) NOT NULL,
     "type" "ExamType" NOT NULL,
-    "difficulty" "ExamDifficulty",
+    "difficulty" "DifficultyLevel",
     "time_limit" INTEGER,
     "max_number_of_questions" INTEGER,
     "status" "ReviewStatus",
@@ -410,14 +407,14 @@ CREATE TABLE "SubmittedMatchingPair" (
 );
 
 -- CreateTable
-CREATE TABLE "RunningCanvas" (
+CREATE TABLE "ActiveCanvas" (
     "id" TEXT NOT NULL,
     "hint" TEXT,
     "canvas_json" TEXT,
     "user_id" TEXT NOT NULL,
     "question_id" TEXT NOT NULL,
 
-    CONSTRAINT "RunningCanvas_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "ActiveCanvas_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -496,7 +493,7 @@ CREATE TABLE "QuestionLevel" (
 );
 
 -- CreateTable
-CREATE TABLE "StudentTopicProgress" (
+CREATE TABLE "StudentTopicDetails" (
     "id" TEXT NOT NULL,
     "student_id" TEXT NOT NULL,
     "topic_id" TEXT NOT NULL,
@@ -510,7 +507,7 @@ CREATE TABLE "StudentTopicProgress" (
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "StudentTopicProgress_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "StudentTopicDetails_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
@@ -554,6 +551,9 @@ CREATE UNIQUE INDEX "SubmittedAnswer_submission_id_solution_id_key" ON "Submitte
 
 -- CreateIndex
 CREATE UNIQUE INDEX "SubmittedMcq_submission_id_solution_id_key" ON "SubmittedMcq"("submission_id", "solution_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "GuardianStudentMap_guardian_id_student_id_key" ON "GuardianStudentMap"("guardian_id", "student_id");
 
 -- AddForeignKey
 ALTER TABLE "Auth" ADD CONSTRAINT "Auth_role_id_fkey" FOREIGN KEY ("role_id") REFERENCES "Role"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -610,6 +610,9 @@ ALTER TABLE "Submission" ADD CONSTRAINT "Submission_student_id_fkey" FOREIGN KEY
 ALTER TABLE "Submission" ADD CONSTRAINT "Submission_question_id_fkey" FOREIGN KEY ("question_id") REFERENCES "Question"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "Submission" ADD CONSTRAINT "Submission_topic_id_fkey" FOREIGN KEY ("topic_id") REFERENCES "Topic"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "SubmittedAnswer" ADD CONSTRAINT "SubmittedAnswer_submission_id_fkey" FOREIGN KEY ("submission_id") REFERENCES "Submission"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -619,7 +622,13 @@ ALTER TABLE "SubmittedAnswer" ADD CONSTRAINT "SubmittedAnswer_solution_id_fkey" 
 ALTER TABLE "SubmittedMcq" ADD CONSTRAINT "SubmittedMcq_submission_id_fkey" FOREIGN KEY ("submission_id") REFERENCES "Submission"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "SubmittedMcq" ADD CONSTRAINT "SubmittedMcq_solution_id_fkey" FOREIGN KEY ("solution_id") REFERENCES "SolutionBase"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "SubmittedDescriptive" ADD CONSTRAINT "SubmittedDescriptive_submission_id_fkey" FOREIGN KEY ("submission_id") REFERENCES "Submission"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "SubmittedDescriptive" ADD CONSTRAINT "SubmittedDescriptive_solution_id_fkey" FOREIGN KEY ("solution_id") REFERENCES "SolutionBase"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "SolutionMatchingPair" ADD CONSTRAINT "SolutionMatchingPair_solution_base_id_fkey" FOREIGN KEY ("solution_base_id") REFERENCES "SolutionBase"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -658,10 +667,10 @@ ALTER TABLE "QuestionSet" ADD CONSTRAINT "QuestionSet_assignmentId_fkey" FOREIGN
 ALTER TABLE "SubmittedMatchingPair" ADD CONSTRAINT "SubmittedMatchingPair_submission_id_solution_id_fkey" FOREIGN KEY ("submission_id", "solution_id") REFERENCES "SubmittedAnswer"("submission_id", "solution_id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "RunningCanvas" ADD CONSTRAINT "RunningCanvas_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "Auth"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "ActiveCanvas" ADD CONSTRAINT "ActiveCanvas_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "Auth"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "RunningCanvas" ADD CONSTRAINT "RunningCanvas_question_id_fkey" FOREIGN KEY ("question_id") REFERENCES "Question"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "ActiveCanvas" ADD CONSTRAINT "ActiveCanvas_question_id_fkey" FOREIGN KEY ("question_id") REFERENCES "Question"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "AiResponse" ADD CONSTRAINT "AiResponse_question_id_fkey" FOREIGN KEY ("question_id") REFERENCES "Question"("id") ON DELETE SET NULL ON UPDATE CASCADE;
@@ -700,7 +709,7 @@ ALTER TABLE "QuestionLevel" ADD CONSTRAINT "QuestionLevel_question_id_fkey" FORE
 ALTER TABLE "QuestionLevel" ADD CONSTRAINT "QuestionLevel_board_age_level_id_fkey" FOREIGN KEY ("board_age_level_id") REFERENCES "BoardAgeLevel"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "StudentTopicProgress" ADD CONSTRAINT "StudentTopicProgress_student_id_fkey" FOREIGN KEY ("student_id") REFERENCES "Student"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "StudentTopicDetails" ADD CONSTRAINT "StudentTopicDetails_student_id_fkey" FOREIGN KEY ("student_id") REFERENCES "Student"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "StudentTopicProgress" ADD CONSTRAINT "StudentTopicProgress_topic_id_fkey" FOREIGN KEY ("topic_id") REFERENCES "Topic"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "StudentTopicDetails" ADD CONSTRAINT "StudentTopicDetails_topic_id_fkey" FOREIGN KEY ("topic_id") REFERENCES "Topic"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
