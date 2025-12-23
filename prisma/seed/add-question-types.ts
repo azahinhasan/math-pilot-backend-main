@@ -10,6 +10,10 @@ async function seedQuestionTypes() {
       description: 'Multiple Choice Question',
     },
     {
+      name: 'TrueFalse',
+      description: 'True/False question (stored using MCQ options True and False)',
+    },
+    {
       name: 'Descriptive',
       description: 'Descriptive or free-form answer question',
     },
