@@ -3,8 +3,9 @@ import { CqrsModule } from '@nestjs/cqrs';
 import { PrismaModule } from 'src/prisma/prisma.module';
 import { ExamsController } from './exams.controller';
 import { CreateExamHandler } from './commands/handlers/create-exam.handler';
+import { CreateMockExamHandler } from './commands/handlers/create-mock-exam.handler';
 
-export const CommandHandlers = [CreateExamHandler];
+export const CommandHandlers = [CreateExamHandler, CreateMockExamHandler];
 
 @Module({
   imports: [CqrsModule, PrismaModule],

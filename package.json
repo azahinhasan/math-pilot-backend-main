@@ -12,7 +12,7 @@
     "start": "nest start",
     "dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
-    "start:prod": "node dist/main",
+    "start:prod": "node dist/src/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
     "test:watch": "jest --watch",
@@ -25,6 +25,7 @@
     "db:seed": "prisma db seed",
     "db:seed:practice": "ts-node prisma/seed/practice-questions.ts",
     "db:seed:question-types": "ts-node prisma/seed/question-types.ts"
+    "db:seed:exam-test": "ts-node prisma/seed/exam-test-data.ts"
   },
   "dependencies": {
     "@clerk/backend": "^2.24.0",
