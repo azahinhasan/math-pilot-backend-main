@@ -2,11 +2,16 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
+// Run with: npx ts-node prisma/seed/add-question-types.ts
 async function seedQuestionTypes() {
   const questionTypes = [
     {
       name: 'MCQ',
       description: 'Multiple Choice Question',
+    },
+    {
+      name: 'TrueFalse',
+      description: 'True/False question (stored using MCQ options True and False)',
     },
     {
       name: 'Descriptive',

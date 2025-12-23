@@ -1,0 +1,3 @@
+- yarn db:seed
+- npx ts-node prisma/seed/gcse-mathematics-topics-subtopics.ts
+- npx ts-node prisma/seed/a-level-pure-mathematics-1-topics-subtopics.ts

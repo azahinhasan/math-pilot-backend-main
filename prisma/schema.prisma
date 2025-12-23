@@ -115,11 +115,11 @@ model Auth {
   createdAt            DateTime      @default(now()) @map("created_at")
   updatedAt            DateTime      @updatedAt @map("updated_at")
 
-  role            Role            @relation(fields: [roleId], references: [id])
+  role            Role           @relation(fields: [roleId], references: [id])
   guardian        Guardian?
   student         Student?
-  createdStudents Student[]       @relation("CreatedStudents")
-  runningCanvases RunningCanvas[]
+  createdStudents Student[]      @relation("CreatedStudents")
+  activeCanvas    ActiveCanvas[]
   histories       History[]
   examLogs        ExamLog[]
 }
@@ -216,6 +216,7 @@ model Topic {
   questions           Question[]
   examSubtopics       ExamSubtopic[]
   studentTopicDetails StudentTopicDetails[]
+  submissions         Submission[]
 }
 
 model Subtopic {
@@ -277,17 +278,17 @@ model Question {
   updatedAt           DateTime        @updatedAt @map("updated_at")
   voided              Boolean         @default(false)
 
-  questionType    QuestionType    @relation(fields: [questionTypeId], references: [id])
-  module          Module?         @relation(fields: [moduleId], references: [id])
-  topic           Topic?          @relation(fields: [topicId], references: [id])
-  subtopic        Subtopic?       @relation(fields: [subtopicId], references: [id])
-  solutionBases   SolutionBase[]
-  submissions     Submission[]
-  questionSets    QuestionSet[]
-  runningCanvases RunningCanvas[]
-  aiResponses     AiResponse[]
-  histories       History[]
-  questionLevels  QuestionLevel[]
+  questionType   QuestionType    @relation(fields: [questionTypeId], references: [id])
+  module         Module?         @relation(fields: [moduleId], references: [id])
+  topic          Topic?          @relation(fields: [topicId], references: [id])
+  subtopic       Subtopic?       @relation(fields: [subtopicId], references: [id])
+  solutionBases  SolutionBase[]
+  submissions    Submission[]
+  questionSets   QuestionSet[]
+  activeCanvas   ActiveCanvas[]
+  aiResponses    AiResponse[]
+  histories      History[]
+  questionLevels QuestionLevel[]
 }
 
 model SolutionBase {
@@ -336,6 +337,7 @@ model Submission {
   studentId           String           @map("student_id")
   // teacherId         String?          @map("teacher_id") // Commented: teachers table not available
   questionId          String           @map("question_id")
+  topicId             String?          @map("topic_id")
   type                SubmissionType
   status              SubmissionStatus
   awardedMarks        Int?             @map("awarded_marks")
@@ -351,6 +353,7 @@ model Submission {
   question              Question               @relation(fields: [questionId], references: [id])
   submittedAnswers      SubmittedAnswer[]
   submittedMcqs         SubmittedMcq[]
+  topic                 Topic?                 @relation(fields: [topicId], references: [id])
   submittedDescriptives SubmittedDescriptive[]
 }
 
@@ -378,8 +381,8 @@ model SubmittedMcq {
   updatedAt       DateTime @updatedAt @map("updated_at")
   voided          Boolean  @default(false)
 
-  submission Submission @relation(fields: [submissionId], references: [id])
-  solution SolutionBase @relation(fields: [solutionId], references: [id])
+  submission Submission   @relation(fields: [submissionId], references: [id])
+  solution   SolutionBase @relation(fields: [solutionId], references: [id])
 
   @@unique([submissionId, solutionId])
 }
@@ -395,8 +398,8 @@ model SubmittedDescriptive {
   updatedAt                  DateTime @updatedAt @map("updated_at")
   voided                     Boolean  @default(false)
 
-  submission Submission @relation(fields: [submissionId], references: [id])
-  solution SolutionBase @relation(fields: [solutionId], references: [id])
+  submission Submission   @relation(fields: [submissionId], references: [id])
+  solution   SolutionBase @relation(fields: [solutionId], references: [id])
 }
 
 model Exam {
@@ -517,8 +520,7 @@ model SubmittedMatchingPair {
   submittedAnswer SubmittedAnswer @relation(fields: [submissionId, solutionId], references: [submissionId, solutionId])
 }
 
-// TODO: Rename to ActiveCanvas
-model RunningCanvas {
+model ActiveCanvas {
   id         String  @id @default(uuid())
   hint       String?
   canvasJson String? @map("canvas_json")

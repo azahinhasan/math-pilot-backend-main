@@ -10,6 +10,9 @@ import { RoleModule } from './modules/role/role.module';
 import { BoardAgeLevelModule } from './modules/board-age-level/board-age-level.module';
 import { ModulesModule } from './modules/modules/modules.module';
 import { ExamsModule } from './modules/exams/exams.module';
+import { TopicsModule } from './modules/topics/topics.module';
+import { AnalyticsModule } from './modules/analytics/analytics.module';
+import { QuestionsModule } from './modules/questions/questions.module';
 
 @Module({
   imports: [
@@ -20,8 +23,11 @@ import { ExamsModule } from './modules/exams/exams.module';
     PracticeModeModule,
     RoleModule,
     BoardAgeLevelModule,
+    QuestionsModule,
     ModulesModule,
-    ExamsModule
+    ExamsModule,
+    TopicsModule,
+    AnalyticsModule
   ], // Read .env file for environment variables
   controllers: [AppController],
   providers: [AppService],
