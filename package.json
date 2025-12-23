@@ -6,6 +6,7 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
+    "prebuild": "prisma generate",
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
@@ -23,6 +24,7 @@
     "db:generate": "prisma generate",
     "db:seed": "prisma db seed",
     "db:seed:practice": "ts-node prisma/seed/practice-questions.ts",
+    "db:seed:question-types": "ts-node prisma/seed/question-types.ts"
     "db:seed:exam-test": "ts-node prisma/seed/exam-test-data.ts"
   },
   "dependencies": {
