@@ -35,7 +35,8 @@ export class GetTestPerformanceByIntervalHandler
   async execute(
     query: GetTestPerformanceByIntervalQuery,
   ): Promise<TestPerformanceByInterval> {
-    const { studentId, interval, startDate, endDate, submissionType } = query;
+    const { studentId, interval, startDate, endDate, submissionType, subject } =
+      query;
 
     const student = await this.prisma.student.findUnique({
       where: { id: studentId },
@@ -60,6 +61,14 @@ export class GetTestPerformanceByIntervalHandler
 
     if (submissionType) {
       whereClause.type = submissionType;
+    }
+
+    if (subject) {
+      whereClause.question = {
+        module: {
+          subject: subject,
+        },
+      };
     }
 
     const submissions = await this.prisma.submission.findMany({

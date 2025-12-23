@@ -23,14 +23,8 @@ import { DeleteUserCommand } from './commands/delete-user.command';
 import { RegisterUserDto } from './dto/register-user.dto';
 import { OnboardingDto } from './dto/onboarding.dto';
 import { OnboardingCommand } from './commands/onboarding.command';
-import { GetPerformanceAnalyticsDto } from './dto/get-performance-analytics.dto';
-import { GetPerformanceAnalyticsQuery } from './queries/get-performance-analytics.query';
-import { GetTestPerformanceByIntervalDto } from './dto/get-test-performance-by-interval.dto';
-import { GetTestPerformanceByIntervalQuery } from './queries/get-test-performance-by-interval.query';
-import { GetActivityAnalyticsDto } from './dto/get-activity-analytics.dto';
-import { GetActivityAnalyticsQuery } from './queries/get-activity-analytics.query';
-import { GetProgressAnalyticsDto } from './dto/get-progress-analytics.dto';
-import { GetProgressAnalyticsQuery } from './queries/get-progress-analytics.query';
+import { GetSubjectProgressQuery } from './queries/get-subject-progress.query';
+import { GetSubjectPerformanceQuery } from './queries/get-subject-performance.query';
 
 @Controller('users')
 export class UsersController {
@@ -88,356 +82,96 @@ export class UsersController {
     }
   }
 
-  @Get('performance/analytics')
-  @UseGuards(ClerkAuthGuard)
-  async getPerformanceAnalytics(
-    @Req() req,
-    @Query() filters: GetPerformanceAnalyticsDto,
-  ) {
-    try {
-      const clerkId = req.user.sub;
-
-      const auth = await this.queryBus.execute(new GetUserQuery(clerkId));
-
-      if (!auth.student) {
-        throw new HttpException(
-          'User is not a student',
-          HttpStatus.BAD_REQUEST,
-        );
-      }
-
-      const studentId = auth.student.id;
-
-      const startDate = filters.startDate
-        ? new Date(filters.startDate)
-        : undefined;
-      const endDate = filters.endDate ? new Date(filters.endDate) : undefined;
-
-      const analytics = await this.queryBus.execute(
-        new GetPerformanceAnalyticsQuery(
-          studentId,
-          startDate,
-          endDate,
-          filters.submissionType,
-          filters.difficulty,
-          filters.topicId,
-          filters.moduleId,
-        ),
-      );
-
-      return {
-        message: 'Performance analytics retrieved successfully',
-        data: analytics,
-      };
-    } catch (error) {
-      if (error instanceof HttpException) {
-        throw error;
-      }
-      throw new InternalServerErrorException(
-        `Failed to fetch performance analytics: ${error.message}`,
-      );
-    }
-  }
-
-  @Get('test-analytics/:studentId')
-  async getStudentPerformanceAnalytics(
-    @Param('studentId') studentId: string,
-    @Query() filters: GetPerformanceAnalyticsDto,
-  ) {
-    try {
-      const startDate = filters.startDate
-        ? new Date(filters.startDate)
-        : undefined;
-      const endDate = filters.endDate ? new Date(filters.endDate) : undefined;
-
-      const analytics = await this.queryBus.execute(
-        new GetPerformanceAnalyticsQuery(
-          studentId,
-          startDate,
-          endDate,
-          filters.submissionType,
-          filters.difficulty,
-          filters.topicId,
-          filters.moduleId,
-        ),
-      );
-
-      return {
-        message: 'Performance analytics retrieved successfully',
-        data: analytics,
-      };
-    } catch (error) {
-      if (error instanceof HttpException) {
-        throw error;
-      }
-      throw new InternalServerErrorException(
-        `Failed to fetch performance analytics: ${error.message}`,
-      );
-    }
-  }
-
-  @Get('activity/analytics')
-  @UseGuards(ClerkAuthGuard)
-  async getActivityAnalytics(
-    @Req() req,
-    @Query() filters: GetActivityAnalyticsDto,
-  ) {
-    try {
-      const clerkId = req.user.sub;
-
-      const auth = await this.queryBus.execute(new GetUserQuery(clerkId));
-
-      if (!auth.student) {
-        throw new HttpException(
-          'User is not a student',
-          HttpStatus.BAD_REQUEST,
-        );
-      }
-
-      const studentId = auth.student.id;
-
-      const startDate = filters.startDate
-        ? new Date(filters.startDate)
-        : undefined;
-      const endDate = filters.endDate ? new Date(filters.endDate) : undefined;
-
-      const analytics = await this.queryBus.execute(
-        new GetActivityAnalyticsQuery(
-          studentId,
-          startDate,
-          endDate,
-          filters.topicId,
-          filters.moduleId,
-          filters.includeAi,
-          filters.includeSchedule,
-        ),
-      );
-
-      return {
-        message: 'Activity analytics retrieved successfully',
-        data: analytics,
-      };
-    } catch (error) {
-      if (error instanceof HttpException) {
-        throw error;
-      }
-      throw new InternalServerErrorException(
-        `Failed to fetch activity analytics: ${error.message}`,
-      );
-    }
-  }
-
-  @Get('activity/test-analytics/:studentId')
-  async getStudentActivityAnalytics(
-    @Param('studentId') studentId: string,
-    @Query() filters: GetActivityAnalyticsDto,
-  ) {
-    try {
-      const startDate = filters.startDate
-        ? new Date(filters.startDate)
-        : undefined;
-      const endDate = filters.endDate ? new Date(filters.endDate) : undefined;
-
-      const analytics = await this.queryBus.execute(
-        new GetActivityAnalyticsQuery(
-          studentId,
-          startDate,
-          endDate,
-          filters.topicId,
-          filters.moduleId,
-          filters.includeAi,
-          filters.includeSchedule,
-        ),
-      );
-
-      return {
-        message: 'Activity analytics retrieved successfully',
-        data: analytics,
-      };
-    } catch (error) {
-      if (error instanceof HttpException) {
-        throw error;
-      }
-      throw new InternalServerErrorException(
-        `Failed to fetch activity analytics: ${error.message}`,
-      );
-    }
-  }
-
-  @Get('progress/analytics')
-  @UseGuards(ClerkAuthGuard)
-  async getProgressAnalytics(
-    @Req() req,
-    @Query() filters: GetProgressAnalyticsDto,
-  ) {
-    try {
-      const clerkId = req.user.sub;
-
-      const auth = await this.queryBus.execute(new GetUserQuery(clerkId));
-
-      if (!auth.student) {
-        throw new HttpException(
-          'User is not a student',
-          HttpStatus.BAD_REQUEST,
-        );
-      }
-
-      const studentId = auth.student.id;
-
-      const startDate = filters.startDate
-        ? new Date(filters.startDate)
-        : undefined;
-      const endDate = filters.endDate ? new Date(filters.endDate) : undefined;
-
-      const analytics = await this.queryBus.execute(
-        new GetProgressAnalyticsQuery(
-          studentId,
-          startDate,
-          endDate,
-          filters.topicId,
-          filters.moduleId,
-          filters.includeMilestones,
-          filters.includeRecommendations,
-        ),
-      );
-
-      return {
-        message: 'Progress analytics retrieved successfully',
-        data: analytics,
-      };
-    } catch (error) {
-      if (error instanceof HttpException) {
-        throw error;
-      }
-      throw new InternalServerErrorException(
-        `Failed to fetch progress analytics: ${error.message}`,
-      );
-    }
-  }
-
-  @Get('progress/test-analytics/:studentId')
-  async getStudentProgressAnalytics(
-    @Param('studentId') studentId: string,
-    @Query() filters: GetProgressAnalyticsDto,
-  ) {
-    try {
-      const startDate = filters.startDate
-        ? new Date(filters.startDate)
-        : undefined;
-      const endDate = filters.endDate ? new Date(filters.endDate) : undefined;
-
-      const analytics = await this.queryBus.execute(
-        new GetProgressAnalyticsQuery(
-          studentId,
-          startDate,
-          endDate,
-          filters.topicId,
-          filters.moduleId,
-          filters.includeMilestones,
-          filters.includeRecommendations,
-        ),
-      );
-
-      return {
-        message: 'Progress analytics retrieved successfully',
-        data: analytics,
-      };
-    } catch (error) {
-      if (error instanceof HttpException) {
-        throw error;
-      }
-      throw new InternalServerErrorException(
-        `Failed to fetch progress analytics: ${error.message}`,
-      );
-    }
-  }
-
-  @Get('performance/test-by-interval')
-  @UseGuards(ClerkAuthGuard)
-  async getTestPerformanceByInterval(
-    @Req() req,
-    @Query() filters: GetTestPerformanceByIntervalDto,
-  ) {
-    try {
-      const clerkId = req.user.sub;
-
-      const auth = await this.queryBus.execute(new GetUserQuery(clerkId));
-
-      if (!auth.student) {
-        throw new HttpException(
-          'User is not a student',
-          HttpStatus.BAD_REQUEST,
-        );
-      }
-
-      const studentId = auth.student.id;
-
-      const startDate = filters.startDate
-        ? new Date(filters.startDate)
-        : undefined;
-      const endDate = filters.endDate ? new Date(filters.endDate) : undefined;
-
-      const performance = await this.queryBus.execute(
-        new GetTestPerformanceByIntervalQuery(
-          studentId,
-          filters.interval,
-          startDate,
-          endDate,
-          filters.submissionType,
-        ),
-      );
-
-      return {
-        message: 'Test performance by interval retrieved successfully',
-        data: performance,
-      };
-    } catch (error) {
-      if (error instanceof HttpException) {
-        throw error;
-      }
-      throw new InternalServerErrorException(
-        `Failed to fetch test performance by interval: ${error.message}`,
-      );
-    }
-  }
-
-  @Get('test-performance-by-interval/:studentId')
-  async getStudentTestPerformanceByInterval(
-    @Param('studentId') studentId: string,
-    @Query() filters: GetTestPerformanceByIntervalDto,
-  ) {
-    try {
-      const startDate = filters.startDate
-        ? new Date(filters.startDate)
-        : undefined;
-      const endDate = filters.endDate ? new Date(filters.endDate) : undefined;
-
-      const performance = await this.queryBus.execute(
-        new GetTestPerformanceByIntervalQuery(
-          studentId,
-          filters.interval,
-          startDate,
-          endDate,
-          filters.submissionType,
-        ),
-      );
-
-      return {
-        message: 'Test performance by interval retrieved successfully',
-        data: performance,
-      };
-    } catch (error) {
-      if (error instanceof HttpException) {
-        throw error;
-      }
-      throw new InternalServerErrorException(
-        `Failed to fetch test performance by interval: ${error.message}`,
-      );
-    }
-  }
-
   @Get(':id')
   async getUser(@Param('id') id: string) {
     return this.queryBus.execute(new GetUserQuery(id));
+  }
+
+  /**
+   * GET /users/:studentId/subject-progress
+   * Get subject-wise progress (completion ratio from practice mode)
+   * 
+   * Query params:
+   * - subject: Filter by specific subject (optional)
+   * - startDate: Start date for filtering (optional)
+   * - endDate: End date for filtering (optional)
+   */
+  @Get(':studentId/subject-progress')
+  async getSubjectProgress(
+    @Param('studentId') studentId: string,
+    @Query('subject') subject?: string,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+  ) {
+    try {
+      const parsedStartDate = startDate ? new Date(startDate) : undefined;
+      const parsedEndDate = endDate ? new Date(endDate) : undefined;
+
+      const result = await this.queryBus.execute(
+        new GetSubjectProgressQuery(
+          studentId,
+          subject,
+          parsedStartDate,
+          parsedEndDate,
+        ),
+      );
+
+      return {
+        success: true,
+        message: 'Subject progress retrieved successfully',
+        data: result,
+      };
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        `Failed to fetch subject progress: ${error.message}`,
+      );
+    }
+  }
+
+  /**
+   * GET /users/:studentId/subject-performance
+   * Get subject-wise performance (marks ratio from test/exam mode)
+   * 
+   * Query params:
+   * - subject: Filter by specific subject (optional)
+   * - startDate: Start date for filtering (optional)
+   * - endDate: End date for filtering (optional)
+   */
+  @Get(':studentId/subject-performance')
+  async getSubjectPerformance(
+    @Param('studentId') studentId: string,
+    @Query('subject') subject?: string,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+  ) {
+    try {
+      const parsedStartDate = startDate ? new Date(startDate) : undefined;
+      const parsedEndDate = endDate ? new Date(endDate) : undefined;
+
+      const result = await this.queryBus.execute(
+        new GetSubjectPerformanceQuery(
+          studentId,
+          subject,
+          parsedStartDate,
+          parsedEndDate,
+        ),
+      );
+
+      return {
+        success: true,
+        message: 'Subject performance retrieved successfully',
+        data: result,
+      };
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        `Failed to fetch subject performance: ${error.message}`,
+      );
+    }
   }
 }

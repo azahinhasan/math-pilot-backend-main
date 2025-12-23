@@ -1,5 +1,5 @@
 import { IsOptional, IsEnum, IsDateString } from 'class-validator';
-import { SubmissionType } from '@prisma/client';
+import { SubmissionType, Subject } from '@prisma/client';
 
 export enum TimeInterval {
   DAY = 'day',
@@ -22,4 +22,8 @@ export class GetTestPerformanceByIntervalDto {
   @IsOptional()
   @IsEnum(SubmissionType)
   submissionType?: SubmissionType;
+
+  @IsOptional()
+  @IsEnum(Subject)
+  subject?: Subject;
 }
