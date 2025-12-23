@@ -36,6 +36,9 @@ AGENTS.md
 !.vscode/launch.json
 !.vscode/extensions.json
 
+# Prisma
+prisma/migrations
+
 # dotenv environment variable files
 .env
 .env.development.local

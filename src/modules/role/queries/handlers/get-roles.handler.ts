@@ -9,12 +9,16 @@ export class GetRolesHandler implements IQueryHandler<GetRolesQuery> {
   async execute(query: GetRolesQuery): Promise<any> {
     const roleNames = ['Student', 'Teacher', 'Guardian'];
     
-    return this.prisma.role.findMany({
+    const roles = await this.prisma.role.findMany({
       where: {
         name: {
           in: roleNames,
         },
       },
     });
+    return {
+      message: 'Roles retrieved successfully',
+      data: roles,
+    };
   }
 }

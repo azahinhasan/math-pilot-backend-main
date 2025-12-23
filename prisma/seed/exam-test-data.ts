@@ -144,6 +144,7 @@ async function main() {
         questionTypeId: q.questionTypeId,
         questionFor: q.questionFor,
         topicId: q.topicId,
+        moduleId: moduleRecord.id,
         subtopicId: q.subtopicId,
         solutionBases: {
           create: {

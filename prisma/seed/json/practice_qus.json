@@ -6,7 +6,10 @@
             "hint": "Write as $$(x+m)(x+n)=0$$ where $mn=2$ and $$m+n=3\\Rightarrow m=1,n=2.$$",
             "correct_answer": "$$(x+1)(x+2)=0\\Rightarrow x=-1,-2$$",
             "difficulty_level": "Easy",
-            "image" : "", 	
+            "image": "",
+            "module_name": "Mathematics",
+            "topic_name": "Chapter 1",
+            "subtopic_name": "Order of Operation",
             "total_marks": 1,
             "time_Limit": 1
         }
