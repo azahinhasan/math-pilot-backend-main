@@ -29,8 +29,9 @@
 
 ```bash
 $  npm install
-$  npx prisma generate
-$  yarn db:migrate 
+$  npx prisma migrate dev
+# $  npx prisma generate
+# $  yarn db:migrate 
 $  yarn db:seed
 ```
 
