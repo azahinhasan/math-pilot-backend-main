@@ -1,17 +1,19 @@
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { GetTopicsByModuleQuery } from '../get-topics-by-module.query';
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 @QueryHandler(GetTopicsByModuleQuery)
-export class GetTopicsByModuleHandler
-  implements IQueryHandler<GetTopicsByModuleQuery>
-{
+export class GetTopicsByModuleHandler implements IQueryHandler<GetTopicsByModuleQuery> {
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(query: GetTopicsByModuleQuery) {
-    const { moduleId, clerkId, paperNumber } = query;
+    const { moduleId, clerkId, paperNumber, page, limit } = query;
 
     // Fetch authenticated user data with student and board information
     const authData = await this.prisma.auth.findUnique({
@@ -66,6 +68,14 @@ export class GetTopicsByModuleHandler
       whereClause.paperNumber = paperNumber;
     }
 
+    // Calculate pagination
+    const skip = (page - 1) * limit;
+
+    // Get total count for pagination metadata
+    const totalCount = await this.prisma.topic.count({
+      where: whereClause,
+    });
+
     // Fetch topics with module details and practice questions
     const topics = await this.prisma.topic.findMany({
       where: whereClause,
@@ -94,6 +104,8 @@ export class GetTopicsByModuleHandler
           serialNumber: 'asc',
         },
       ],
+      skip,
+      take: limit,
     });
 
     const studentId = authData?.student?.id;
@@ -102,12 +114,12 @@ export class GetTopicsByModuleHandler
     const topicsWithProgress = await Promise.all(
       topics.map(async (topic) => {
         const totalPracticeQuestions = topic.questions.length;
-        
+
         let progress = 0;
         // Calculate progress only if student exists and has practice questions
         if (studentId && totalPracticeQuestions > 0) {
-          const practiceQuestionIds = topic.questions.map(q => q.id);
-          
+          const practiceQuestionIds = topic.questions.map((q) => q.id);
+
           // Find all completed submissions for this topic's practice questions
           const completedSubmissions = await this.prisma.submission.findMany({
             where: {
@@ -129,11 +141,13 @@ export class GetTopicsByModuleHandler
 
           // Calculate progress percentage based on completed vs total questions
           const completedQuestionsCount = completedSubmissions.length;
-          progress = Math.round((completedQuestionsCount / totalPracticeQuestions) * 100);
+          progress = Math.round(
+            (completedQuestionsCount / totalPracticeQuestions) * 100,
+          );
         }
 
         const { questions, ...topicData } = topic;
-        
+
         return {
           ...topicData,
           progress,
@@ -143,8 +157,9 @@ export class GetTopicsByModuleHandler
 
     return {
       message: 'Topics retrieved successfully',
-      moduleId,
-      paperNumber: paperNumber ?? 'all',
+      page,
+      limit,
+      totalCount,
       data: topicsWithProgress,
     };
   }

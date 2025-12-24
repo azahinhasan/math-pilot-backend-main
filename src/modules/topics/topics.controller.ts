@@ -60,12 +60,16 @@ export class TopicsController {
     @Param('moduleId') moduleId: string,
     @Query('paperNumber', new ParseIntPipe({ optional: true }))
     paperNumber: number | undefined,
+    @Query('page', new ParseIntPipe({ optional: true }))
+    page: number = 1,
+    @Query('limit', new ParseIntPipe({ optional: true }))
+    limit: number = 10,
     @Req() req,
   ) {
     const clerkId = req.user.sub;
 
     return this.queryBus.execute(
-      new GetTopicsByModuleQuery(moduleId, clerkId, paperNumber),
+      new GetTopicsByModuleQuery(moduleId, clerkId, paperNumber, page, limit),
     );
   }
 
