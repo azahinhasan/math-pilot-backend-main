@@ -65,11 +65,13 @@ export class CreateMockExamHandler
           },
         });
 
+        // Create QuestionSet entries for the mock exam.
+        // Note: Using 'serialNo' to match the Prisma schema.
         await tx.questionSet.createMany({
           data: uniqueQuestionIds.map((questionId, idx) => ({
             examId: exam.id,
             questionId,
-            serialId: idx + 1,
+            serialNo: idx + 1,
             name: questionSetName,
             year,
             season,

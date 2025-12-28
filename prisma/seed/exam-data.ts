@@ -121,8 +121,9 @@ export async function seedExams() {
   exams.push(algebraExam);
   console.log(`✓ Created exam: ${algebraExam.name} (ID: ${algebraExam.id})`);
 
-  // Link algebra exam to subtopics
+  // Link algebra exam to subtopics and questions
   if (algebraModule && algebraModule.topics.length > 0) {
+    let questionSerial = 1;
     for (const topic of algebraModule.topics) {
       for (const subtopic of topic.subtopics) {
         await prisma.examSubtopic.create({
@@ -132,6 +133,23 @@ export async function seedExams() {
             subtopicId: subtopic.id,
           },
         });
+
+        // Add some questions to the question set if they exist
+        const questions = await prisma.question.findMany({
+          where: { subtopicId: subtopic.id, voided: false },
+          take: 5,
+        });
+
+        if (questions.length > 0) {
+          await prisma.questionSet.createMany({
+            data: questions.map((q) => ({
+              examId: algebraExam.id,
+              questionId: q.id,
+              moduleId: algebraModule.id,
+              serialNo: questionSerial++,
+            })),
+          });
+        }
       }
     }
   }
@@ -155,8 +173,9 @@ export async function seedExams() {
   exams.push(geometryExam);
   console.log(`✓ Created exam: ${geometryExam.name} (ID: ${geometryExam.id})`);
 
-  // Link geometry exam to subtopics
+  // Link geometry exam to subtopics and questions
   if (geometryModule && geometryModule.topics.length > 0) {
+    let questionSerial = 1;
     for (const topic of geometryModule.topics) {
       for (const subtopic of topic.subtopics) {
         await prisma.examSubtopic.create({
@@ -166,6 +185,22 @@ export async function seedExams() {
             subtopicId: subtopic.id,
           },
         });
+
+        const questions = await prisma.question.findMany({
+          where: { subtopicId: subtopic.id, voided: false },
+          take: 5,
+        });
+
+        if (questions.length > 0) {
+          await prisma.questionSet.createMany({
+            data: questions.map((q) => ({
+              examId: geometryExam.id,
+              questionId: q.id,
+              moduleId: geometryModule.id,
+              serialNo: questionSerial++,
+            })),
+          });
+        }
       }
     }
   }
@@ -189,8 +224,9 @@ export async function seedExams() {
   exams.push(numberExam);
   console.log(`✓ Created exam: ${numberExam.name} (ID: ${numberExam.id})`);
 
-  // Link number exam to subtopics
+  // Link number exam to subtopics and questions
   if (numberModule && numberModule.topics.length > 0) {
+    let questionSerial = 1;
     for (const topic of numberModule.topics) {
       for (const subtopic of topic.subtopics) {
         await prisma.examSubtopic.create({
@@ -200,6 +236,22 @@ export async function seedExams() {
             subtopicId: subtopic.id,
           },
         });
+
+        const questions = await prisma.question.findMany({
+          where: { subtopicId: subtopic.id, voided: false },
+          take: 5,
+        });
+
+        if (questions.length > 0) {
+          await prisma.questionSet.createMany({
+            data: questions.map((q) => ({
+              examId: numberExam.id,
+              questionId: q.id,
+              moduleId: numberModule.id,
+              serialNo: questionSerial++,
+            })),
+          });
+        }
       }
     }
   }
@@ -223,7 +275,8 @@ export async function seedExams() {
   exams.push(mockExam);
   console.log(`✓ Created exam: ${mockExam.name} (ID: ${mockExam.id})`);
 
-  // Link mock exam to all subtopics
+  // Link mock exam to all subtopics and questions
+  let mockQuestionSerial = 1;
   for (const module of modules) {
     for (const topic of module.topics) {
       for (const subtopic of topic.subtopics) {
@@ -234,6 +287,22 @@ export async function seedExams() {
             subtopicId: subtopic.id,
           },
         });
+
+        const questions = await prisma.question.findMany({
+          where: { subtopicId: subtopic.id, voided: false },
+          take: 2,
+        });
+
+        if (questions.length > 0) {
+          await prisma.questionSet.createMany({
+            data: questions.map((q) => ({
+              examId: mockExam.id,
+              questionId: q.id,
+              moduleId: module.id,
+              serialNo: mockQuestionSerial++,
+            })),
+          });
+        }
       }
     }
   }
@@ -257,8 +326,9 @@ export async function seedExams() {
   exams.push(finalExam);
   console.log(`✓ Created exam: ${finalExam.name} (ID: ${finalExam.id})`);
 
-  // Link final exam to algebra subtopics
+  // Link final exam to algebra subtopics and questions
   if (algebraModule && algebraModule.topics.length > 0) {
+    let finalQuestionSerial = 1;
     for (const topic of algebraModule.topics) {
       for (const subtopic of topic.subtopics) {
         await prisma.examSubtopic.create({
@@ -268,6 +338,22 @@ export async function seedExams() {
             subtopicId: subtopic.id,
           },
         });
+
+        const questions = await prisma.question.findMany({
+          where: { subtopicId: subtopic.id, voided: false },
+          take: 5,
+        });
+
+        if (questions.length > 0) {
+          await prisma.questionSet.createMany({
+            data: questions.map((q) => ({
+              examId: finalExam.id,
+              questionId: q.id,
+              moduleId: algebraModule.id,
+              serialNo: finalQuestionSerial++,
+            })),
+          });
+        }
       }
     }
   }
