@@ -28,8 +28,9 @@
     "db:seed:exams": "ts-node prisma/seed/exam-data.ts",
     "db:seed:comprehensive": "ts-node prisma/seed/comprehensive-seed.ts",
     "db:seed:submission-types": "ts-node prisma/seed/add-submission-types.ts",
-    "db:seed:question-types": "ts-node prisma/seed/add-question-types.ts",
-    "db:seed:exam-test": "ts-node prisma/seed/exam-test-data.ts"
+    "db:seed:exam-test": "ts-node prisma/seed/exam-test-data.ts",
+    "db:seed:exam-solutions": "ts-node prisma/seed/exam-solutions-seed.ts",
+    "db:seed:question-types": "ts-node prisma/seed/add-question-types.ts"
   },
   "dependencies": {
     "@clerk/backend": "^2.24.0",
