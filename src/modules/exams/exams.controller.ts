@@ -1,12 +1,13 @@
-import { Body, Controller, Get, Post, Query, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, Req, UseGuards, Param } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { CreateExamDto } from './dto/create-exam.dto';
 import { CreateExamCommand } from './commands/create-exam.command';
 import { CreateMockExamDto } from './dto/create-mock-exam.dto';
 import { CreateMockExamCommand } from './commands/create-mock-exam.command';
-import { GetExamHistoryDto } from './dto/get-exam-history.dto';
+import { GetExamSolutionsQuery } from './queries/get-exam-solutions.query';
+import { ClerkAuthGuard } from '../../clerk-auth-guard';
 import { GetExamHistoryQuery } from './queries/get-exam-history.query';
-import { ClerkAuthGuard } from 'src/clerk-auth-guard';
+import { GetExamHistoryDto } from './dto/get-exam-history.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 /**
@@ -20,14 +21,22 @@ export class ExamsController {
     private readonly prisma: PrismaService,
   ) {}
 
-  // Unauthenticated for now (per request)
+  /**
+   * Endpoint to create a new exam.
+   * Protected by ClerkAuthGuard.
+   */
   @Post()
+  @UseGuards(ClerkAuthGuard)
   async createExam(@Body() dto: CreateExamDto) {
     return this.commandBus.execute(new CreateExamCommand(dto));
   }
 
-  // Unauthenticated for now (per request)
+  /**
+   * Endpoint to create a new mock exam.
+   * Protected by ClerkAuthGuard.
+   */
   @Post('mock')
+  @UseGuards(ClerkAuthGuard)
   async createMockExam(@Body() dto: CreateMockExamDto) {
     return this.commandBus.execute(new CreateMockExamCommand(dto));
   }
@@ -60,6 +69,19 @@ export class ExamsController {
 
     // 3. Dispatch the query to the handler to fetch and aggregate exam submissions
     return this.queryBus.execute(new GetExamHistoryQuery(auth.student.id, dto));
+  }
+  /**
+   * 
+    * GET /exams/:examId/solutions
+   * Retrieves all question solutions for a specific exam.
+   * Protected by ClerkAuthGuard.
+   ** @param examId The ID of the exam to retrieve solutions for.
+   ** @returns A promise that resolves to the exam solutions.
+   */
+  @Get(':examId/solutions')
+  @UseGuards(ClerkAuthGuard)
+  async getExamSolutions(@Param('examId') examId: string) {
+    return this.queryBus.execute(new GetExamSolutionsQuery(examId));
   }
 }
 

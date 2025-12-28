@@ -25,6 +25,9 @@ import { OnboardingDto } from './dto/onboarding.dto';
 import { OnboardingCommand } from './commands/onboarding.command';
 import { GetSubjectProgressQuery } from './queries/get-subject-progress.query';
 import { GetSubjectPerformanceQuery } from './queries/get-subject-performance.query';
+import { UpdateUserConfigDto } from './dto/update-user-config.dto';
+import { UpdateUserConfigCommand } from './commands/update-user-config.command';
+import { Patch } from '@nestjs/common';
 
 @Controller('users')
 export class UsersController {
@@ -57,6 +60,17 @@ export class UsersController {
   @Post('onboarding')
   async onboarding(@Body() onboardingDto: OnboardingDto) {
     return this.commandBus.execute(new OnboardingCommand(onboardingDto));
+  }
+
+  /**
+   * PATCH /users/config
+   * Update user configurations and profile settings.
+   */
+  @Patch('config')
+  @UseGuards(ClerkAuthGuard)
+  async updateConfig(@Req() req, @Body() dto: UpdateUserConfigDto) {
+    const clerkId = req.user.sub;
+    return this.commandBus.execute(new UpdateUserConfigCommand(clerkId, dto));
   }
 
   @Get('profile')

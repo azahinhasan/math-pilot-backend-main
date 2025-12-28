@@ -1,22 +1,21 @@
 import {
-  Controller,
-  Get,
-  Param,
+  Controller, Get, Param,
   UseGuards,
   Req,
   Post,
   Body,
 } from '@nestjs/common';
-import { QueryBus } from '@nestjs/cqrs';
+import { CommandBus, QueryBus, } from '@nestjs/cqrs';
 import { GetQuestionsByTopicQuery } from './queries/get-questions-by-topic.query';
 import { ClerkAuthGuard } from 'src/clerk-auth-guard';
 import { CreateQuestionDto } from './dto/create-question.dto';
 import { CreateQuestionCommand } from './commands/create-question.command';
+import { GetQuestionSolutionQuery } from './queries/get-question-solution.query';
 
 @Controller('questions')
 @UseGuards(ClerkAuthGuard)
 export class QuestionsController {
-  constructor(private readonly queryBus: QueryBus) {}
+  constructor(private readonly commandBus: CommandBus, private readonly queryBus: QueryBus) {}
 
   @Get('practice-mode/topic/:topicId')
   async getQuestionsByTopic(@Param('topicId') topicId: string, @Req() req) {
@@ -27,8 +26,23 @@ export class QuestionsController {
     );
   }
 
+  /**
+   * Endpoint to create a new question.
+   * @param dto Data transfer object for question creation.
+   */
   @Post()
   async createQuestion(@Body() dto: CreateQuestionDto) {
     return this.queryBus.execute(new CreateQuestionCommand(dto));
   }
+  /**
+   * Endpoint to retrieve the solution for a specific question by ID.
+   * @param questionId The unique identifier of the question.
+   */
+  @Get(':questionId/solution')
+  async getQuestionSolution(@Param('questionId') questionId: string) {
+    return this.queryBus.execute(new GetQuestionSolutionQuery(questionId));
+  }
 }
+
+
+

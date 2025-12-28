@@ -70,11 +70,13 @@ export class CreateExamHandler implements ICommandHandler<CreateExamCommand> {
           questions,
         );
 
+        // Create QuestionSet entries for the exam. 
+        // Note: Using 'serialNo' to match the Prisma schema.
         await tx.questionSet.createMany({
           data: selectedQuestionIds.map((questionId, idx) => ({
             examId: exam.id,
             questionId,
-            serialId: idx + 1,
+            serialNo: idx + 1,
             moduleId,
           })),
           skipDuplicates: true,
