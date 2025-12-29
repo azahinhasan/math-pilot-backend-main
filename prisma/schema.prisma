@@ -249,34 +249,33 @@ model QuestionType {
   voided      Boolean  @default(false)
 
   questions Question[]
-
-  @@map("question_types")
 }
 
 model Question {
-  id                  String          @id @default(uuid())
+  id                  String      @id @default(uuid())
   name                String
-  questionText        String          @map("question_text")
-  questionContentLink String?         @map("question_content_link")
-  contentBy           ContentBy       @default(AI) @map("content_by")
-  questionFor         QuestionFor     @default(Practice) @map("question_for")
-  totalMarks          Int?            @map("total_marks")
-  timeLimit           Int?            @map("time_limit")
+  questionText        String      @map("question_text")
+  questionContentLink String?     @map("question_content_link")
+  contentBy           ContentBy   @default(AI) @map("content_by")
+  questionFor         QuestionFor @default(Practice) @map("question_for")
+  totalMarks          Int?        @map("total_marks")
+  timeLimit           Int?        @map("time_limit")
   hint                String?
   explanation         String?
   givenContext        String?
   findObjective       String?
-  imageUrl            String?         @map("image_url")
-  difficulty_level    DifficultyLevel @default(Easy) @map("difficulty_level")
-  stepCount           Int             @map("step_count")
-  serialNo            Int             @map("serial_no")
-  questionTypeId      String          @map("question_type_id")
-  moduleId            String          @map("module_id")
-  topicId             String          @map("topic_id")
-  subtopicId          String          @map("subtopic_id")
-  createdAt           DateTime        @default(now()) @map("created_at")
-  updatedAt           DateTime        @updatedAt @map("updated_at")
-  voided              Boolean         @default(false)
+
+  imageUrl         String?         @map("image_url")
+  difficulty_level DifficultyLevel @default(Easy) @map("difficulty_level")
+  stepCount        Int             @map("step_count")
+  serialNo         Int             @map("serial_no")
+  questionTypeId   String          @map("question_type_id")
+  moduleId         String          @map("module_id")
+  topicId          String          @map("topic_id")
+  subtopicId       String          @map("subtopic_id")
+  createdAt        DateTime        @default(now()) @map("created_at")
+  updatedAt        DateTime        @updatedAt @map("updated_at")
+  voided           Boolean         @default(false)
 
   questionType   QuestionType    @relation(fields: [questionTypeId], references: [id])
   module         Module          @relation(fields: [moduleId], references: [id])
@@ -320,14 +319,16 @@ model SolutionMcq {
 }
 
 model SolutionDescriptive {
-  id                  String   @id @default(uuid()) @map("descriptive_id")
-  solutionBaseId      String   @unique @map("solution_base_id")
-  descriptiveSolution String?  @map("descriptive_solution") //correct_ans
-  markingStepsJson    Json?    @map("marking_steps_json")
-  maxMarks            Int?     @map("max_marks")
-  createdAt           DateTime @default(now()) @map("created_at")
-  updatedAt           DateTime @updatedAt @map("updated_at")
-  voided              Boolean  @default(false)
+  id                       String   @id @default(uuid()) @map("descriptive_id")
+  solutionBaseId           String   @unique @map("solution_base_id")
+  descriptiveSolution      String?  @map("descriptive_solution") //correct_ans
+  descriptiveSolutionImage String?  @map("descriptive_solution_image")
+  markingStepsJson         Json?    @map("marking_steps_json")
+  maxMarks                 Int?     @map("max_marks")
+  isInputCanvases          Boolean  @default(false) @map("is_input_canvases")
+  createdAt                DateTime @default(now()) @map("created_at")
+  updatedAt                DateTime @updatedAt @map("updated_at")
+  voided                   Boolean  @default(false)
 
   solutionBase SolutionBase @relation(fields: [solutionBaseId], references: [id])
 }

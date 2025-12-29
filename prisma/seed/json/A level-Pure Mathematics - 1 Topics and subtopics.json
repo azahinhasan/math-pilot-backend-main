@@ -1,119 +1,125 @@
 [
- {
-  "Chapter 1 - Algebraic expressions": "Index laws",
-  "Chapter 2 - Quadratics": "Solving quadratic equations",
-  "Chapter 3 - Equations and  inequalities": "Linear simultaneous  equations",
-  "Chapter 4 - Graphs and  transformations": "Cubic graphs ",
-  "Chapter 5 - Straight line graphs": "y = mx + C",
-  "Chapter 6 - Circles": "Midpoints and perpendicular bisectors",
-  "Chapter 7 - Algebraic methods": "Algebraic fractions",
-  "Chapter 8 - The binomial  expansion": "Pascal's triangle",
-  "Chapter 9 - Trigonometric ratios": "The cosine rule",
-  "Chapter 10 - Trigonometric identities and equations": "Angles in all four quadrants",
-  "Chapter 11 - Vetors": "Vectors",
-  "Chapter 12 - Differentiation": "Gradients of curves",
-  "Chapter 13 - Integration": "Integrating $$x^n$$",
-  "Chapter 14 - Exponentials and  logarithms": "Exponential functions"
- },
- 
- {
-  "Chapter 1 - Algebraic expressions": "Expanding brackets",
-  "Chapter 2 - Quadratics": "Completing  the square ",
-  "Chapter 3 - Equations and  inequalities": "Quadratic simultaneous equations",
-  "Chapter 4 - Graphs and  transformations": "Quartic graphs",
-  "Chapter 5 - Straight line graphs": "Equations of straight lines",
-  "Chapter 6 - Circles": "Equation of a circle",
-  "Chapter 7 - Algebraic methods": "Dividing polynomials",
-  "Chapter 8 - The binomial  expansion": "Factorial notation",
-  "Chapter 9 - Trigonometric ratios": "The sine rule",
-  "Chapter 10 - Trigonometric identities and equations": "Exact values of trigonometrical ratios",
-  "Chapter 11 - Vetors": "Representing vectors",
-  "Chapter 12 - Differentiation": "Finding the derivative",
-  "Chapter 13 - Integration": "Indefinite integrals",
-  "Chapter 14 - Exponentials and  logarithms": "$$y = e^x$$"
- },
- 
- {
-  "Chapter 1 - Algebraic expressions": "Factorising",
-  "Chapter 2 - Quadratics": "Functions ",
-  "Chapter 3 - Equations and  inequalities": "Simultaneous equations on graphs",
-  "Chapter 4 - Graphs and  transformations": "Reciprocal graphs",
-  "Chapter 5 - Straight line graphs": "Parallel and perpendicular lines",
-  "Chapter 6 - Circles": "Intersections of straight lines and circles",
-  "Chapter 7 - Algebraic methods": "The factor theorem",
-  "Chapter 8 - The binomial  expansion": "The binomial expansion",
-  "Chapter 9 - Trigonometric ratios": "Areas of triangles",
-  "Chapter 10 - Trigonometric identities and equations": "Trigonometric identities",
-  "Chapter 11 - Vetors": "Magnitude and direction",
-  "Chapter 12 - Differentiation": "Differentiating $$x^n$$",
-  "Chapter 13 - Integration": "Finding functions",
-  "Chapter 14 - Exponentials and  logarithms": "Exponential modelling"
- },
- 
- {
-  "Chapter 1 - Algebraic expressions": "Surds ",
-  "Chapter 2 - Quadratics": "Quadratic graphs",
-  "Chapter 3 - Equations and  inequalities": "Linear inequalities",
-  "Chapter 4 - Graphs and  transformations": "Translating graphs",
-  "Chapter 5 - Straight line graphs": "Length and area",
-  "Chapter 6 - Circles": "Use tangent and chord properties",
-  "Chapter 7 - Algebraic methods": "Mathematical proof",
-  "Chapter 8 - The binomial  expansion": "Solving binomial problems",
-  "Chapter 9 - Trigonometric ratios": "Solving triangle problems",
-  "Chapter 10 - Trigonometric identities and equations": "Harder trigonometric equations",
-  "Chapter 11 - Vetors": "Position vectors",
-  "Chapter 12 - Differentiation": "Differentiating quadratics",
-  "Chapter 13 - Integration": "Definite integrals",
-  "Chapter 14 - Exponentials and  logarithms": " Logarithms"
- },
- 
- {
-  "Chapter 1 - Algebraic expressions": "Rationalising  denominators",
-  "Chapter 2 - Quadratics": "The discriminant",
-  "Chapter 3 - Equations and  inequalities": "Quadratic  inequalities",
-  "Chapter 4 - Graphs and  transformations": "Stretching graphs",
-  "Chapter 5 - Straight line graphs": "Modelling with straight lines",
-  "Chapter 6 - Circles": "Circles and triangles",
-  "Chapter 7 - Algebraic methods": "Methods of proof",
-  "Chapter 8 - The binomial  expansion": "Binomial estimation",
-  "Chapter 9 - Trigonometric ratios": "Graphs of sine, cosine and tangent",
-  "Chapter 10 - Trigonometric identities and equations": "Equations and identities",
-  "Chapter 11 - Vetors": "Solving geometric problems",
-  "Chapter 12 - Differentiation": "Differentiating functions with two or more terms",
-  "Chapter 13 - Integration": "Areas under curves",
-  "Chapter 14 - Exponentials and  logarithms": "Laws of logarithms"
- },
- 
- {
-  "Chapter 2 - Quadratics": "Modelling with quadratics",
-  "Chapter 3 - Equations and  inequalities": "Inequalities on graphs",
-  "Chapter 4 - Graphs and  transformations": "Transforming  functions",
-  "Chapter 11 - Vetors": "Modelling with vectors",
-  "Chapter 12 - Differentiation": "Gradients, tangents and normal",
-  "Chapter 13 - Integration": "Areas under the x-axis",
-  "Chapter 14 - Exponentials and  logarithms": "Solving equations using logarithms"
- },
- 
- {
-  "Chapter 3 - Equations and  inequalities": "Regions",
-  "Chapter 12 - Differentiation": "Increasing and decreasing functions",
-  "Chapter 14 - Exponentials and  logarithms": "Working with natural logarithms"
- },
- 
- {
-  "Chapter 12 - Differentiation": "Second order derivatives",
-  "Chapter 14 - Exponentials and  logarithms": "Logarithms and non-linear data"
- },
- 
- {
-  "Chapter 12 - Differentiation": "Stationary points"
- },
- 
- {
-  "Chapter 12 - Differentiation": "Sketching gradient functions"
- },
- 
- {
-  "Chapter 12 - Differentiation": "Modelling with differentiation"
- }
+    {
+        "Chapter 1 - Algebraic expressions": "Mixed Exercise (Algebraic Equation)",
+        "Chapter 2 - Quadratics": "Mixed Exercise (Quadratic Equations)",
+        "Chapter 3 - Equations and  inequalities": "Mixed Exercise (Equations and Inequalities)",
+        "Chapter 4 - Graphs and  transformations": "Mixed Exercise (Graphs and Transformations)",
+        "Chapter 5 - Straight line graphs": "Mixed Exercise (Straight Line Graphs)",
+        "Chapter 6 - Circles": "Mixed Exercise (Circles)",
+        "Chapter 7 - Algebraic methods": "Mixed Exercise (Algebraic Methods)",
+        "Chapter 8 - The binomial expansion": "Mixed Exercise (Binomial Expansion)",
+        "Chapter 9 - Trigonometric ratios": "Mixed Exercise (Trigonometric Ratios)",
+        "Chapter 10 - Trigonometric identities and equations": "Mixed Exercise (Trigonometric Identities and Equations)",
+        "Chapter 11 - Vetors": "Mixed Exercise (Vectors)",
+        "Chapter 12 - Differentiation": "Mixed Exercise (Differentiation)",
+        "Chapter 13 - Integration": "Mixed Exercise (Integration)",
+        "Chapter 14 - Exponentials and  logarithms": "Mixed Exercise (Exponentials and Logarithms)"
+    },
+    {
+        "Chapter 1 - Algebraic expressions": "Index laws",
+        "Chapter 2 - Quadratics": "Solving quadratic equations",
+        "Chapter 3 - Equations and  inequalities": "Linear simultaneous  equations",
+        "Chapter 4 - Graphs and  transformations": "Cubic graphs",
+        "Chapter 5 - Straight line graphs": "y = mx + C",
+        "Chapter 6 - Circles": "Midpoints and perpendicular bisectors",
+        "Chapter 7 - Algebraic methods": "Algebraic fractions",
+        "Chapter 8 - The binomial  expansion": "Pascal's triangle",
+        "Chapter 9 - Trigonometric ratios": "The cosine rule",
+        "Chapter 10 - Trigonometric identities and equations": "Angles in all four quadrants",
+        "Chapter 11 - Vetors": "Vectors",
+        "Chapter 12 - Differentiation": "Gradients of curves",
+        "Chapter 13 - Integration": "Integrating $$x^n$$",
+        "Chapter 14 - Exponentials and  logarithms": "Exponential functions"
+    },
+    {
+        "Chapter 1 - Algebraic expressions": "Expanding brackets",
+        "Chapter 2 - Quadratics": "Completing  the square ",
+        "Chapter 3 - Equations and  inequalities": "Quadratic simultaneous equations",
+        "Chapter 4 - Graphs and  transformations": "Quartic graphs",
+        "Chapter 5 - Straight line graphs": "Equations of straight lines",
+        "Chapter 6 - Circles": "Equation of a circle",
+        "Chapter 7 - Algebraic methods": "Dividing polynomials",
+        "Chapter 8 - The binomial  expansion": "Factorial notation",
+        "Chapter 9 - Trigonometric ratios": "The sine rule",
+        "Chapter 10 - Trigonometric identities and equations": "Exact values of trigonometrical ratios",
+        "Chapter 11 - Vetors": "Representing vectors",
+        "Chapter 12 - Differentiation": "Finding the derivative",
+        "Chapter 13 - Integration": "Indefinite integrals",
+        "Chapter 14 - Exponentials and  logarithms": "$$y = e^x$$"
+    },
+    {
+        "Chapter 1 - Algebraic expressions": "Factorising",
+        "Chapter 2 - Quadratics": "Functions ",
+        "Chapter 3 - Equations and  inequalities": "Simultaneous equations on graphs",
+        "Chapter 4 - Graphs and  transformations": "Reciprocal graphs",
+        "Chapter 5 - Straight line graphs": "Parallel and perpendicular lines",
+        "Chapter 6 - Circles": "Intersections of straight lines and circles",
+        "Chapter 7 - Algebraic methods": "The factor theorem",
+        "Chapter 8 - The binomial  expansion": "The binomial expansion",
+        "Chapter 9 - Trigonometric ratios": "Areas of triangles",
+        "Chapter 10 - Trigonometric identities and equations": "Trigonometric identities",
+        "Chapter 11 - Vetors": "Magnitude and direction",
+        "Chapter 12 - Differentiation": "Differentiating $$x^n$$",
+        "Chapter 13 - Integration": "Finding functions",
+        "Chapter 14 - Exponentials and  logarithms": "Exponential modelling"
+    },
+    {
+        "Chapter 1 - Algebraic expressions": "Surds ",
+        "Chapter 2 - Quadratics": "Quadratic graphs",
+        "Chapter 3 - Equations and  inequalities": "Linear inequalities",
+        "Chapter 4 - Graphs and  transformations": "Translating graphs",
+        "Chapter 5 - Straight line graphs": "Length and area",
+        "Chapter 6 - Circles": "Use tangent and chord properties",
+        "Chapter 7 - Algebraic methods": "Mathematical proof",
+        "Chapter 8 - The binomial  expansion": "Solving binomial problems",
+        "Chapter 9 - Trigonometric ratios": "Solving triangle problems",
+        "Chapter 10 - Trigonometric identities and equations": "Harder trigonometric equations",
+        "Chapter 11 - Vetors": "Position vectors",
+        "Chapter 12 - Differentiation": "Differentiating quadratics",
+        "Chapter 13 - Integration": "Definite integrals",
+        "Chapter 14 - Exponentials and  logarithms": " Logarithms"
+    },
+    {
+        "Chapter 1 - Algebraic expressions": "Rationalising  denominators",
+        "Chapter 2 - Quadratics": "The discriminant",
+        "Chapter 3 - Equations and  inequalities": "Quadratic  inequalities",
+        "Chapter 4 - Graphs and  transformations": "Stretching graphs",
+        "Chapter 5 - Straight line graphs": "Modelling with straight lines",
+        "Chapter 6 - Circles": "Circles and triangles",
+        "Chapter 7 - Algebraic methods": "Methods of proof",
+        "Chapter 8 - The binomial  expansion": "Binomial estimation",
+        "Chapter 9 - Trigonometric ratios": "Graphs of sine, cosine and tangent",
+        "Chapter 10 - Trigonometric identities and equations": "Equations and identities",
+        "Chapter 11 - Vetors": "Solving geometric problems",
+        "Chapter 12 - Differentiation": "Differentiating functions with two or more terms",
+        "Chapter 13 - Integration": "Areas under curves",
+        "Chapter 14 - Exponentials and  logarithms": "Laws of logarithms"
+    },
+    {
+        "Chapter 2 - Quadratics": "Modelling with quadratics",
+        "Chapter 3 - Equations and  inequalities": "Inequalities on graphs",
+        "Chapter 4 - Graphs and  transformations": "Transforming  functions",
+        "Chapter 11 - Vetors": "Modelling with vectors",
+        "Chapter 12 - Differentiation": "Gradients, tangents and normal",
+        "Chapter 13 - Integration": "Areas under the x-axis",
+        "Chapter 14 - Exponentials and  logarithms": "Solving equations using logarithms"
+    },
+    {
+        "Chapter 3 - Equations and  inequalities": "Regions",
+        "Chapter 12 - Differentiation": "Increasing and decreasing functions",
+        "Chapter 14 - Exponentials and  logarithms": "Working with natural logarithms"
+    },
+    {
+        "Chapter 12 - Differentiation": "Second order derivatives",
+        "Chapter 14 - Exponentials and  logarithms": "Logarithms and non-linear data"
+    },
+    {
+        "Chapter 12 - Differentiation": "Stationary points"
+    },
+    {
+        "Chapter 12 - Differentiation": "Sketching gradient functions"
+    },
+    {
+        "Chapter 12 - Differentiation": "Modelling with differentiation"
+    }
 ]

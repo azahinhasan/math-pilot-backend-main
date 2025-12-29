@@ -28,7 +28,9 @@
     "db:seed:exams": "ts-node prisma/seed/exam-data.ts",
     "db:seed:comprehensive": "ts-node prisma/seed/comprehensive-seed.ts",
     "db:seed:submission-types": "ts-node prisma/seed/add-submission-types.ts",
-    "db:seed:exam-test": "ts-node prisma/seed/exam-test-data.ts"
+    "db:seed:exam-test": "ts-node prisma/seed/exam-test-data.ts",
+    "db:seed:exam-solutions": "ts-node prisma/seed/exam-solutions-seed.ts",
+    "db:seed:question-types": "ts-node prisma/seed/add-question-types.ts"
   },
   "dependencies": {
     "@clerk/backend": "^2.24.0",
@@ -47,7 +49,8 @@
     "form-data": "^4.0.5",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
-    "tsconfig-paths": "^4.2.0"
+    "tsconfig-paths": "^4.2.0",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
