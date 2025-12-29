@@ -2,8 +2,11 @@ import {
   AgeLevelName,
   BoardName,
   DifficultyLevel,
+  ExamType,
   PrismaClient,
+  Question,
   QuestionFor,
+  ReviewStatus,
   Subject,
 } from '@prisma/client';
 
@@ -15,50 +18,39 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('Seeding exam test data (topic/subtopics/questions)...');
 
-  // Topic requires a module; reuse an existing module if possible, otherwise create a minimal one.
-  const existingModule = await prisma.module.findFirst({
-    where: { voided: false },
-    select: { id: true },
+  // 1. Ensure Module exists
+  const boardAgeLevel = await prisma.boardAgeLevel.upsert({
+    where: {
+      boardName_ageLevelName: {
+        boardName: BoardName.AQA,
+        ageLevelName: AgeLevelName.GCSE,
+      },
+    },
+    update: {},
+    create: {
+      boardName: BoardName.AQA,
+      ageLevelName: AgeLevelName.GCSE,
+    },
   });
 
-  const moduleRecord =
-    existingModule ??
-    (await (async () => {
-      const boardAgeLevel = await prisma.boardAgeLevel.upsert({
-        where: {
-          boardName_ageLevelName: {
-            boardName: BoardName.AQA,
-            ageLevelName: AgeLevelName.GCSE,
-          },
-        },
-        update: {},
-        create: {
-          boardName: BoardName.AQA,
-          ageLevelName: AgeLevelName.GCSE,
-        },
-        select: { id: true },
-      });
+  const moduleRecord = await prisma.module.upsert({
+    where: {
+      name_subject_boardAgeLevelId: {
+        name: 'Mathematics (Seeded)',
+        subject: Subject.Mathematics,
+        boardAgeLevelId: boardAgeLevel.id,
+      },
+    },
+    update: {},
+    create: {
+      name: 'Mathematics (Seeded)',
+      description: 'Seed module for exam test data',
+      subject: Subject.Mathematics,
+      boardAgeLevelId: boardAgeLevel.id,
+    },
+  });
 
-      return prisma.module.upsert({
-        where: {
-          name_subject_boardAgeLevelId: {
-            name: 'Mathematics (Seeded)',
-            subject: Subject.Mathematics,
-            boardAgeLevelId: boardAgeLevel.id,
-          },
-        },
-        update: {},
-        create: {
-          name: 'Mathematics (Seeded)',
-          description: 'Seed module for exam test data',
-          subject: Subject.Mathematics,
-          boardAgeLevelId: boardAgeLevel.id,
-        },
-        select: { id: true },
-      });
-    })());
-
-  // Ensure a question type exists to attach to questions
+  // 2. Ensure Question Type exists
   const descriptive = await prisma.questionType.upsert({
     where: { name: 'Descriptive' },
     update: {},
@@ -68,6 +60,7 @@ async function main() {
     },
   });
 
+  // 3. Create Topic
   const topic = await prisma.topic.create({
     data: {
       name: 'Algebra (Seeded)',
@@ -78,6 +71,7 @@ async function main() {
     },
   });
 
+  // 4. Create Subtopics
   const subtopics = await Promise.all([
     prisma.subtopic.create({
       data: {
@@ -95,9 +89,10 @@ async function main() {
     }),
   ]);
 
+  // 5. Define Questions
   const questionsToCreate = [
     // Linear Equations
-    ...Array.from({ length: 6 }).map((_, i) => ({
+    ...Array.from({ length: 3 }).map((_, i) => ({
       name: `Solve linear equation #${i + 1}`,
       questionText: `Solve for x: ${i + 2}x + 3 = ${2 * (i + 2)}.`,
       hint: 'Rearrange to isolate x.',
@@ -112,9 +107,9 @@ async function main() {
       subtopicId: subtopics[0].id,
     })),
     // Quadratics
-    ...Array.from({ length: 6 }).map((_, i) => ({
+    ...Array.from({ length: 3 }).map((_, i) => ({
       name: `Factorise quadratic #${i + 1}`,
-      questionText: `Factorise: x^2 + ${(i + 2)}x + ${i + 1}.`,
+      questionText: `Factorise: x^2 + ${i + 2}x + ${i + 1}.`,
       hint: 'Find two numbers that multiply to the constant term and add to the coefficient of x.',
       totalMarks: 1,
       timeLimit: 2,
@@ -128,9 +123,10 @@ async function main() {
     })),
   ];
 
-  // Create questions + minimal solutions so the DB is consistent with existing patterns
+  // 6. Create Questions and Solutions
+  const createdQuestions: Question[] = [];
   for (const q of questionsToCreate) {
-    await prisma.question.create({
+    const question = await prisma.question.create({
       data: {
         name: q.name,
         questionText: q.questionText,
@@ -157,12 +153,48 @@ async function main() {
         },
       },
     });
+    createdQuestions.push(question);
   }
 
+  // 7. Create Test Exam
+  const testExam = await prisma.exam.create({
+    data: {
+      name: 'Test Exam for API Verification',
+      startTime: new Date(),
+      endTime: new Date(Date.now() + 3600000), // 1 hour from now
+      type: ExamType.Normal,
+      difficulty: DifficultyLevel.Easy,
+      timeLimit: 60,
+      maxNumberOfQuestions: createdQuestions.length,
+      status: ReviewStatus.Scheduled,
+      totalMarks: createdQuestions.reduce((sum, q) => sum + (q.totalMarks || 0), 0),
+    },
+  });
+
+  // 8. Link Exam to Subtopics
+  await prisma.examSubtopic.createMany({
+    data: subtopics.map((s) => ({
+      examId: testExam.id,
+      topicId: topic.id,
+      subtopicId: s.id,
+    })),
+  });
+
+  // 9. Create QuestionSet for the Exam
+  await prisma.questionSet.createMany({
+    data: createdQuestions.map((q, idx) => ({
+      examId: testExam.id,
+      questionId: q.id,
+      moduleId: moduleRecord.id,
+      serialNo: idx + 1,
+    })),
+  });
+
   console.log('Seeded:');
+  console.log(`- examId: ${testExam.id}`);
   console.log(`- topicId: ${topic.id}`);
-  console.log(`- subtopicIds: ${subtopics.map((s) => s.id).join(', ')}`);
-  console.log(`- questions: ${questionsToCreate.length}`);
+  console.log(`- questions: ${createdQuestions.length}`);
+  console.log(`- questionSet entries created`);
 }
 
 main()
