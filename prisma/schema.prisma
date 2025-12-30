@@ -399,6 +399,10 @@ model SubmittedDescriptive {
   hint                       String?  @map("hint")
   chatHistory                String?  @map("chat_history")
   verdict                    String?  @map("verdict") //on track, correct, incorrect
+  evaluation                 String?  @map("evaluation") // LLM evaluation text
+  ocrOutput                  String?  @map("ocr_output") // Extracted text from image
+  isFinished                 Boolean? @map("is_finished") // Whether solution is complete
+  nextStepCount              Int?     @map("next_step_count") // Next step number
   createdAt                  DateTime @default(now()) @map("created_at")
   updatedAt                  DateTime @updatedAt @map("updated_at")
   voided                     Boolean  @default(false)
