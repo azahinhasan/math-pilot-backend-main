@@ -9,6 +9,8 @@ import { ClerkAuthGuard } from '../../clerk-auth-guard';
 import { GetExamHistoryQuery } from './queries/get-exam-history.query';
 import { GetExamHistoryDto } from './dto/get-exam-history.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { SubmitTestDto } from './dto/submit-test.dto';
+import { SubmitTestCommand } from './commands/submit-test.command';
 
 /**
  * Controller for managing Exam-related operations, including creation and historical retrieval.
@@ -82,6 +84,17 @@ export class ExamsController {
   @UseGuards(ClerkAuthGuard)
   async getExamSolutions(@Param('examId') examId: string) {
     return this.queryBus.execute(new GetExamSolutionsQuery(examId));
+  }
+
+  /**
+   * POST /exams/submit
+   * Submit test answers for evaluation
+   * Protected by ClerkAuthGuard.
+   */
+  @Post('submit')
+  @UseGuards(ClerkAuthGuard)
+  async submitTest(@Body() dto: SubmitTestDto) {
+    return this.commandBus.execute(new SubmitTestCommand(dto));
   }
 }
 
