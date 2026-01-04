@@ -18,33 +18,44 @@ export class CreateMockExamHandler
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(command: CreateMockExamCommand) {
-    const {
-      name,
-      timeLimit,
-      questionIds,
-      questionSetName,
-      year,
-      season,
-      markSchemeUrl,
-      moduleId,
-    } = command.payload;
+    const { name, questionSetName, year, season, moduleId } = command.payload;
 
-    const uniqueQuestionIds = [...new Set(questionIds)];
-    if (uniqueQuestionIds.length === 0) {
-      throw new BadRequestException('At least one questionId is required.');
+    // Hardcoded time limit as per requirements
+    const timeLimit = 120;
+
+    // Fetch source question sets to find questions and metadata
+    const sourceQuestionSets = await this.prisma.questionSet.findMany({
+      where: {
+        name: questionSetName,
+        year,
+        season,
+        moduleId,
+        questionId: { not: null },
+      },
+      orderBy: { serialNo: 'asc' },
+    });
+
+    if (sourceQuestionSets.length === 0) {
+      throw new BadRequestException(
+        `No question sets found for Question Set: ${questionSetName}, Year: ${year}, Season: ${season}, Module: ${moduleId}`,
+      );
     }
+
+    // Extract Question IDs
+    const questionIds = sourceQuestionSets.map((qs) => qs.questionId!);
+    const uniqueQuestionIds = [...new Set(questionIds)];
+
+    // Derive metadata from the first question set entry
+    // (Assuming consistent metadata across the set as per requirements)
+    const metadataSource = sourceQuestionSets[0];
+    const markSchemeUrl = metadataSource.markSchemeUrl ?? undefined;
 
     const { startTime, endTime } = this.computeStartEndTimes(timeLimit);
 
     try {
       const result = await this.prisma.$transaction(async (tx) => {
+        // Verify questions exist and are not voided
         await this.assertQuestionsExist(tx, uniqueQuestionIds);
-
-        const resolvedModuleId = await this.resolveModuleIdForQuestionSet(
-          tx,
-          uniqueQuestionIds,
-          moduleId,
-        );
 
         const totalMarks = await this.sumTotalMarksForQuestions(
           tx,
@@ -76,7 +87,7 @@ export class CreateMockExamHandler
             year,
             season,
             markSchemeUrl,
-            moduleId: resolvedModuleId,
+            moduleId,
           })),
           skipDuplicates: true,
         });
@@ -123,32 +134,4 @@ export class CreateMockExamHandler
     });
     return agg._sum.totalMarks ?? 0;
   }
-
-  private async resolveModuleIdForQuestionSet(
-    db: DbClient,
-    questionIds: string[],
-    moduleId?: string,
-  ): Promise<string> {
-    if (moduleId) return moduleId;
-
-    const questions = await db.question.findMany({
-      where: { id: { in: questionIds } },
-      select: { moduleId: true, topic: { select: { moduleId: true } } },
-    });
-
-    const inferred = questions
-      .map((q) => q.moduleId ?? q.topic?.moduleId)
-      .filter((id): id is string => Boolean(id));
-
-    const unique = [...new Set(inferred)];
-    if (unique.length !== 1) {
-      throw new BadRequestException(
-        'moduleId is required (or all questions must belong to the same module).',
-      );
-    }
-
-    return unique[0];
-  }
 }
-
-
