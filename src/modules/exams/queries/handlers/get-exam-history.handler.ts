@@ -13,13 +13,14 @@ export interface ExamHistoryEntry {
   examName: string;
   topicNames: string[];
   subtopicNames: string[];
-  progress: number;      // Count of correct answers across all questions in this exam
-  accuracy: number;      // Percentage of correct answers (0-100)
-  timeSpent: number;     // Total duration of the attempt in seconds
-  mistakes: number;      // Count of incorrect answers
-  totalMarks: number;    // Sum of awarded marks across all questions
-  maxMarks: number;      // Maximum possible marks defined for the exam
-  attemptedAt: Date;     // Timestamp indicating when the attempt began
+  progress: number; // Count of correct answers across all questions in this exam
+  score: number; // Percentage of correct answers (0-100)
+  timeSpent: number; // Total duration of the attempt in seconds
+  mistakes: number; // Count of incorrect answers
+  totalMarks: number; // Sum of awarded marks across all questions
+  maxMarks: number; // Maximum possible marks defined for the exam
+  grade: string; // Grade based on percentage (GCSE 9-1)
+  attemptedAt: Date; // Timestamp indicating when the attempt began
 }
 
 /**
@@ -28,7 +29,9 @@ export interface ExamHistoryEntry {
  * Handles grouping, calculation of metrics, filtering, sorting, and pagination.
  */
 @QueryHandler(GetExamHistoryQuery)
-export class GetExamHistoryHandler implements IQueryHandler<GetExamHistoryQuery> {
+export class GetExamHistoryHandler
+  implements IQueryHandler<GetExamHistoryQuery>
+{
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(query: GetExamHistoryQuery) {
@@ -43,20 +46,26 @@ export class GetExamHistoryHandler implements IQueryHandler<GetExamHistoryQuery>
         type: SubmissionType.Exam,
         examId: { not: null },
         // Optional filters for topic/subtopic names
-        ...(topic || subtopic ? {
-          question: {
-            topic: topic ? { name: { contains: topic, mode: 'insensitive' } } : undefined,
-            subtopic: subtopic ? { name: { contains: subtopic, mode: 'insensitive' } } : undefined,
-          }
-        } : {}),
+        ...(topic || subtopic
+          ? {
+              question: {
+                topic: topic
+                  ? { name: { contains: topic, mode: 'insensitive' } }
+                  : undefined,
+                subtopic: subtopic
+                  ? { name: { contains: subtopic, mode: 'insensitive' } }
+                  : undefined,
+              },
+            }
+          : {}),
       },
       include: {
         question: {
           include: {
             topic: true,
             subtopic: true,
-          }
-        }
+          },
+        },
       },
       orderBy: {
         beganAt: 'desc',
@@ -81,24 +90,40 @@ export class GetExamHistoryHandler implements IQueryHandler<GetExamHistoryQuery>
     const examMap = new Map(exams.map((e) => [e.id, e]));
 
     // 3. Process each group to calculate the required metrics
-    const historyEntries: ExamHistoryEntry[] = Array.from(examGroups.entries()).map(([examId, group]) => {
+    const historyEntries: ExamHistoryEntry[] = Array.from(
+      examGroups.entries(),
+    ).map(([examId, group]) => {
       const examInfo = examMap.get(examId);
-      
+
       // Collect unique topic and subtopic names across all questions in this exam attempt
-      const topicNames = [...new Set(group.map(s => s.question.topic.name))];
-      const subtopicNames = [...new Set(group.map(s => s.question.subtopic.name))];
-      
+      const topicNames = [...new Set(group.map((s) => s.question.topic.name))];
+      const subtopicNames = [
+        ...new Set(group.map((s) => s.question.subtopic.name)),
+      ];
+
       // Calculate correctness metrics
-      const correctAnswers = group.reduce((sum, s) => sum + (s.correctAnswersCount || 0), 0);
+      const correctAnswers = group.reduce(
+        (sum, s) => sum + (s.correctAnswersCount || 0),
+        0,
+      );
       const totalQuestions = group.length;
-      
+      const score =
+        totalQuestions > 0
+          ? Math.round((correctAnswers / totalQuestions) * 100)
+          : 0;
+
       // Calculate marks obtained
-      const totalMarksObtained = group.reduce((sum, s) => sum + (s.awardedMarks || 0), 0);
-      
+      const totalMarksObtained = group.reduce(
+        (sum, s) => sum + (s.awardedMarks || 0),
+        0,
+      );
+
       // Calculate time spent (sum of durations of each question submission)
       const totalTimeSpentSeconds = group.reduce((sum, s) => {
         if (s.beganAt && s.endedAt) {
-          return sum + Math.floor((s.endedAt.getTime() - s.beganAt.getTime()) / 1000);
+          return (
+            sum + Math.floor((s.endedAt.getTime() - s.beganAt.getTime()) / 1000)
+          );
         }
         return sum;
       }, 0);
@@ -109,7 +134,8 @@ export class GetExamHistoryHandler implements IQueryHandler<GetExamHistoryQuery>
         topicNames,
         subtopicNames,
         progress: correctAnswers,
-        accuracy: totalQuestions > 0 ? Math.round((correctAnswers / totalQuestions) * 100) : 0,
+        score,
+        grade: this.calculateGrade(score),
         timeSpent: totalTimeSpentSeconds,
         mistakes: totalQuestions - correctAnswers,
         totalMarks: totalMarksObtained,
@@ -123,14 +149,19 @@ export class GetExamHistoryHandler implements IQueryHandler<GetExamHistoryQuery>
       historyEntries.sort((a, b) => b.totalMarks - a.totalMarks);
     } else {
       // Default: recent attempts first
-      historyEntries.sort((a, b) => b.attemptedAt.getTime() - a.attemptedAt.getTime());
+      historyEntries.sort(
+        (a, b) => b.attemptedAt.getTime() - a.attemptedAt.getTime(),
+      );
     }
 
     // 5. Apply pagination
     const currentPage = page || 1;
     const currentLimit = limit || 10;
     const totalCount = historyEntries.length;
-    const paginatedEntries = historyEntries.slice((currentPage - 1) * currentLimit, currentPage * currentLimit);
+    const paginatedEntries = historyEntries.slice(
+      (currentPage - 1) * currentLimit,
+      currentPage * currentLimit,
+    );
 
     return {
       entries: paginatedEntries,
@@ -139,8 +170,35 @@ export class GetExamHistoryHandler implements IQueryHandler<GetExamHistoryQuery>
         page: currentPage,
         limit: currentLimit,
         totalPages: Math.ceil(totalCount / currentLimit),
-      }
+      },
     };
   }
-}
 
+  /**
+   * Calculates the grade based on percentage using GCSE 9-1 grading scale.
+   */
+  private calculateGrade(percentage: number): string {
+    // Grade  |  Approx % Needed
+    // 9      |  82-90+
+    // 8      |  72-81
+    // 7      |  62-71
+    // 6      |  52-61
+    // 5      |  42-51
+    // 4      |  32-41
+    // 3      |  22-31
+    // 2      |  12-21
+    // 1      |  <12 (interpreted as >10 and <12 due to U)
+    // U      |  0-10
+
+    if (percentage >= 82) return '9';
+    if (percentage >= 72) return '8';
+    if (percentage >= 62) return '7';
+    if (percentage >= 52) return '6';
+    if (percentage >= 42) return '5';
+    if (percentage >= 32) return '4';
+    if (percentage >= 22) return '3';
+    if (percentage >= 12) return '2';
+    if (percentage > 10) return '1';
+    return 'U';
+  }
+}
