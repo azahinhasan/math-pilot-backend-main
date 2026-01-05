@@ -310,22 +310,22 @@ export class EvaluatePracticeHandler implements ICommandHandler<EvaluatePractice
         // Includes submission details, AI evaluation, and progress tracking
 
         const formattedResponse = {
-          submission_id: submission.id,
+          submissionId: submission.id,
           questionId,
-          student_id: student.id,
+          studentId: student.id,
           status: submission.status,
           evaluation: aiResponse.evaluation,
-          extracted_text: aiResponse.extracted_text,
+          extractedText: aiResponse.extracted_text,
           hint: aiResponse.hint,
           verdict: aiResponse.verdict,
-          is_correct: isCorrect,
-          is_finished: isFinished,
-          next_step_count: aiResponse.nextStepCount,
-          images_processed: aiResponse.images_processed,
-          total_images: aiResponse.total_images,
+          isCorrect,
+          isFinished,
+          nextStepCount: aiResponse.nextStepCount,
+          imagesProcessed: aiResponse.images_processed,
+          totalImages: aiResponse.total_images,
           chatHistory: aiResponse.chatHistory,
-          began_at: submission.beganAt,
-          ended_at: submission.endedAt,
+          beganAt: submission.beganAt,
+          endedAt: submission.endedAt,
           canvasData: aiResponse.canvas_json,
         };
 
