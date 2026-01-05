@@ -650,5 +650,86 @@ export class ExamsService {
       },
     });
   }
+
+  /**
+   * Get user's exam statuses based on submissions
+   * Returns exam status (graded/submitted) for each exam the user has attempted
+   */
+  async getUserExamStatuses(studentId: string) {
+    this.logger.log(`Fetching exam statuses for student: ${studentId}`);
+
+    // Get all submissions grouped by examId with status aggregation and exam details
+    // All done in a single query with JOIN - no loops needed!
+    const examStatuses = await this.prisma.$queryRaw<
+      Array<{
+        exam_id: string;
+        exam_name: string;
+        exam_type: string;
+        start_time: Date;
+        end_time: Date;
+        total_marks: number;
+        total_submissions: bigint;
+        graded_count: bigint;
+        submitted_count: bigint;
+        in_progress_count: bigint;
+      }>
+    >`
+      SELECT 
+        s."exam_id",
+        e."name" as exam_name,
+        e."type" as exam_type,
+        e."start_time",
+        e."end_time",
+        e."total_marks",
+        COUNT(*) as total_submissions,
+        COUNT(*) FILTER (WHERE s.status = 'Graded') as graded_count,
+        COUNT(*) FILTER (WHERE s.status = 'Submitted') as submitted_count,
+        COUNT(*) FILTER (WHERE s.status = 'InProgress') as in_progress_count
+      FROM "Submission" s
+      INNER JOIN "Exam" e ON s."exam_id" = e."id"
+      WHERE s."student_id" = ${studentId}
+        AND s."exam_id" IS NOT NULL
+        AND s."voided" = false
+      GROUP BY s."exam_id", e."name", e."type", e."start_time", e."end_time", e."total_marks"
+      ORDER BY e."start_time" DESC
+    `;
+
+    // Process the results - just transform the data, no additional queries
+    const results = examStatuses.map((examStat) => {
+      const totalSubmissions = Number(examStat.total_submissions);
+      const gradedCount = Number(examStat.graded_count);
+      const submittedCount = Number(examStat.submitted_count);
+      const inProgressCount = Number(examStat.in_progress_count);
+
+      // Determine exam status: graded if all submissions are graded, otherwise submitted
+      const examStatus: 'graded' | 'submitted' = 
+        gradedCount === totalSubmissions ? 'graded' : 'submitted';
+
+      return {
+        examId: examStat.exam_id,
+        examName: examStat.exam_name,
+        examType: examStat.exam_type,
+        examStatus,
+        totalSubmissions,
+        gradedCount,
+        submittedCount,
+        inProgressCount,
+        startTime: examStat.start_time,
+        endTime: examStat.end_time,
+        totalMarks: examStat.total_marks,
+      };
+    });
+
+    this.logger.log(`Found ${results.length} exams for student ${studentId}`);
+
+    return {
+      status: 'success',
+      data: {
+        studentId,
+        exams: results,
+        totalExams: results.length,
+      },
+    };
+  }
 }
 
