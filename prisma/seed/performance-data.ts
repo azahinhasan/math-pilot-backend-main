@@ -1082,7 +1082,7 @@ async function main() {
               ? 'Correct solution provided'
               : 'Partially correct solution',
             awardedMarks: sub.marks,
-            canvasJson:""
+            canvasData: '',
           },
         });
       }
@@ -1460,7 +1460,7 @@ async function main() {
               ? 'Correct solution provided'
               : 'Partially correct solution',
             awardedMarks: sub.marks,
-            canvasJson:""
+            canvasData: '',
           },
         });
       }
@@ -1611,7 +1611,7 @@ async function main() {
               ? 'Correct answer'
               : 'Incorrect attempt',
             awardedMarks: sub.marks,
-            canvasJson:""
+            canvasData: '',
           },
         });
       }
@@ -1911,7 +1911,7 @@ async function main() {
               ? 'Correct answer'
               : 'Incorrect attempt',
             awardedMarks: sub.marks,
-            canvasJson:""
+            canvasData: '',
           },
         });
       }
@@ -2060,7 +2060,7 @@ async function main() {
             solutionId: solutionBase.id,
             descriptiveSubmittedAnswer: 'Attempted solution',
             awardedMarks: sub.marks,
-            canvasJson:""
+            canvasData: '',
           },
         });
       }
@@ -2080,10 +2080,11 @@ async function main() {
       studentId: student1.id,
       topicId: linearEquationsTopic.id,
       status: SubmissionStatus.Graded,
-      questionsAttempted: 15,      // Increased for completion
-      questionsCorrect: 14,         // 93% accuracy
+      questionsAttempted: 15, // Increased for completion
+      questionsCorrect: 14, // 93% accuracy
       timeSpentInSeconds: 900,
       lastAccessedAt: daysAgo(1),
+      type: 'Exam',
     },
   });
 
@@ -2092,11 +2093,12 @@ async function main() {
       studentId: student1.id,
       topicId: quadraticTopic.id,
       status: SubmissionStatus.Graded,
-      questionsAttempted: 12,      // Increased for completion
-      questionsCorrect: 10,         // 83% accuracy
+      questionsAttempted: 12, // Increased for completion
+      questionsCorrect: 10, // 83% accuracy
       timeSpentInSeconds: 1850,
       isFavorite: true,
       lastAccessedAt: daysAgo(1),
+      type: 'Exam',
     },
   });
 
@@ -2105,10 +2107,11 @@ async function main() {
       studentId: student1.id,
       topicId: trianglesTopic.id,
       status: SubmissionStatus.Graded,
-      questionsAttempted: 10,      // Exactly at minimum
-      questionsCorrect: 9,          // 90% accuracy
+      questionsAttempted: 10, // Exactly at minimum
+      questionsCorrect: 9, // 90% accuracy
       timeSpentInSeconds: 720,
       lastAccessedAt: daysAgo(2),
+      type: 'Exam',
     },
   });
 
@@ -2118,10 +2121,11 @@ async function main() {
       studentId: student1.id,
       topicId: anglesTopic.id,
       status: SubmissionStatus.Graded,
-      questionsAttempted: 7,       // In progress
-      questionsCorrect: 6,          // 86% accuracy
+      questionsAttempted: 7, // In progress
+      questionsCorrect: 6, // 86% accuracy
       timeSpentInSeconds: 420,
       lastAccessedAt: daysAgo(3),
+      type: 'Exam',
     },
   });
 
@@ -2131,10 +2135,11 @@ async function main() {
       studentId: student2.id,
       topicId: linearEquationsTopic.id,
       status: SubmissionStatus.Graded,
-      questionsAttempted: 12,      // Enough attempts
-      questionsCorrect: 9,          // 75% accuracy - just completed!
+      questionsAttempted: 12, // Enough attempts
+      questionsCorrect: 9, // 75% accuracy - just completed!
       timeSpentInSeconds: 950,
       lastAccessedAt: daysAgo(3),
+      type: 'Exam',
     },
   });
 
@@ -2143,11 +2148,12 @@ async function main() {
       studentId: student2.id,
       topicId: quadraticTopic.id,
       status: SubmissionStatus.Graded,
-      questionsAttempted: 10,      // At minimum
-      questionsCorrect: 5,          // 50% accuracy - not completed
+      questionsAttempted: 10, // At minimum
+      questionsCorrect: 5, // 50% accuracy - not completed
       timeSpentInSeconds: 1471,
       isFavorite: true,
       lastAccessedAt: daysAgo(3),
+      type: 'Exam',
     },
   });
 
@@ -2156,10 +2162,11 @@ async function main() {
       studentId: student2.id,
       topicId: anglesTopic.id,
       status: SubmissionStatus.Graded,
-      questionsAttempted: 8,       // In progress
-      questionsCorrect: 4,          // 50% accuracy
+      questionsAttempted: 8, // In progress
+      questionsCorrect: 4, // 50% accuracy
       timeSpentInSeconds: 650,
       lastAccessedAt: daysAgo(4),
+      type: 'Exam',
     },
   });
 
@@ -2169,10 +2176,11 @@ async function main() {
       studentId: student3.id,
       topicId: linearEquationsTopic.id,
       status: SubmissionStatus.Graded,
-      questionsAttempted: 10,      // Enough attempts
-      questionsCorrect: 3,          // 30% accuracy - not completed
+      questionsAttempted: 10, // Enough attempts
+      questionsCorrect: 3, // 30% accuracy - not completed
       timeSpentInSeconds: 1215,
       lastAccessedAt: daysAgo(6),
+      type: 'Exam',
     },
   });
 
@@ -2181,10 +2189,11 @@ async function main() {
       studentId: student3.id,
       topicId: quadraticTopic.id,
       status: SubmissionStatus.Graded,
-      questionsAttempted: 8,       // In progress
-      questionsCorrect: 1,          // 12.5% accuracy - struggling
+      questionsAttempted: 8, // In progress
+      questionsCorrect: 1, // 12.5% accuracy - struggling
       timeSpentInSeconds: 1380,
       lastAccessedAt: daysAgo(9),
+      type: 'Exam',
     },
   });
 
@@ -2193,10 +2202,11 @@ async function main() {
       studentId: student3.id,
       topicId: anglesTopic.id,
       status: SubmissionStatus.Graded,
-      questionsAttempted: 5,       // Few attempts
-      questionsCorrect: 1,          // 20% accuracy
+      questionsAttempted: 5, // Few attempts
+      questionsCorrect: 1, // 20% accuracy
       timeSpentInSeconds: 520,
       lastAccessedAt: daysAgo(10),
+      type: 'Exam',
     },
   });
 

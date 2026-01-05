@@ -228,7 +228,7 @@ export class ExamsService {
         solutionId,
         descriptiveSubmittedAnswer: descriptiveData.descriptiveSubmittedAnswer || null,
         solutionImageUrl: descriptiveData.solutionImageUrl || null,
-        canvasJson: descriptiveData.canvasJson || {},
+        canvasData: descriptiveData.canvasData || {},
         hint: descriptiveData.hint || null,
         chatHistory: descriptiveData.chatHistory || null,
         isCorrect: false, // Will be updated during evaluation

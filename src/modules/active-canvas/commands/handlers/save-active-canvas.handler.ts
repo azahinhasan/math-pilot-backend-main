@@ -9,8 +9,8 @@ export class SaveActiveCanvasHandler
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(command: SaveActiveCanvasCommand) {
-    const { questionId, clerkId, hint, canvasJson } = command;
-    console.log(questionId, clerkId, hint, canvasJson);
+    const { questionId, clerkId, hint, canvasData } = command;
+    console.log(questionId, clerkId, hint, canvasData);
 
     try {
       const user = await this.prisma.auth.findUnique({
@@ -35,7 +35,7 @@ export class SaveActiveCanvasHandler
           },
           data: {
             hint,
-            canvasJson,
+            canvasData,
           },
         });
         return {
@@ -49,7 +49,7 @@ export class SaveActiveCanvasHandler
           questionId,
           userId: user.id,
           hint,
-          canvasJson,
+          canvasData,
         },
       });
 

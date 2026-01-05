@@ -24,21 +24,22 @@ export class PracticeModeController {
     @UploadedFiles(
       new ParseFilePipe({
         validators: [
-          new FileTypeValidator({ fileType: '.(png|jpeg|jpg)' }),
+          // new FileTypeValidator({ fileType: /image\/(png|jpeg|jpg)/ }),
         ],
       }),
     ) images: Array<Express.Multer.File>,
   ) {
-    const parsedCanvasData = JSON.parse(evaluatePracticeDto.canvas_data);
+    const parsedCanvasData = JSON.parse(evaluatePracticeDto.canvasData);
 
     return this.commandBus.execute(
       new EvaluatePracticeCommand(
-        evaluatePracticeDto.question_id,
+        evaluatePracticeDto.questionId,
         parsedCanvasData,
         images,
-        evaluatePracticeDto.current_step_count,
+        evaluatePracticeDto.currentStepCount,
         req.user.sub,
-        evaluatePracticeDto.chat_history,
+        parseInt(evaluatePracticeDto.timeSpent),
+        evaluatePracticeDto.chatHistory,
       ),
     );
   }

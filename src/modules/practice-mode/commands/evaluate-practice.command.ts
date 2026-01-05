@@ -3,11 +3,12 @@ import { CanvasDataItem } from '../dto/evaluate-practice.dto';
 
 export class EvaluatePracticeCommand implements ICommand {
   constructor(
-    public readonly question_id: string,
-    public readonly canvas_data: CanvasDataItem[],
+    public readonly questionId: string,
+    public readonly canvasData: string,
     public readonly files: Express.Multer.File[],
-    public readonly current_step_count: string,
+    public readonly currentStepCount: string,
     public readonly clerkId: string,
-    public readonly chat_history?: string,
+    public readonly timeSpent: number,
+    public readonly chatHistory?: string,
   ) {}
 }

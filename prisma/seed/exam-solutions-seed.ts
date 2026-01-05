@@ -138,7 +138,7 @@ async function main() {
           submissionId: submission.id,
           solutionId: solutionBase.id,
           descriptiveSubmittedAnswer: `Student's solution: ${solutionText}`,
-          canvasJson: {},
+          canvasData: "",
           isCorrect: true,
           awardedMarks: question.totalMarks || 1,
           verdict: 'correct'

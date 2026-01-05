@@ -160,7 +160,15 @@ export class GetTopicsByModuleHandler implements IQueryHandler<GetTopicsByModule
       page,
       limit,
       totalCount,
-      data: topicsWithProgress,
+      data: {
+        topics: topicsWithProgress,
+        progress: {
+          completedTopics: 0,
+          inProgressTopics: 0,
+          streak: authData?.student?.currentStreak || 0,
+          totalTimeSpent: 0,
+        },
+      },
     };
   }
 }
