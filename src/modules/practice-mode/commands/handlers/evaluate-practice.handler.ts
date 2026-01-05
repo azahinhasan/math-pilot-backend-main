@@ -202,17 +202,16 @@ export class EvaluatePracticeHandler implements ICommandHandler<EvaluatePractice
 
         // Update or create StudentTopicDetails for tracking student progress per topic
         // Check if this question was already attempted (has a submitted submission)
-        const previousSubmission = await this.prisma.submission.findFirst({
+        const previousSubmission = await this.prisma.submission.count({
           where: {
             studentId: student.id,
             questionId: questionId,
             type: 'Practice',
-            status: 'Submitted',
             voided: false,
           },
         });
 
-        const isFirstAttempt = !previousSubmission;
+        const isFirstAttempt = previousSubmission === 0;
 
         const existingTopicDetails =
           await this.prisma.studentTopicDetails.findFirst({
@@ -282,9 +281,9 @@ export class EvaluatePracticeHandler implements ICommandHandler<EvaluatePractice
           // Only increment counts if this is the first attempt at this question
           if (isFirstAttempt) {
             updateData.questionsAttempted = { increment: 1 };
-            if (isCorrect) {
-              updateData.questionsCorrect = { increment: 1 };
-            }
+          }
+          if (isCorrect) {
+            updateData.questionsCorrect = { increment: 1 };
           }
 
           await this.prisma.studentTopicDetails.update({

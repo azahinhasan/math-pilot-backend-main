@@ -52,7 +52,7 @@ export class PracticeModeController {
   @Post('try-again')
   async tryAgain(@Body() tryAgainDto: TryAgainDto, @Req() req) {
     return this.commandBus.execute(
-      new TryAgainCommand(tryAgainDto.question_id, req.user.sub),
+      new TryAgainCommand(tryAgainDto.questionId, req.user.sub),
     );
   }
 }
