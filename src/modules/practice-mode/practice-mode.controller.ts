@@ -1,4 +1,17 @@
-import { Body, Controller, FileTypeValidator, Get, ParseFilePipe, Post, Param, UploadedFiles, UseInterceptors, UseGuards, Req } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  FileTypeValidator,
+  Get,
+  ParseFilePipe,
+  Post,
+  Param,
+  UploadedFiles,
+  UseInterceptors,
+  UseGuards,
+  Req,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { EvaluatePracticeDto } from './dto/evaluate-practice.dto';
@@ -22,14 +35,33 @@ export class PracticeModeController {
   async evaluatePractice(
     @Body() evaluatePracticeDto: EvaluatePracticeDto,
     @Req() req,
-    @UploadedFiles(
-      new ParseFilePipe({
-        validators: [
-          // new FileTypeValidator({ fileType: /image\/(png|jpeg|jpg)/ }),
-        ],
-      }),
-    ) images: Array<Express.Multer.File>,
+    @UploadedFiles() images: Array<Express.Multer.File>,
   ) {
+    if (!images || images.length === 0) {
+      throw new Error('At least one image is required');
+    }
+
+    const allowedMimeTypes = ['image/png', 'image/jpeg', 'image/jpg'];
+    const maxFileSize = 20 * 1024 * 1024; // 20MB
+
+    for (const image of images) {
+      if (!allowedMimeTypes.includes(image.mimetype)) {
+        throw new InternalServerErrorException(
+          `Invalid file type: ${image.mimetype}. Allowed types: ${allowedMimeTypes.join(', ')}`,
+        );
+      }
+
+      if (image.size > maxFileSize) {
+        throw new InternalServerErrorException(
+          `File size exceeds limit. Maximum allowed: ${maxFileSize / (1024 * 1024)}MB`,
+        );
+      }
+
+      if (!image.buffer || image.buffer.length === 0) {
+        throw new InternalServerErrorException('Invalid file: empty buffer');
+      }
+    }
+
     const parsedCanvasData = JSON.parse(evaluatePracticeDto.canvasData);
 
     return this.commandBus.execute(
@@ -47,7 +79,9 @@ export class PracticeModeController {
 
   @Get('submissions/:questionId')
   async getSubmissions(@Param('questionId') questionId: string, @Req() req) {
-    return this.queryBus.execute(new GetSubmissionsQuery(questionId, req.user.sub));
+    return this.queryBus.execute(
+      new GetSubmissionsQuery(questionId, req.user.sub),
+    );
   }
 
   @Post('try-again')
@@ -61,6 +95,8 @@ export class PracticeModeController {
   async getModuleStatistics(@Param('moduleId') moduleId: string, @Req() req) {
     const clerkId = req.user.sub;
 
-    return this.queryBus.execute(new GetModuleStatisticsQuery(moduleId, clerkId));
+    return this.queryBus.execute(
+      new GetModuleStatisticsQuery(moduleId, clerkId),
+    );
   }
 }

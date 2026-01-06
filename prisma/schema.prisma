@@ -62,7 +62,7 @@ enum SubmissionType {
 enum SubmissionStatus {
   InProgress
   Submitted
-  Graded
+  Graded // Graded == Completed
 }
 
 enum ReviewStatus {

@@ -137,174 +137,178 @@ export class EvaluatePracticeHandler implements ICommandHandler<EvaluatePractice
         }
 
         // Determine correctness and completion status from AI response
-
         const isCorrect = aiResponse.verdict === 'correct';
         const isFinished = aiResponse.is_finished === true;
 
-        // Check if there's an existing InProgress submission for this question
-        let submission = await this.prisma.submission.findFirst({
-          where: {
-            studentId: student.id,
-            questionId,
-            type: 'Practice',
-            status: 'InProgress',
-            voided: false,
-          },
-          orderBy: {
-            beganAt: 'desc',
-          },
-        });
-
-        // If no InProgress submission exists, or if this submission is finished, create a new one
-        if (!submission) {
-          submission = await this.prisma.submission.create({
-            data: {
+        // Execute all database operations in a transaction
+        const submission = await this.prisma.$transaction(async (tx) => {
+          // Check if there's an existing InProgress submission for this question
+          let submission = await tx.submission.findFirst({
+            where: {
               studentId: student.id,
               questionId,
               type: 'Practice',
-              status: isFinished ? 'Submitted' : 'InProgress',
-              beganAt: new Date(),
-              endedAt: isFinished ? new Date() : null,
+              status: 'InProgress',
+              voided: false,
+            },
+            orderBy: {
+              beganAt: 'desc',
             },
           });
-        } else {
-          submission = await this.prisma.submission.update({
-            where: { id: submission.id },
+
+          // If no InProgress submission exists, or if this submission is finished, create a new one
+          if (!submission) {
+            submission = await tx.submission.create({
+              data: {
+                studentId: student.id,
+                questionId,
+                type: 'Practice',
+                status: isFinished ? 'Graded' : 'InProgress',
+                beganAt: new Date(),
+                endedAt: isFinished ? new Date() : null,
+              },
+            });
+          } else {
+            submission = await tx.submission.update({
+              where: { id: submission.id },
+              data: {
+                status: isFinished ? 'Graded' : 'InProgress',
+                endedAt: new Date(),
+              },
+            });
+          }
+
+          // Delete the active canvas for this question if submission submitted
+          await tx.activeCanvas.deleteMany({
+            where: {
+              questionId: questionId,
+            },
+          });
+
+          // Store the submitted descriptive answer with AI evaluation results
+          // Includes extracted text, canvas data, verdict, hint, and chat history
+          await tx.submittedDescriptive.create({
             data: {
-              status: isFinished ? 'Submitted' : 'InProgress',
-              endedAt: new Date(),
+              submissionId: submission.id,
+              solutionId: solutionBase.id,
+              descriptiveSubmittedAnswer: aiResponse.extracted_text,
+              isCorrect: isCorrect,
+              hint: aiResponse.hint,
+              chatHistory: aiResponse.chatHistory,
+              verdict: aiResponse.verdict,
+              canvasData: canvasData,
             },
           });
-        }
 
-        // Delete the active canvas for this question if submission submitted
-        await this.prisma.activeCanvas.deleteMany({
-          where: {
-            questionId: questionId,
-          },
-        });
-
-        // Store the submitted descriptive answer with AI evaluation results
-        // Includes extracted text, canvas data, verdict, hint, and chat history
-
-        await this.prisma.submittedDescriptive.create({
-          data: {
-            submissionId: submission.id,
-            solutionId: solutionBase.id,
-            descriptiveSubmittedAnswer: aiResponse.extracted_text,
-            isCorrect: isCorrect,
-            hint: aiResponse.hint,
-            chatHistory: aiResponse.chatHistory,
-            verdict: aiResponse.verdict,
-            canvasData: canvasData,
-          },
-        });
-
-        // Update or create StudentTopicDetails for tracking student progress per topic
-        // Check if this question was already attempted (has a submitted submission)
-        const previousSubmission = await this.prisma.submission.count({
-          where: {
-            studentId: student.id,
-            questionId: questionId,
-            type: 'Practice',
-            voided: false,
-          },
-        });
-
-        const isFirstAttempt = previousSubmission === 0;
-
-        const existingTopicDetails =
-          await this.prisma.studentTopicDetails.findFirst({
+          // Update or create StudentTopicDetails for tracking student progress per topic
+          // Check if this question was already attempted (has a submitted submission)
+          const previousSubmission = await tx.submission.count({
             where: {
               studentId: student.id,
-              topicId: question.topicId,
+              questionId: questionId,
               type: 'Practice',
+              voided: false,
             },
           });
+          console.log(previousSubmission, 'previousSubmission');
 
-        // Get total practice questions for this topic
-        const totalPracticeQuestions = await this.prisma.question.count({
-          where: {
-            topicId: question.topicId,
-            questionFor: 'Practice',
-            voided: false,
-          },
-        });
+          const existingTopicDetails =
+            await tx.studentTopicDetails.findFirst({
+              where: {
+                studentId: student.id,
+                topicId: question.topicId,
+                type: 'Practice',
+              },
+            });
 
-        // Get all correct submissions for this topic
-        const correctSubmissions = await this.prisma.submission.findMany({
-          where: {
-            studentId: student.id,
-            question: {
+          // Get total practice questions for this topic
+          const totalPracticeQuestions = await tx.question.count({
+            where: {
               topicId: question.topicId,
               questionFor: 'Practice',
+              voided: false,
             },
-            type: 'Practice',
-            status: 'Submitted',
-            voided: false,
-          },
-          include: {
-            submittedDescriptives: true,
-          },
-        });
-
-        // Count unique questions with correct answers
-        const uniqueCorrectQuestions = new Set(
-          correctSubmissions
-            .filter((sub) =>
-              sub.submittedDescriptives.some((desc) => desc.isCorrect),
-            )
-            .map((sub) => sub.questionId),
-        );
-
-        // Add current question if it's correct and finished
-        if (isCorrect && isFinished) {
-          uniqueCorrectQuestions.add(questionId);
-        }
-
-        const correctQuestionsCount = uniqueCorrectQuestions.size;
-
-        // Determine status: Submitted only if all practice questions are correct
-        const topicStatus =
-          correctQuestionsCount >= totalPracticeQuestions
-            ? 'Submitted'
-            : 'InProgress';
-
-        if (existingTopicDetails) {
-          // Update existing record
-          const updateData: any = {
-            timeSpentInSeconds: { increment: timeSpent || 0 },
-            lastAccessedAt: new Date(),
-            status: topicStatus,
-          };
-
-          // Only increment counts if this is the first attempt at this question
-          if (isFirstAttempt) {
-            updateData.questionsAttempted = { increment: 1 };
-          }
-          if (isCorrect) {
-            updateData.questionsCorrect = { increment: 1 };
-          }
-
-          await this.prisma.studentTopicDetails.update({
-            where: { id: existingTopicDetails.id },
-            data: updateData,
           });
-        } else {
-          // Create new record
-          await this.prisma.studentTopicDetails.create({
-            data: {
+
+          // Get all correct submissions for this topic
+          const correctSubmissions = await tx.submission.findMany({
+            where: {
               studentId: student.id,
-              topicId: question.topicId,
+              question: {
+                topicId: question.topicId,
+                questionFor: 'Practice',
+              },
               type: 'Practice',
-              questionsAttempted: isFirstAttempt ? 1 : 0,
-              questionsCorrect: isCorrect ? 1 : 0,
-              timeSpentInSeconds: timeSpent || 0,
+              voided: false,
+            },
+            include: {
+              submittedDescriptives: true,
+            },
+          });
+
+          // Count unique questions with correct answers
+          const uniqueCorrectQuestions = new Set(
+            correctSubmissions
+              .filter(
+                (sub) =>
+                  sub.submittedDescriptives.some((desc) => desc.isCorrect) &&
+                  sub.status === 'Graded',
+              )
+              .map((sub) => sub.questionId),
+          );
+
+          const uniqueAttempts = new Set(
+            correctSubmissions.map((sub) => sub.questionId)
+          );
+
+          // Add current question if it's correct and finished
+          if (isCorrect && isFinished) {
+            uniqueCorrectQuestions.add(questionId);
+          }
+
+          const correctQuestionsCount = uniqueCorrectQuestions.size;
+
+          // Determine status: Graded only if all practice questions are correct
+          const topicStatus =
+            correctQuestionsCount >= totalPracticeQuestions
+              ? 'Graded'
+              : 'InProgress';
+
+          if (existingTopicDetails) {
+            // Update existing record
+            const updateData: any = {
+              timeSpentInSeconds: { increment: timeSpent || 0 },
               lastAccessedAt: new Date(),
               status: topicStatus,
-            },
-          });
-        }
+              questionsAttempted: uniqueAttempts.size,
+            };
+
+            if (isCorrect) {
+              updateData.questionsCorrect = { increment: 1 };
+            }
+
+            await tx.studentTopicDetails.update({
+              where: { id: existingTopicDetails.id },
+              data: updateData,
+            });
+          } else {
+            // Create new record
+            await tx.studentTopicDetails.create({
+              data: {
+                studentId: student.id,
+                topicId: question.topicId,
+                type: 'Practice',
+                questionsAttempted: 1,
+                questionsCorrect: isCorrect ? 1 : 0,
+                timeSpentInSeconds: timeSpent || 0,
+                lastAccessedAt: new Date(),
+                status: topicStatus,
+              },
+            });
+          }
+
+          return submission;
+        });
 
         // Format the response to return to the client
         // Includes submission details, AI evaluation, and progress tracking

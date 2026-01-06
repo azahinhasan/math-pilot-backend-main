@@ -68,7 +68,7 @@ export class GetModuleStatisticsHandler implements IQueryHandler<GetModuleStatis
 
       topicStatusMap.set(detail.topicId, detail.status);
 
-      if (detail.status === SubmissionStatus.Submitted) {
+      if (detail.status === SubmissionStatus.Graded) {
         completedTopics++;
       } else if (detail.status === SubmissionStatus.InProgress) {
         inProgressTopics++;
