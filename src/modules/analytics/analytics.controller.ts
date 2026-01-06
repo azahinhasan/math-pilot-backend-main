@@ -379,7 +379,7 @@ export class AnalyticsController {
     }
   }
 
-  @Get('dashboard')
+  @Get('progress-dashboard')
   @UseGuards(ClerkAuthGuard)
   async getDashboardAnalytics(
     @Req() req,
@@ -529,4 +529,3 @@ export class AnalyticsController {
     }
   }
 }
-
