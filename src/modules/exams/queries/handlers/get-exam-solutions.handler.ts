@@ -9,9 +9,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
  */
 @Injectable()
 @QueryHandler(GetExamSolutionsQuery)
-export class GetExamSolutionsHandler
-  implements IQueryHandler<GetExamSolutionsQuery>
-{
+export class GetExamSolutionsHandler implements IQueryHandler<GetExamSolutionsQuery> {
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(query: GetExamSolutionsQuery) {
@@ -62,10 +60,37 @@ export class GetExamSolutionsHandler
       .filter((qs) => qs.question) // Ensure there's a question record linked to the question set
       .map((qs) => {
         const question = qs.question!; // Safe assertion after filter
+        const solutionBase = question.solutionBases[0]; // Assuming single solution base active
+
+        let type = 'Unknown';
+        if (solutionBase) {
+          if (solutionBase.solutionMCQs?.length > 0) {
+            const mcqs = solutionBase.solutionMCQs;
+            const hasTrue = mcqs.some(
+              (m) => m.optionText.trim().toUpperCase() === 'TRUE',
+            );
+            const hasFalse = mcqs.some(
+              (m) => m.optionText.trim().toUpperCase() === 'FALSE',
+            );
+
+            if (mcqs.length === 2 && hasTrue && hasFalse) {
+              type = 'Boolean';
+            } else {
+              type = 'MCQ';
+            }
+          } else if (solutionBase.solutionMatchingPairs?.length > 0) {
+            type = 'Matching';
+          } else if (solutionBase.solutionDescriptives?.length > 0) {
+            const desc = solutionBase.solutionDescriptives[0];
+            type = desc.isInputCanvases ? 'Descriptive' : 'ShortAnswer';
+          }
+        }
+
         return {
           questionId: qs.questionId,
           serialNo: qs.serialNo,
           name: question.name,
+          type,
           questionText: question.questionText,
           // solutionBases contains the actual answers/marking schemes
           solutions: question.solutionBases,
@@ -81,4 +106,3 @@ export class GetExamSolutionsHandler
     };
   }
 }
-
