@@ -35,6 +35,9 @@ enum AgeLevelName {
 
 enum Subject {
   Mathematics
+  Physics
+  Chemistry
+  Biology
 }
 
 enum ContentBy {
