@@ -23,6 +23,7 @@ import { GetProgressAnalyticsQuery } from '../users/queries/get-progress-analyti
 import { GetDashboardAnalyticsDto } from '../users/dto/get-dashboard-analytics.dto';
 import { GetDashboardAnalyticsQuery } from '../users/queries/get-dashboard-analytics.query';
 import { GetSubjectProgressQuery } from '../users/queries/get-subject-progress.query';
+import { GetSubjectsProgressQuery } from '../users/queries/get-subjects-progress.query';
 import { GetSubjectPerformanceQuery } from '../users/queries/get-subject-performance.query';
 
 @Controller('analytics')
@@ -447,6 +448,38 @@ export class AnalyticsController {
       }
       throw new InternalServerErrorException(
         `Failed to fetch dashboard analytics: ${error.message}`,
+      );
+    }
+  }
+
+  @Get('subjects-progress')
+  @UseGuards(ClerkAuthGuard)
+  async getSubjectsProgress(@Req() req) {
+    try {
+      const clerkId = req.user.sub;
+      const auth = await this.queryBus.execute(new GetUserQuery(clerkId));
+
+      if (!auth.student) {
+        throw new HttpException(
+          'User is not a student',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
+      const result = await this.queryBus.execute(
+        new GetSubjectsProgressQuery(auth.student.id),
+      );
+
+      return {
+        message: 'Subjects progress retrieved successfully',
+        data: result,
+      };
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        `Failed to fetch subjects progress: ${error.message}`,
       );
     }
   }
