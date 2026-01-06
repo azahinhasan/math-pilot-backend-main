@@ -12,15 +12,17 @@ export interface ExamHistoryEntry {
   examId: string;
   examName: string;
   topicNames: string[];
-  subtopicNames: string[];
-  progress: number; // Count of correct answers across all questions in this exam
+  subject: string;
+  testType: string;
+  // subtopicNames: string[];
+  // progress: number; // Count of correct answers across all questions in this exam
   score: number; // Percentage of correct answers (0-100)
-  timeSpent: number; // Total duration of the attempt in seconds
-  mistakes: number; // Count of incorrect answers
-  totalMarks: number; // Sum of awarded marks across all questions
-  maxMarks: number; // Maximum possible marks defined for the exam
   grade: string; // Grade based on percentage (GCSE 9-1)
   attemptedAt: Date; // Timestamp indicating when the attempt began
+  // timeSpent: number; // Total duration of the attempt in seconds
+  // mistakes: number; // Count of incorrect answers
+  // totalMarks: number; // Sum of awarded marks across all questions
+  // maxMarks: number; // Maximum possible marks defined for the exam
 }
 
 /**
@@ -29,9 +31,7 @@ export interface ExamHistoryEntry {
  * Handles grouping, calculation of metrics, filtering, sorting, and pagination.
  */
 @QueryHandler(GetExamHistoryQuery)
-export class GetExamHistoryHandler
-  implements IQueryHandler<GetExamHistoryQuery>
-{
+export class GetExamHistoryHandler implements IQueryHandler<GetExamHistoryQuery> {
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(query: GetExamHistoryQuery) {
@@ -64,6 +64,7 @@ export class GetExamHistoryHandler
           include: {
             topic: true,
             subtopic: true,
+            module: true,
           },
         },
       },
@@ -97,9 +98,12 @@ export class GetExamHistoryHandler
 
       // Collect unique topic and subtopic names across all questions in this exam attempt
       const topicNames = [...new Set(group.map((s) => s.question.topic.name))];
-      const subtopicNames = [
-        ...new Set(group.map((s) => s.question.subtopic.name)),
-      ];
+      // const subtopicNames = [
+      //   ...new Set(group.map((s) => s.question.subtopic.name)),
+      // ];
+
+      // Assuming one common subject for all questions in the exam
+      const subject = group[0]?.question?.module?.subject || 'Unknown';
 
       // Calculate correctness metrics
       const correctAnswers = group.reduce(
@@ -131,22 +135,42 @@ export class GetExamHistoryHandler
       return {
         examId,
         examName: examInfo?.name || 'Unknown Exam',
+        subject,
+        testType: examInfo?.type || 'Unknown',
         topicNames,
-        subtopicNames,
-        progress: correctAnswers,
+        // subtopicNames,
+        // progress: correctAnswers,
+        attemptedAt: group[0].beganAt, // Using the first question's start time as the attempt timestamp
         score,
         grade: this.calculateGrade(score),
-        timeSpent: totalTimeSpentSeconds,
-        mistakes: totalQuestions - correctAnswers,
-        totalMarks: totalMarksObtained,
-        maxMarks: examInfo?.totalMarks || 0,
-        attemptedAt: group[0].beganAt, // Using the first question's start time as the attempt timestamp
+        // timeSpent: totalTimeSpentSeconds,
+        // mistakes: totalQuestions - correctAnswers,
+        // totalMarks: totalMarksObtained,
+        // maxMarks: examInfo?.totalMarks || 0,
       };
     });
 
     // 4. Apply sorting
-    if (sortBy === ExamHistorySortBy.MARKS) {
-      historyEntries.sort((a, b) => b.totalMarks - a.totalMarks);
+    if (sortBy === ExamHistorySortBy.SCORE) {
+      historyEntries.sort((a, b) => b.score - a.score);
+    } else if (sortBy === ExamHistorySortBy.GRADE) {
+      const gradeOrder: Record<string, number> = {
+        '9': 9,
+        '8': 8,
+        '7': 7,
+        '6': 6,
+        '5': 5,
+        '4': 4,
+        '3': 3,
+        '2': 2,
+        '1': 1,
+        U: 0,
+      };
+      historyEntries.sort((a, b) => {
+        const gradeA = gradeOrder[a.grade] ?? -1;
+        const gradeB = gradeOrder[b.grade] ?? -1;
+        return gradeB - gradeA;
+      });
     } else {
       // Default: recent attempts first
       historyEntries.sort(
