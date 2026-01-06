@@ -7,6 +7,7 @@ import { EvaluatePracticeCommand } from './commands/evaluate-practice.command';
 import { TryAgainCommand } from './commands/try-again.command';
 import { GetSubmissionsQuery } from './queries/get-submissions.query';
 import { ClerkAuthGuard } from 'src/clerk-auth-guard';
+import { GetModuleStatisticsQuery } from './queries/get-module-statistics.query';
 
 @Controller('practice')
 @UseGuards(ClerkAuthGuard)
@@ -54,5 +55,12 @@ export class PracticeModeController {
     return this.commandBus.execute(
       new TryAgainCommand(tryAgainDto.questionId, req.user.sub),
     );
+  }
+
+  @Get('statistics/:moduleId')
+  async getModuleStatistics(@Param('moduleId') moduleId: string, @Req() req) {
+    const clerkId = req.user.sub;
+
+    return this.queryBus.execute(new GetModuleStatisticsQuery(moduleId, clerkId));
   }
 }

@@ -6,6 +6,7 @@ import { ModulesController } from './modules.controller';
 import { CreateModuleHandler } from './commands/handlers/create-module.handler';
 import { DeleteModuleHandler } from './commands/handlers/delete-module.handler';
 import { GetModulesBySubjectHandler } from './queries/handlers/get-modules-by-subject.handler';
+import { GetModuleStatisticsHandler } from '../practice-mode/queries/handlers/get-module-statistics.handler';
 
 @Module({
   imports: [CqrsModule, ConfigModule, PrismaModule],
@@ -14,6 +15,7 @@ import { GetModulesBySubjectHandler } from './queries/handlers/get-modules-by-su
     CreateModuleHandler,
     DeleteModuleHandler,
     GetModulesBySubjectHandler,
+    GetModuleStatisticsHandler,
   ],
 })
 export class ModulesModule {}
