@@ -1,4 +1,17 @@
-import { Body, Controller, FileTypeValidator, Get, ParseFilePipe, Post, Param, UploadedFiles, UseInterceptors, UseGuards, Req } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  FileTypeValidator,
+  Get,
+  ParseFilePipe,
+  Post,
+  Param,
+  UploadedFiles,
+  UseInterceptors,
+  UseGuards,
+  Req,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { EvaluatePracticeDto } from './dto/evaluate-practice.dto';
@@ -7,6 +20,7 @@ import { EvaluatePracticeCommand } from './commands/evaluate-practice.command';
 import { TryAgainCommand } from './commands/try-again.command';
 import { GetSubmissionsQuery } from './queries/get-submissions.query';
 import { ClerkAuthGuard } from 'src/clerk-auth-guard';
+import { GetModuleStatisticsQuery } from './queries/get-module-statistics.query';
 
 @Controller('practice')
 @UseGuards(ClerkAuthGuard)
@@ -21,37 +35,68 @@ export class PracticeModeController {
   async evaluatePractice(
     @Body() evaluatePracticeDto: EvaluatePracticeDto,
     @Req() req,
-    @UploadedFiles(
-      new ParseFilePipe({
-        validators: [
-          new FileTypeValidator({ fileType: '.(png|jpeg|jpg)' }),
-        ],
-      }),
-    ) images: Array<Express.Multer.File>,
+    @UploadedFiles() images: Array<Express.Multer.File>,
   ) {
-    const parsedCanvasData = JSON.parse(evaluatePracticeDto.canvas_data);
+    if (!images || images.length === 0) {
+      throw new Error('At least one image is required');
+    }
+
+    const allowedMimeTypes = ['image/png', 'image/jpeg', 'image/jpg'];
+    const maxFileSize = 20 * 1024 * 1024; // 20MB
+
+    for (const image of images) {
+      if (!allowedMimeTypes.includes(image.mimetype)) {
+        throw new InternalServerErrorException(
+          `Invalid file type: ${image.mimetype}. Allowed types: ${allowedMimeTypes.join(', ')}`,
+        );
+      }
+
+      if (image.size > maxFileSize) {
+        throw new InternalServerErrorException(
+          `File size exceeds limit. Maximum allowed: ${maxFileSize / (1024 * 1024)}MB`,
+        );
+      }
+
+      if (!image.buffer || image.buffer.length === 0) {
+        throw new InternalServerErrorException('Invalid file: empty buffer');
+      }
+    }
+
+    const parsedCanvasData = JSON.parse(evaluatePracticeDto.canvasData);
 
     return this.commandBus.execute(
       new EvaluatePracticeCommand(
-        evaluatePracticeDto.question_id,
+        evaluatePracticeDto.questionId,
         parsedCanvasData,
         images,
-        evaluatePracticeDto.current_step_count,
+        evaluatePracticeDto.currentStepCount,
         req.user.sub,
-        evaluatePracticeDto.chat_history,
+        parseInt(evaluatePracticeDto.timeSpent),
+        evaluatePracticeDto.chatHistory,
       ),
     );
   }
 
   @Get('submissions/:questionId')
   async getSubmissions(@Param('questionId') questionId: string, @Req() req) {
-    return this.queryBus.execute(new GetSubmissionsQuery(questionId, req.user.sub));
+    return this.queryBus.execute(
+      new GetSubmissionsQuery(questionId, req.user.sub),
+    );
   }
 
   @Post('try-again')
   async tryAgain(@Body() tryAgainDto: TryAgainDto, @Req() req) {
     return this.commandBus.execute(
-      new TryAgainCommand(tryAgainDto.question_id, req.user.sub),
+      new TryAgainCommand(tryAgainDto.questionId, req.user.sub),
+    );
+  }
+
+  @Get('statistics/:moduleId')
+  async getModuleStatistics(@Param('moduleId') moduleId: string, @Req() req) {
+    const clerkId = req.user.sub;
+
+    return this.queryBus.execute(
+      new GetModuleStatisticsQuery(moduleId, clerkId),
     );
   }
 }

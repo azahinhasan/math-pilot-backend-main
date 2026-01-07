@@ -62,7 +62,7 @@ enum SubmissionType {
 enum SubmissionStatus {
   InProgress
   Submitted
-  Graded
+  Graded // Graded == Completed
 }
 
 enum ReviewStatus {
@@ -394,7 +394,7 @@ model SubmittedDescriptive {
   solutionId                 String   @map("solution_id")
   descriptiveSubmittedAnswer String?  @map("descriptive_submitted_answer")
   solutionImageUrl           String?  @map("solution_image_url")
-  canvasJson                 Json     @map("canvas_json")
+  canvasData                 String   @map("canvas_data")
   isCorrect                  Boolean  @default(false) @map("is_correct")
   awardedMarks               Int?     @map("awarded_marks")
   hint                       String?  @map("hint")
@@ -533,7 +533,7 @@ model SubmittedMatchingPair {
 model ActiveCanvas {
   id         String  @id @default(uuid())
   hint       String?
-  canvasJson String  @map("canvas_json")
+  canvasData String  @map("canvas_data")
   userId     String  @map("user_id")
   questionId String  @map("question_id")
 
@@ -566,7 +566,7 @@ model History {
   hint          String?
   verdict       Boolean?
   outdated      Boolean?
-  canvasJson    String?  @map("canvas_json")
+  canvasData    String?  @map("canvas_data")
   userId        String   @map("user_id")
   questionId    String?  @map("question_id")
   moduleId      String?  @map("module_id")
@@ -620,18 +620,20 @@ model QuestionLevel {
 }
 
 model StudentTopicDetails {
-  id                  String            @id @default(uuid())
-  studentId           String            @map("student_id")
-  topicId             String            @map("topic_id")
-  status              SubmissionStatus?
-  questionsAttempted  Int?              @map("questions_attempted")
-  questionsCorrect    Int?              @map("questions_correct")
-  isFavorite          Boolean           @default(false) @map("is_favorite")
-  timeSpentInSeconds  Int               @default(0) @map("time_spent_in_seconds")
-  aiGeneratedNotesUrl String?           @map("ai_generated_notes_url")
-  lastAccessedAt      DateTime?         @map("last_accessed_at")
-  createdAt           DateTime          @default(now()) @map("created_at")
-  updatedAt           DateTime          @updatedAt @map("updated_at")
+  id                 String            @id @default(uuid())
+  studentId          String            @map("student_id")
+  topicId            String            @map("topic_id")
+  status             SubmissionStatus?
+  questionsAttempted Int?              @map("questions_attempted")
+  questionsCorrect   Int?              @map("questions_correct")
+  type               SubmissionType
+
+  isFavorite          Boolean   @default(false) @map("is_favorite")
+  timeSpentInSeconds  Int       @default(0) @map("time_spent_in_seconds")
+  aiGeneratedNotesUrl String?   @map("ai_generated_notes_url")
+  lastAccessedAt      DateTime? @map("last_accessed_at")
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt           DateTime  @updatedAt @map("updated_at")
 
   student Student @relation(fields: [studentId], references: [id])
   topic   Topic   @relation(fields: [topicId], references: [id])

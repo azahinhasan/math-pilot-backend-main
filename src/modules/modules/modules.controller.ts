@@ -14,6 +14,7 @@ import { CreateModuleDto } from './dto/create-module.dto';
 import { CreateModuleCommand } from './commands/create-module.command';
 import { DeleteModuleCommand } from './commands/delete-module.command';
 import { GetModulesBySubjectQuery } from './queries/get-modules-by-subject.query';
+import { GetModuleStatisticsQuery } from '../practice-mode/queries/get-module-statistics.query';
 import { Subject } from '@prisma/client';
 import { ClerkAuthGuard } from 'src/clerk-auth-guard';
 
@@ -58,5 +59,7 @@ export class ModulesController {
 
     return this.queryBus.execute(new GetModulesBySubjectQuery(subject,clerkId));
   }
+
+
 }
 

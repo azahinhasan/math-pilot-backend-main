@@ -41,7 +41,7 @@ export class DescriptiveSubmissionDataDto {
 
   @IsObject()
   @IsOptional()
-  canvasJson?: any;
+  canvasData?: any;
 
   @IsString()
   @IsOptional()
