@@ -1,4 +1,13 @@
-import { Body, Controller, Get, Post, Query, Req, UseGuards, Param } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Query,
+  Req,
+  UseGuards,
+  Param,
+} from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { CreateExamDto } from './dto/create-exam.dto';
 import { CreateExamCommand } from './commands/create-exam.command';
@@ -11,6 +20,8 @@ import { GetExamHistoryDto } from './dto/get-exam-history.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { SubmitTestDto } from './dto/submit-test.dto';
 import { SubmitTestCommand } from './commands/submit-test.command';
+import { ExamsService } from './exams.service';
+import { GetMockPastPapersQuery } from './queries/get-mock-past-papers.query';
 
 /**
  * Controller for managing Exam-related operations, including creation and historical retrieval.
@@ -21,6 +32,7 @@ export class ExamsController {
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
     private readonly prisma: PrismaService,
+    private readonly examsService: ExamsService,
   ) {}
 
   /**
@@ -41,6 +53,20 @@ export class ExamsController {
   @UseGuards(ClerkAuthGuard)
   async createMockExam(@Body() dto: CreateMockExamDto) {
     return this.commandBus.execute(new CreateMockExamCommand(dto));
+  }
+
+  /**
+   * GET /exams/mock/past-papers
+   * Lists available past papers for mock exams.
+   * Protected by ClerkAuthGuard.
+   */
+  @Get('mock/past-papers')
+  @UseGuards(ClerkAuthGuard)
+  async getMockPastPapers(
+    @Query('moduleId') moduleId?: string,
+    @Query('boardId') boardId?: string,
+  ) {
+    return this.queryBus.execute(new GetMockPastPapersQuery(moduleId, boardId));
   }
 
   /**
@@ -73,8 +99,8 @@ export class ExamsController {
     return this.queryBus.execute(new GetExamHistoryQuery(auth.student.id, dto));
   }
   /**
-   * 
-    * GET /exams/:examId/solutions
+   *
+   * GET /exams/:examId/solutions
    * Retrieves all question solutions for a specific exam.
    * Protected by ClerkAuthGuard.
    ** @param examId The ID of the exam to retrieve solutions for.
@@ -96,6 +122,39 @@ export class ExamsController {
   async submitTest(@Body() dto: SubmitTestDto) {
     return this.commandBus.execute(new SubmitTestCommand(dto));
   }
+
+  /**
+   * GET /exams/status
+   * Get exam statuses for the authenticated user
+   * Returns graded/submitted status for each exam based on all submissions
+   * Protected by ClerkAuthGuard.
+   */
+  @Get('status')
+  @UseGuards(ClerkAuthGuard)
+  async getExamStatuses(@Req() req) {
+    // 1. Extract Clerk ID from the authenticated request's JWT claims
+    const clerkId = req.user.sub;
+
+    // 2. Resolve the student record associated with this Clerk user
+    const auth = await this.prisma.auth.findUnique({
+      where: { clerkId },
+      include: { student: true },
+    });
+
+    // If no student record is found, return empty result
+    if (!auth || !auth.student) {
+      return {
+        status: 'success',
+        message: 'Student record not found for this user',
+        data: {
+          studentId: null,
+          exams: [],
+          totalExams: 0,
+        },
+      };
+    }
+
+    // 3. Get exam statuses from service
+    return this.examsService.getUserExamStatuses(auth.student.id);
+  }
 }
-
-
