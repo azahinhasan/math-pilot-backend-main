@@ -35,6 +35,9 @@ enum AgeLevelName {
 
 enum Subject {
   Mathematics
+  Physics
+  Chemistry
+  Biology
 }
 
 enum ContentBy {
@@ -142,9 +145,9 @@ model Student {
   authId          String   @unique @map("auth_id")
   boardAgeLevelId String?  @map("board_age_level_id")
   country         String?
-  currentStreak   Int
-  longestStreak   Int
-  totalXp         Int
+  currentStreak   Int      @default(0)
+  longestStreak   Int      @default(0)
+  totalXp         Int      @default(0)
   lastActivity    DateTime @map("last_activity")
   createdBy       String?  @map("created_by")
   createdAt       DateTime @default(now()) @map("created_at")

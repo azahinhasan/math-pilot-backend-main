@@ -9,19 +9,23 @@ export class GetAgeLevelsHandler implements IQueryHandler<GetAgeLevelsQuery> {
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(query: GetAgeLevelsQuery) {
-    const ageLevels = await this.prisma.boardAgeLevel.findMany({
-      where: {
-        voided: false,
-      },
-      select: {
-        ageLevelName: true,
-      },
-      distinct: ['ageLevelName'],
-    });
+    try {
+      const ageLevels = await this.prisma.boardAgeLevel.findMany({
+        where: {
+          voided: false,
+        },
+        select: {
+          ageLevelName: true,
+        },
+        distinct: ['ageLevelName'],
+      });
 
-    return {
-      message: 'Age levels retrieved successfully',
-      data: ageLevels.map((item) => item.ageLevelName),
-    };
+      return {
+        message: 'Age levels retrieved successfully',
+        data: ageLevels.map((item) => item.ageLevelName),
+      };
+    } catch (error) {
+      throw new Error(`Failed to retrieve age levels: ${error.message}`);
+    }
   }
 }
