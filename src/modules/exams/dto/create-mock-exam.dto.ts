@@ -19,4 +19,7 @@ export class CreateMockExamDto {
 
   @IsString()
   moduleId: string;
+
+  @IsString()
+  boardId: string;
 }

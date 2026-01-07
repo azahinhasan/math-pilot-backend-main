@@ -16,7 +16,8 @@ export class CreateMockExamHandler implements ICommandHandler<CreateMockExamComm
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(command: CreateMockExamCommand) {
-    const { name, questionSetName, year, season, moduleId } = command.payload;
+    const { name, questionSetName, year, season, moduleId, boardId } =
+      command.payload;
 
     // 1. Find the Past Paper based on the provided details
     const pastPaper = await this.prisma.pastPaper.findFirst({
@@ -25,6 +26,7 @@ export class CreateMockExamHandler implements ICommandHandler<CreateMockExamComm
         year,
         season,
         moduleId,
+        boardId,
         voided: false,
       },
       include: {
@@ -37,7 +39,7 @@ export class CreateMockExamHandler implements ICommandHandler<CreateMockExamComm
 
     if (!pastPaper) {
       throw new BadRequestException(
-        `No Past Paper found for Name: ${questionSetName}, Year: ${year}, Season: ${season}, Module: ${moduleId}`,
+        `No Past Paper found for Name: ${questionSetName}, Year: ${year}, Season: ${season}, Module: ${moduleId}, Board: ${boardId}`,
       );
     }
 

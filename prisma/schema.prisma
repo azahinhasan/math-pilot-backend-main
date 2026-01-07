@@ -173,6 +173,7 @@ model BoardAgeLevel {
   subtopics      Subtopic[]
   goalLevels     GoalLevel[]
   questionLevels QuestionLevel[]
+  pastPapers     PastPaper[]
 
   @@unique([boardName, ageLevelName])
 }
@@ -501,11 +502,13 @@ model PastPaper {
   timeLimit     Int?     @map("time_limit")
   markSchemeUrl String?  @map("mark_scheme_url")
   moduleId      String   @map("module_id")
+  boardId       String   @map("board_id")
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @updatedAt @map("updated_at")
   voided        Boolean  @default(false)
 
   module       Module        @relation(fields: [moduleId], references: [id])
+  board        BoardAgeLevel @relation(fields: [boardId], references: [id])
   questionSets QuestionSet[]
 }
 
