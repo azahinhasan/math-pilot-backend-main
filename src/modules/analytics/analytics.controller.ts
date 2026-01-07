@@ -452,7 +452,7 @@ export class AnalyticsController {
     }
   }
 
-  @Get('subjects-progress')
+  @Get('subject-wise-progress')
   @UseGuards(ClerkAuthGuard)
   async getSubjectsProgress(@Req() req) {
     try {
