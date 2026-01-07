@@ -34,13 +34,13 @@ interface SubjectPerformanceResponse {
   studentId: string;
   studentName: string;
   overallPerformance: {
-    testQuestionsAttempted: number;
-    testQuestionsCorrect: number;
-    totalMarksObtained: number;
-    totalMarksPossible: number;
-    accuracyPercentage: number;
+    // testQuestionsAttempted: number;
+    // testQuestionsCorrect: number;
+    // totalMarksObtained: number;
+    // totalMarksPossible: number;
+    // accuracyPercentage: number;
     performancePercentage: number;
-    averageScore: number;
+    // averageScore: number;
   };
   subjects: SubjectPerformance[];
   dateRange: {
@@ -52,9 +52,7 @@ interface SubjectPerformanceResponse {
 // ==================== Handler ====================
 
 @QueryHandler(GetSubjectPerformanceQuery)
-export class GetSubjectPerformanceHandler
-  implements IQueryHandler<GetSubjectPerformanceQuery>
-{
+export class GetSubjectPerformanceHandler implements IQueryHandler<GetSubjectPerformanceQuery> {
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(
@@ -263,22 +261,22 @@ export class GetSubjectPerformanceHandler
       studentId: student.id,
       studentName: student.fullName,
       overallPerformance: {
-        testQuestionsAttempted: overallAttempted,
-        testQuestionsCorrect: overallCorrect,
-        totalMarksObtained: overallMarksObtained,
-        totalMarksPossible: overallMarksPossible,
-        accuracyPercentage:
-          overallAttempted > 0
-            ? Math.round((overallCorrect / overallAttempted) * 100)
-            : 0,
+        // testQuestionsAttempted: overallAttempted,
+        // testQuestionsCorrect: overallCorrect,
+        // totalMarksObtained: overallMarksObtained,
+        // totalMarksPossible: overallMarksPossible,
+        // accuracyPercentage:
+        //   overallAttempted > 0
+        //     ? Math.round((overallCorrect / overallAttempted) * 100)
+        //     : 0,
         performancePercentage:
           overallMarksPossible > 0
             ? Math.round((overallMarksObtained / overallMarksPossible) * 100)
             : 0,
-        averageScore:
-          overallAttempted > 0
-            ? Math.round((overallMarksObtained / overallAttempted) * 100) / 100
-            : 0,
+        // averageScore:
+        //   overallAttempted > 0
+        //     ? Math.round((overallMarksObtained / overallAttempted) * 100) / 100
+        //     : 0,
       },
       subjects,
       dateRange: {
@@ -288,4 +286,3 @@ export class GetSubjectPerformanceHandler
     };
   }
 }
-

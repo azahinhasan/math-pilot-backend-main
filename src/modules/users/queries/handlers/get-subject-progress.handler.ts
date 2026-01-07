@@ -6,7 +6,7 @@ import { QuestionFor, Subject } from '@prisma/client';
 
 // ==================== Interfaces ====================
 
-interface ModuleProgress {
+interface ModuleProgressStats {
   moduleId: string;
   moduleName: string;
   totalPracticeQuestions: number;
@@ -16,13 +16,23 @@ interface ModuleProgress {
   timeSpentInSeconds: number;
 }
 
+interface ModuleProgress {
+  moduleId: string;
+  moduleName: string;
+  // totalPracticeQuestions: number;
+  // attemptedPracticeQuestions: number;
+  // completedPracticeQuestions: number;
+  progressPercentage: number;
+  // timeSpentInSeconds: number;
+}
+
 interface SubjectProgress {
   subject: Subject;
-  totalPracticeQuestions: number;
-  attemptedPracticeQuestions: number;
-  completedPracticeQuestions: number;
+  // totalPracticeQuestions: number;
+  // attemptedPracticeQuestions: number;
+  // completedPracticeQuestions: number;
   progressPercentage: number;
-  timeSpentInSeconds: number;
+  // timeSpentInSeconds: number;
   modules: ModuleProgress[];
 }
 
@@ -30,9 +40,9 @@ interface SubjectProgressResponse {
   studentId: string;
   studentName: string;
   overallProgress: {
-    totalPracticeQuestions: number;
-    attemptedPracticeQuestions: number;
-    completedPracticeQuestions: number;
+    // totalPracticeQuestions: number;
+    // attemptedPracticeQuestions: number;
+    // completedPracticeQuestions: number;
     progressPercentage: number;
   };
   subjects: SubjectProgress[];
@@ -45,9 +55,7 @@ interface SubjectProgressResponse {
 // ==================== Handler ====================
 
 @QueryHandler(GetSubjectProgressQuery)
-export class GetSubjectProgressHandler
-  implements IQueryHandler<GetSubjectProgressQuery>
-{
+export class GetSubjectProgressHandler implements IQueryHandler<GetSubjectProgressQuery> {
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(
@@ -119,7 +127,7 @@ export class GetSubjectProgressHandler
     });
 
     // Group by subject and module
-    const subjectMap = new Map<Subject, Map<string, ModuleProgress>>();
+    const subjectMap = new Map<Subject, Map<string, ModuleProgressStats>>();
 
     // Initialize with all available questions
     for (const question of allPracticeQuestions) {
@@ -165,10 +173,7 @@ export class GetSubjectProgressHandler
       moduleAttemptedQuestions.get(moduleId)!.add(questionId);
 
       // Track completed questions (status = Submitted or Graded)
-      if (
-        submission.status === 'Submitted' ||
-        submission.status === 'Graded'
-      ) {
+      if (submission.status === 'Submitted' || submission.status === 'Graded') {
         if (!moduleCompletedQuestions.has(moduleId)) {
           moduleCompletedQuestions.set(moduleId, new Set());
         }
@@ -257,15 +262,23 @@ export class GetSubjectProgressHandler
 
       subjects.push({
         subject: subj,
-        totalPracticeQuestions: subjectTotal,
-        attemptedPracticeQuestions: subjectAttempted,
-        completedPracticeQuestions: subjectCompleted,
+        // totalPracticeQuestions: subjectTotal,
+        // attemptedPracticeQuestions: subjectAttempted,
+        // completedPracticeQuestions: subjectCompleted,
         progressPercentage:
           subjectTotal > 0
             ? Math.round((subjectCompleted / subjectTotal) * 100)
             : 0,
-        timeSpentInSeconds: subjectTimeSpent,
-        modules,
+        // timeSpentInSeconds: subjectTimeSpent,
+        modules: modules.map((m) => ({
+          moduleId: m.moduleId,
+          moduleName: m.moduleName,
+          // totalPracticeQuestions: m.totalPracticeQuestions,
+          // attemptedPracticeQuestions: m.attemptedPracticeQuestions,
+          // completedPracticeQuestions: m.completedPracticeQuestions,
+          progressPercentage: m.progressPercentage,
+          // timeSpentInSeconds: m.timeSpentInSeconds,
+        })),
       });
 
       overallTotalQuestions += subjectTotal;
@@ -277,9 +290,9 @@ export class GetSubjectProgressHandler
       studentId: student.id,
       studentName: student.fullName,
       overallProgress: {
-        totalPracticeQuestions: overallTotalQuestions,
-        attemptedPracticeQuestions: overallAttemptedQuestions,
-        completedPracticeQuestions: overallCompletedQuestions,
+        // totalPracticeQuestions: overallTotalQuestions,
+        // attemptedPracticeQuestions: overallAttemptedQuestions,
+        // completedPracticeQuestions: overallCompletedQuestions,
         progressPercentage:
           overallTotalQuestions > 0
             ? Math.round(
@@ -295,4 +308,3 @@ export class GetSubjectProgressHandler
     };
   }
 }
-

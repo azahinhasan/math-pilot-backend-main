@@ -23,24 +23,62 @@ export class CreateExamHandler implements ICommandHandler<CreateExamCommand> {
     const examType = this.getExamType(type);
     this.validateDifficulty(examType, difficulty);
 
-    const pairs = this.flattenTopicSubtopicPairs(topics);
+    const uniqueTopicIds = this.unique(topics.map((t) => t.topicId));
+    await this.assertTopicsExist(this.prisma, uniqueTopicIds);
+
+    const explicitTopics = topics.filter(
+      (t) => t.subtopicIds && t.subtopicIds.length > 0,
+    );
+    const implicitTopics = topics.filter(
+      (t) => !t.subtopicIds || t.subtopicIds.length === 0,
+    );
+
+    let pairs: TopicSubtopicPair[] = [];
+
+    // 1. Process explicit topic-subtopic pairs
+    if (explicitTopics.length > 0) {
+      const explicitPairs = this.flattenTopicSubtopicPairs(explicitTopics);
+      const explicitSubtopicIds = this.unique(
+        explicitPairs.map((p) => p.subtopicId),
+      );
+
+      await this.assertSubtopicsExistAndBelongToTopics(
+        this.prisma,
+        explicitSubtopicIds,
+        explicitPairs,
+      );
+      pairs.push(...explicitPairs);
+    }
+
+    // 2. Process implicit topics (fetch all subtopics)
+    if (implicitTopics.length > 0) {
+      const implicitTopicIds = this.unique(
+        implicitTopics.map((t) => t.topicId),
+      );
+      const subtopics = await this.prisma.subtopic.findMany({
+        where: { topicId: { in: implicitTopicIds } },
+        select: { id: true, topicId: true },
+      });
+
+      const implicitPairs = subtopics.map((s) => ({
+        topicId: s.topicId,
+        subtopicId: s.id,
+      }));
+      pairs.push(...implicitPairs);
+    }
+
     this.ensurePairsNotEmpty(pairs);
 
-    const uniqueTopicIds = this.unique(topics.map((t) => t.topicId));
     const uniqueSubtopicIds = this.unique(pairs.map((p) => p.subtopicId));
-
-    await this.assertTopicsExist(this.prisma, uniqueTopicIds);
-    await this.assertSubtopicsExistAndBelongToTopics(
-      this.prisma,
-      uniqueSubtopicIds,
-      pairs,
-    );
 
     const { startTime, endTime } = this.computeStartEndTimes(timeLimit);
 
     try {
       const result = await this.prisma.$transaction(async (tx) => {
-        const moduleId = await this.assertSingleModuleForTopics(tx, uniqueTopicIds);
+        const moduleId = await this.assertSingleModuleForTopics(
+          tx,
+          uniqueTopicIds,
+        );
 
         const exam = await tx.exam.create({
           data: {
@@ -64,13 +102,14 @@ export class CreateExamHandler implements ICommandHandler<CreateExamCommand> {
           skipDuplicates: true,
         });
 
-        const selectedQuestionIds = await this.pickRandomQuestionIdsFromSubtopics(
-          tx,
-          uniqueSubtopicIds,
-          questions,
-        );
+        const selectedQuestionIds =
+          await this.pickRandomQuestionIdsFromSubtopics(
+            tx,
+            uniqueSubtopicIds,
+            questions,
+          );
 
-        // Create QuestionSet entries for the exam. 
+        // Create QuestionSet entries for the exam.
         // Note: Using 'serialNo' to match the Prisma schema.
         await tx.questionSet.createMany({
           data: selectedQuestionIds.map((questionId, idx) => ({
@@ -139,10 +178,13 @@ export class CreateExamHandler implements ICommandHandler<CreateExamCommand> {
   }
 
   private flattenTopicSubtopicPairs(
-    topics: { topicId: string; subtopicIds: string[] }[],
+    topics: { topicId: string; subtopicIds?: string[] }[],
   ): TopicSubtopicPair[] {
     return topics.flatMap((t) =>
-      t.subtopicIds.map((subtopicId) => ({ topicId: t.topicId, subtopicId })),
+      (t.subtopicIds || []).map((subtopicId) => ({
+        topicId: t.topicId,
+        subtopicId,
+      })),
     );
   }
 
@@ -166,7 +208,9 @@ export class CreateExamHandler implements ICommandHandler<CreateExamCommand> {
     if (existingTopics.length !== topicIds.length) {
       const found = new Set(existingTopics.map((t) => t.id));
       const missing = topicIds.filter((id) => !found.has(id));
-      throw new BadRequestException(`Unknown topicId(s): ${missing.join(', ')}`);
+      throw new BadRequestException(
+        `Unknown topicId(s): ${missing.join(', ')}`,
+      );
     }
   }
 
