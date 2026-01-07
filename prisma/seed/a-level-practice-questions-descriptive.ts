@@ -7,7 +7,8 @@ const prisma = new PrismaClient();
 
 function removeComments(text: string): string {
   if (!text) return text;
-  return text.replace(/\/\//g, '');
+  return text;
+  //return text.replace(/\/\//g, '');
 }
 
 function normalizeString(str: string): string {
