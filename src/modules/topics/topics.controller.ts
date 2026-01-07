@@ -74,10 +74,14 @@ export class TopicsController {
   }
 
   @Get('my-board')
-  async getTopicsByUserBoard(@Req() req) {
+  async getTopicsByUserBoard(
+    @Req() req,
+    @Query('subject') subject?: string,
+    @Query('paperNumber', new ParseIntPipe({ optional: true })) paperNumber?: number,
+  ) {
     const clerkId = req.user.sub;
 
-    return this.queryBus.execute(new GetTopicsByUserBoardQuery(clerkId));
+    return this.queryBus.execute(new GetTopicsByUserBoardQuery(clerkId, subject, paperNumber));
   }
 
   @Post('subtopics/search')

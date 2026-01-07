@@ -35,6 +35,9 @@ enum AgeLevelName {
 
 enum Subject {
   Mathematics
+  Physics
+  Chemistry
+  Biology
 }
 
 enum ContentBy {
@@ -142,9 +145,9 @@ model Student {
   authId          String   @unique @map("auth_id")
   boardAgeLevelId String?  @map("board_age_level_id")
   country         String?
-  currentStreak   Int
-  longestStreak   Int
-  totalXp         Int
+  currentStreak   Int      @default(0)
+  longestStreak   Int      @default(0)
+  totalXp         Int      @default(0)
   lastActivity    DateTime @map("last_activity")
   createdBy       String?  @map("created_by")
   createdAt       DateTime @default(now()) @map("created_at")
@@ -173,6 +176,7 @@ model BoardAgeLevel {
   subtopics      Subtopic[]
   goalLevels     GoalLevel[]
   questionLevels QuestionLevel[]
+  pastPapers     PastPaper[]
 
   @@unique([boardName, ageLevelName])
 }
@@ -195,6 +199,7 @@ model Module {
   studentSchedules StudentSchedule[]
   questionSets     QuestionSet[]
   histories        History[]
+  pastPapers       PastPaper[]
 
   @@unique([name, subject, boardAgeLevelId])
 }
@@ -492,23 +497,39 @@ model Assignment {
   questionSets QuestionSet[]
 }
 
-model QuestionSet {
+model PastPaper {
   id            String   @id @default(uuid())
-  serialNo      Int?     @map("serial_no")
-  questionId    String?  @map("question_id")
-  examId        String?  @map("exam_id")
-  // homeworkId    String?     @map("homework_id")
-  name          String?
-  year          Int?
-  season        String?
+  name          String
+  year          Int
+  season        String
+  timeLimit     Int?     @map("time_limit")
   markSchemeUrl String?  @map("mark_scheme_url")
   moduleId      String   @map("module_id")
+  boardId       String   @map("board_id")
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @updatedAt @map("updated_at")
   voided        Boolean  @default(false)
 
+  module       Module        @relation(fields: [moduleId], references: [id])
+  board        BoardAgeLevel @relation(fields: [boardId], references: [id])
+  questionSets QuestionSet[]
+}
+
+model QuestionSet {
+  id          String   @id @default(uuid())
+  serialNo    Int?     @map("serial_no")
+  questionId  String?  @map("question_id")
+  examId      String?  @map("exam_id")
+  // homeworkId    String?     @map("homework_id")
+  pastPaperId String?  @map("past_paper_id")
+  moduleId    String   @map("module_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  voided      Boolean  @default(false)
+
   question     Question?   @relation(fields: [questionId], references: [id])
   exam         Exam?       @relation(fields: [examId], references: [id])
+  pastPaper    PastPaper?  @relation(fields: [pastPaperId], references: [id])
   // assignment Assignment? @relation(fields: [homeworkId], references: [id])
   module       Module      @relation(fields: [moduleId], references: [id])
   // homework Assignment? @relation(fields: [homeworkId], references: [id])
