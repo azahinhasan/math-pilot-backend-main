@@ -1,4 +1,13 @@
-import { Body, Controller, Get, Post, Query, Req, UseGuards, Param } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Query,
+  Req,
+  UseGuards,
+  Param,
+} from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { CreateExamDto } from './dto/create-exam.dto';
 import { CreateExamCommand } from './commands/create-exam.command';
@@ -12,6 +21,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { SubmitTestDto } from './dto/submit-test.dto';
 import { SubmitTestCommand } from './commands/submit-test.command';
 import { ExamsService } from './exams.service';
+import { GetMockPastPapersQuery } from './queries/get-mock-past-papers.query';
 
 /**
  * Controller for managing Exam-related operations, including creation and historical retrieval.
@@ -46,6 +56,20 @@ export class ExamsController {
   }
 
   /**
+   * GET /exams/mock/past-papers
+   * Lists available past papers for mock exams.
+   * Protected by ClerkAuthGuard.
+   */
+  @Get('mock/past-papers')
+  @UseGuards(ClerkAuthGuard)
+  async getMockPastPapers(
+    @Query('moduleId') moduleId?: string,
+    @Query('boardId') boardId?: string,
+  ) {
+    return this.queryBus.execute(new GetMockPastPapersQuery(moduleId, boardId));
+  }
+
+  /**
    * GET /exams/history
    * Lists historical entries for tests attempted by the student.
    * Authenticated via Clerk JWT.
@@ -75,8 +99,8 @@ export class ExamsController {
     return this.queryBus.execute(new GetExamHistoryQuery(auth.student.id, dto));
   }
   /**
-   * 
-    * GET /exams/:examId/solutions
+   *
+   * GET /exams/:examId/solutions
    * Retrieves all question solutions for a specific exam.
    * Protected by ClerkAuthGuard.
    ** @param examId The ID of the exam to retrieve solutions for.
@@ -134,5 +158,3 @@ export class ExamsController {
     return this.examsService.getUserExamStatuses(auth.student.id);
   }
 }
-
-

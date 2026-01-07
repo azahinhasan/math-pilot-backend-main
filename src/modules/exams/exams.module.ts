@@ -10,6 +10,7 @@ import { CreateMockExamHandler } from './commands/handlers/create-mock-exam.hand
 import { SubmitTestHandler } from './commands/handlers/submit-test.handler';
 import { GetExamHistoryHandler } from './queries/handlers/get-exam-history.handler';
 import { GetExamSolutionsHandler } from './queries/handlers/get-exam-solutions.handler';
+import { GetMockPastPapersHandler } from './queries/handlers/get-mock-past-papers.handler';
 
 // List of all Command Handlers to be registered as providers
 export const CommandHandlers = [
@@ -19,17 +20,15 @@ export const CommandHandlers = [
 ];
 
 // List of all Query Handlers to be registered as providers
-export const QueryHandlers = [GetExamSolutionsHandler, GetExamHistoryHandler];
+export const QueryHandlers = [
+  GetExamSolutionsHandler,
+  GetExamHistoryHandler,
+  GetMockPastPapersHandler,
+];
 
 @Module({
   imports: [CqrsModule, PrismaModule, HttpModule, ConfigModule],
   controllers: [ExamsController],
-  providers: [
-    ExamsService,
-    ...CommandHandlers,
-    ...QueryHandlers,
-  ],
+  providers: [ExamsService, ...CommandHandlers, ...QueryHandlers],
 })
 export class ExamsModule {}
-
-
