@@ -5,9 +5,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 @QueryHandler(GetModulesBySubjectQuery)
-export class GetModulesBySubjectHandler
-  implements IQueryHandler<GetModulesBySubjectQuery>
-{
+export class GetModulesBySubjectHandler implements IQueryHandler<GetModulesBySubjectQuery> {
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(query: GetModulesBySubjectQuery) {
@@ -19,18 +17,14 @@ export class GetModulesBySubjectHandler
       },
       include: {
         student: {
-          include: {
-            boardAgeLevel: true,
+          select: {
+            boardAgeLevelId: true,
           },
         },
       },
     });
 
-    /* Fallback because student boardAgeLevel may be represented either as a FK (boardAgeLevelId)
-     or as an expanded relation (boardAgeLevel.id) depending on how the auth record was created/loaded. */
-    const studentBoardAgeLevelId =
-      authData?.student?.boardAgeLevelId ??
-      authData?.student?.boardAgeLevel?.id;
+    const studentBoardAgeLevelId = authData?.student?.boardAgeLevelId;
 
     if (!studentBoardAgeLevelId) {
       throw new BadRequestException('No board found for student');

@@ -16,6 +16,7 @@ import { GetDashboardAnalyticsHandler } from './queries/handlers/get-dashboard-a
 import { GetSubjectProgressHandler } from './queries/handlers/get-subject-progress.handler';
 import { GetSubjectPerformanceHandler } from './queries/handlers/get-subject-performance.handler';
 import { UpdateUserConfigHandler } from './commands/handlers/update-user-config.handler';
+import { GetSubjectsProgressHandler } from './queries/handlers/get-subjects-progress.handler';
 
 @Module({
   imports: [CqrsModule, ConfigModule, PrismaModule],
@@ -34,6 +35,7 @@ import { UpdateUserConfigHandler } from './commands/handlers/update-user-config.
     GetSubjectProgressHandler,
     GetSubjectPerformanceHandler,
     UpdateUserConfigHandler,
+    GetSubjectsProgressHandler,
   ],
 })
 export class UsersModule {}

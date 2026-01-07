@@ -3,26 +3,31 @@ import { IsNotEmpty, IsNumber, IsObject, IsOptional, IsString } from 'class-vali
 export class CanvasDataItem {
   @IsNumber()
   @IsNotEmpty()
-  serial_no: number;
+  serialNumber: number;
 
-  @IsObject()
+  @IsString()
   @IsNotEmpty()
-  canvas_json: object;
+  canvasData: string;
 }
 
 export class EvaluatePracticeDto {
   @IsString()
   @IsNotEmpty()
-  question_id: string;
+  questionId: string;
 
   @IsOptional()
-  chat_history?: string;
+  chatHistory?: string;
 
   @IsString()
   @IsNotEmpty()
-  current_step_count: string;
+  currentStepCount: string;
 
   @IsString()
   @IsNotEmpty()
-  canvas_data: string;
+  canvasData: string;
+
+  @IsString()
+  @IsNotEmpty()
+  timeSpent: string;
+  
 }

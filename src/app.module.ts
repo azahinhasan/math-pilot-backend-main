@@ -15,6 +15,7 @@ import { QuestionsModule } from './modules/questions/questions.module';
 import { ActiveCanvasModule } from './modules/active-canvas/active-canvas.module';
 import { HealthModule } from './modules/health/health.module';
 import { AnalyticsModule } from './modules/analytics/analytics.module';
+import { UploadModule } from './modules/upload/upload.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { AnalyticsModule } from './modules/analytics/analytics.module';
     ActiveCanvasModule,
     HealthModule,
     AnalyticsModule,
+    UploadModule,
   ], // Read .env file for environment variables
   controllers: [AppController],
   providers: [AppService],

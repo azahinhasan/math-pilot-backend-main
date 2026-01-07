@@ -11,5 +11,5 @@ export class SaveActiveCanvasDto {
 
   @IsString()
   @IsNotEmpty()
-  canvasJson: string;
+  canvasData: string;
 }

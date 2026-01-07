@@ -155,7 +155,7 @@ async function main() {
               ? 'Complete and correct exam answer'
               : 'Partially correct exam answer with minor errors',
             awardedMarks: awardedMarks,
-            canvasJson:""
+            canvasData:""
           },
         });
       }
@@ -245,7 +245,7 @@ async function main() {
               ? 'Complete and correct exam answer'
               : 'Partially correct exam answer',
             awardedMarks: awardedMarks,
-            canvasJson:""
+            canvasData:""
           },
         });
       }
@@ -344,7 +344,7 @@ async function main() {
               ? 'Thorough homework solution with all steps shown'
               : 'Homework attempt with some errors in methodology',
             awardedMarks: awardedMarks,
-            canvasJson:""
+            canvasData:""
           },
         });
       }
@@ -432,7 +432,7 @@ async function main() {
             solutionId: solutionBase.id,
             descriptiveSubmittedAnswer: 'Well-structured homework solution',
             awardedMarks: awardedMarks,
-            canvasJson:""
+            canvasData:""
           },
         });
       }

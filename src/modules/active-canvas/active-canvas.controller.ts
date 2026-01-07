@@ -30,7 +30,7 @@ export class ActiveCanvasController {
       new SaveActiveCanvasCommand(
         saveActiveCanvasDto.questionId,
         req.user.sub,
-        saveActiveCanvasDto.canvasJson,
+        saveActiveCanvasDto.canvasData,
         saveActiveCanvasDto.hint,
       ),
     );

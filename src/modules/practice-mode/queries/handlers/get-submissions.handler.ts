@@ -52,7 +52,7 @@ export class GetSubmissionsHandler
           select: {
             id: true,
             descriptiveSubmittedAnswer: true,
-            canvasJson: true,
+            canvasData: true,
             isCorrect: true,
             awardedMarks: true,
             hint: true,

@@ -5,8 +5,9 @@ import { Type } from 'class-transformer';
  * Supported sorting options for exam history
  */
 export enum ExamHistorySortBy {
-  MARKS = 'marks',
-  RECENT = 'recent',
+  DATE = 'date',
+  SCORE = 'score',
+  GRADE = 'grade',
 }
 
 /**
@@ -33,7 +34,7 @@ export class GetExamHistoryDto {
    */
   @IsOptional()
   @IsEnum(ExamHistorySortBy)
-  sortBy?: ExamHistorySortBy = ExamHistorySortBy.RECENT;
+  sortBy?: ExamHistorySortBy = ExamHistorySortBy.DATE;
 
   /**
    * Pagination: The page number to retrieve (starts at 1)
@@ -51,4 +52,3 @@ export class GetExamHistoryDto {
   @Type(() => Number)
   limit?: number = 10;
 }
-

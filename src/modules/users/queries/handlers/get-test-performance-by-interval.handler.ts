@@ -9,13 +9,15 @@ interface IntervalPerformance {
   intervalStart: Date;
   intervalEnd: Date;
   intervalLabel: string;
-  weightedMarksPercentage: number;
-  accuracyRatio: number;
-  totalSubmissions: number;
-  totalMarksAttempted: number;
-  totalMarksAwarded: number;
-  questionsFullyCorrect: number;
-  totalQuestions: number;
+  // weightedMarksPercentage: number;
+  // accuracyRatio: number;
+  // totalSubmissions: number;
+  // totalMarksAttempted: number;
+  // totalMarksAwarded: number;
+  // questionsFullyCorrect: number;
+  // totalQuestions: number;
+  performancePercentage: number;
+  progressPercentage: number;
 }
 
 interface TestPerformanceByInterval {
@@ -27,9 +29,7 @@ interface TestPerformanceByInterval {
 }
 
 @QueryHandler(GetTestPerformanceByIntervalQuery)
-export class GetTestPerformanceByIntervalHandler
-  implements IQueryHandler<GetTestPerformanceByIntervalQuery>
-{
+export class GetTestPerformanceByIntervalHandler implements IQueryHandler<GetTestPerformanceByIntervalQuery> {
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(
@@ -212,15 +212,21 @@ export class GetTestPerformanceByIntervalHandler
 
     switch (interval) {
       case 'day':
-        return `${year}-${month}-${day}`;
+        // Return Day Name (e.g., Sun, Mon)
+        return date.toLocaleDateString('en-US', { weekday: 'short' });
       case 'week':
-        const weekEnd = new Date(date);
-        weekEnd.setDate(weekEnd.getDate() + 6);
-        const endMonth = String(weekEnd.getMonth() + 1).padStart(2, '0');
-        const endDay = String(weekEnd.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day} to ${endMonth}-${endDay}`;
+        // ! Might need the following code later on
+        // const weekEnd = new Date(date);
+        // weekEnd.setDate(weekEnd.getDate() + 6);
+        // const endMonth = String(weekEnd.getMonth() + 1).padStart(2, '0');
+        // const endDay = String(weekEnd.getDate()).padStart(2, '0');
+        // return `${year}-${month}-${day} to ${endMonth}-${endDay}`;
+
+        // Return Day Name (e.g., Sun, Mon)
+        return date.toLocaleDateString('en-US', { weekday: 'short' });
       case 'month':
-        return `${year}-${month}`;
+        // Return Month Name (e.g., Jan, Feb)
+        return date.toLocaleDateString('en-US', { month: 'short' });
     }
   }
 
@@ -237,13 +243,15 @@ export class GetTestPerformanceByIntervalHandler
         intervalStart,
         intervalEnd,
         intervalLabel,
-        weightedMarksPercentage: 0,
-        accuracyRatio: 0,
-        totalSubmissions: 0,
-        totalMarksAttempted: 0,
-        totalMarksAwarded: 0,
-        questionsFullyCorrect: 0,
-        totalQuestions: 0,
+        // weightedMarksPercentage: 0,
+        // accuracyRatio: 0,
+        // totalSubmissions: 0,
+        // totalMarksAttempted: 0,
+        // totalMarksAwarded: 0,
+        // questionsFullyCorrect: 0,
+        // totalQuestions: 0,
+        performancePercentage: 0,
+        progressPercentage: 0,
       };
     }
 
@@ -314,19 +322,29 @@ export class GetTestPerformanceByIntervalHandler
     const accuracyRatio =
       totalQuestions > 0 ? questionsFullyCorrect / totalQuestions : 0;
 
+    const performancePercentage =
+      totalMarksAttempted > 0
+        ? (totalMarksAwarded / totalMarksAttempted) * 100
+        : 0;
+
+    const progressPercentage =
+      totalQuestions > 0 ? (questionsFullyCorrect / totalQuestions) * 100 : 0;
+
     return {
       intervalStart,
       intervalEnd,
       intervalLabel,
-      weightedMarksPercentage: parseFloat(
-        (weightedMarksPercentage / 100).toFixed(4),
-      ),
-      accuracyRatio: parseFloat(accuracyRatio.toFixed(4)),
-      totalSubmissions: submissions.length,
-      totalMarksAttempted,
-      totalMarksAwarded,
-      questionsFullyCorrect,
-      totalQuestions,
+      // weightedMarksPercentage: parseFloat(
+      //   (weightedMarksPercentage / 100).toFixed(4),
+      // ),
+      // accuracyRatio: parseFloat(accuracyRatio.toFixed(4)),
+      // totalSubmissions: submissions.length,
+      // totalMarksAttempted,
+      // totalMarksAwarded,
+      // questionsFullyCorrect,
+      // totalQuestions,
+      performancePercentage: parseFloat(performancePercentage.toFixed(2)),
+      progressPercentage: parseFloat(progressPercentage.toFixed(2)),
     };
   }
 }
