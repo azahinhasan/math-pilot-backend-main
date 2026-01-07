@@ -12,43 +12,47 @@ type DbClient = PrismaService | Prisma.TransactionClient;
 
 @Injectable()
 @CommandHandler(CreateMockExamCommand)
-export class CreateMockExamHandler
-  implements ICommandHandler<CreateMockExamCommand>
-{
+export class CreateMockExamHandler implements ICommandHandler<CreateMockExamCommand> {
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(command: CreateMockExamCommand) {
     const { name, questionSetName, year, season, moduleId } = command.payload;
 
-    // Hardcoded time limit as per requirements
-    const timeLimit = 120;
-
-    // Fetch source question sets to find questions and metadata
-    const sourceQuestionSets = await this.prisma.questionSet.findMany({
+    // 1. Find the Past Paper based on the provided details
+    const pastPaper = await this.prisma.pastPaper.findFirst({
       where: {
         name: questionSetName,
         year,
         season,
         moduleId,
-        questionId: { not: null },
+        voided: false,
       },
-      orderBy: { serialNo: 'asc' },
+      include: {
+        questionSets: {
+          where: { questionId: { not: null }, voided: false },
+          orderBy: { serialNo: 'asc' },
+        },
+      },
     });
 
-    if (sourceQuestionSets.length === 0) {
+    if (!pastPaper) {
       throw new BadRequestException(
-        `No question sets found for Question Set: ${questionSetName}, Year: ${year}, Season: ${season}, Module: ${moduleId}`,
+        `No Past Paper found for Name: ${questionSetName}, Year: ${year}, Season: ${season}, Module: ${moduleId}`,
       );
     }
 
-    // Extract Question IDs
-    const questionIds = sourceQuestionSets.map((qs) => qs.questionId!);
-    const uniqueQuestionIds = [...new Set(questionIds)];
+    if (pastPaper.questionSets.length === 0) {
+      throw new BadRequestException(
+        `Past Paper found but has no questions linked. ID: ${pastPaper.id}`,
+      );
+    }
 
-    // Derive metadata from the first question set entry
-    // (Assuming consistent metadata across the set as per requirements)
-    const metadataSource = sourceQuestionSets[0];
-    const markSchemeUrl = metadataSource.markSchemeUrl ?? undefined;
+    // Use time limit from Past Paper or default to 120 minutes
+    const timeLimit = pastPaper.timeLimit || 120;
+
+    // Extract Question IDs
+    const questionIds = pastPaper.questionSets.map((qs) => qs.questionId!);
+    const uniqueQuestionIds = [...new Set(questionIds)];
 
     const { startTime, endTime } = this.computeStartEndTimes(timeLimit);
 
@@ -64,7 +68,7 @@ export class CreateMockExamHandler
 
         const exam = await tx.exam.create({
           data: {
-            name: name?.trim() ? name.trim() : 'Mock Exam - Mathematics',
+            name: name?.trim() ? name.trim() : `Mock Exam - ${questionSetName}`,
             startTime,
             endTime,
             type: ExamType.Mock,
@@ -77,16 +81,13 @@ export class CreateMockExamHandler
         });
 
         // Create QuestionSet entries for the mock exam.
-        // Note: Using 'serialNo' to match the Prisma schema.
+        // Linking to the original PastPaper and Questions.
         await tx.questionSet.createMany({
           data: uniqueQuestionIds.map((questionId, idx) => ({
             examId: exam.id,
             questionId,
             serialNo: idx + 1,
-            name: questionSetName,
-            year,
-            season,
-            markSchemeUrl,
+            pastPaperId: pastPaper.id,
             moduleId,
           })),
           skipDuplicates: true,
