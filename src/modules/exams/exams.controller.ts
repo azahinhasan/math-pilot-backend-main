@@ -11,6 +11,7 @@ import { GetExamHistoryDto } from './dto/get-exam-history.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { SubmitTestDto } from './dto/submit-test.dto';
 import { SubmitTestCommand } from './commands/submit-test.command';
+import { ExamsService } from './exams.service';
 
 /**
  * Controller for managing Exam-related operations, including creation and historical retrieval.
@@ -21,6 +22,7 @@ export class ExamsController {
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
     private readonly prisma: PrismaService,
+    private readonly examsService: ExamsService,
   ) {}
 
   /**
@@ -95,6 +97,41 @@ export class ExamsController {
   @UseGuards(ClerkAuthGuard)
   async submitTest(@Body() dto: SubmitTestDto) {
     return this.commandBus.execute(new SubmitTestCommand(dto));
+  }
+
+  /**
+   * GET /exams/status
+   * Get exam statuses for the authenticated user
+   * Returns graded/submitted status for each exam based on all submissions
+   * Protected by ClerkAuthGuard.
+   */
+  @Get('status')
+  @UseGuards(ClerkAuthGuard)
+  async getExamStatuses(@Req() req) {
+    // 1. Extract Clerk ID from the authenticated request's JWT claims
+    const clerkId = req.user.sub;
+
+    // 2. Resolve the student record associated with this Clerk user
+    const auth = await this.prisma.auth.findUnique({
+      where: { clerkId },
+      include: { student: true },
+    });
+
+    // If no student record is found, return empty result
+    if (!auth || !auth.student) {
+      return {
+        status: 'success',
+        message: 'Student record not found for this user',
+        data: {
+          studentId: null,
+          exams: [],
+          totalExams: 0,
+        },
+      };
+    }
+
+    // 3. Get exam statuses from service
+    return this.examsService.getUserExamStatuses(auth.student.id);
   }
 }
 
