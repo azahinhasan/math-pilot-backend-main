@@ -485,6 +485,57 @@ export class AnalyticsController {
   }
 
   /**
+   * GET /api/v1/analytics/subject-progress
+   * Get subject-wise progress for the authenticated student
+   */
+  @Get('subject-progress')
+  @UseGuards(ClerkAuthGuard)
+  async getMySubjectProgress(
+    @Req() req,
+    @Query('subject') subject?: string,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+  ) {
+    try {
+      const clerkId = req.user.sub;
+      const auth = await this.queryBus.execute(new GetUserQuery(clerkId));
+
+      if (!auth.student) {
+        throw new HttpException(
+          'User is not a student',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
+      const studentId = auth.student.id;
+      const parsedStartDate = startDate ? new Date(startDate) : undefined;
+      const parsedEndDate = endDate ? new Date(endDate) : undefined;
+
+      const result = await this.queryBus.execute(
+        new GetSubjectProgressQuery(
+          studentId,
+          subject,
+          parsedStartDate,
+          parsedEndDate,
+        ),
+      );
+
+      return {
+        success: true,
+        message: 'Subject progress retrieved successfully',
+        data: result,
+      };
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        `Failed to fetch subject progress: ${error.message}`,
+      );
+    }
+  }
+
+  /**
    * GET /api/v1/analytics/subject-progress/:studentId
    * Get subject-wise progress (completion ratio from practice mode)
    */
@@ -519,6 +570,57 @@ export class AnalyticsController {
       }
       throw new InternalServerErrorException(
         `Failed to fetch subject progress: ${error.message}`,
+      );
+    }
+  }
+
+  /**
+   * GET /api/v1/analytics/subject-performance
+   * Get subject-wise performance for the authenticated student
+   */
+  @Get('subject-performance')
+  @UseGuards(ClerkAuthGuard)
+  async getMySubjectPerformance(
+    @Req() req,
+    @Query('subject') subject?: string,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+  ) {
+    try {
+      const clerkId = req.user.sub;
+      const auth = await this.queryBus.execute(new GetUserQuery(clerkId));
+
+      if (!auth.student) {
+        throw new HttpException(
+          'User is not a student',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
+      const studentId = auth.student.id;
+      const parsedStartDate = startDate ? new Date(startDate) : undefined;
+      const parsedEndDate = endDate ? new Date(endDate) : undefined;
+
+      const result = await this.queryBus.execute(
+        new GetSubjectPerformanceQuery(
+          studentId,
+          subject,
+          parsedStartDate,
+          parsedEndDate,
+        ),
+      );
+
+      return {
+        success: true,
+        message: 'Subject performance retrieved successfully',
+        data: result,
+      };
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        `Failed to fetch subject performance: ${error.message}`,
       );
     }
   }
