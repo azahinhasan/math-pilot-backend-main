@@ -45,9 +45,9 @@ export class CreateExamTopicSelectionDto {
   topicId: string;
 
   @IsArray()
-  @ArrayNotEmpty()
   @IsString({ each: true })
-  subtopicIds: string[];
+  @IsOptional()
+  subtopicIds?: string[];
 }
 
 export class CreateExamDto {
