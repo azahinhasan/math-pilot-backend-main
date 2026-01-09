@@ -227,7 +227,7 @@ export class ExamsService {
         submissionId,
         solutionId,
         descriptiveSubmittedAnswer: descriptiveData.descriptiveSubmittedAnswer || null,
-        solutionImageUrl: descriptiveData.solutionImageUrl || null,
+        solutionImageFileName: descriptiveData.solutionImageFileName || null,
         canvasData: descriptiveData.canvasData || {},
         hint: descriptiveData.hint || null,
         chatHistory: descriptiveData.chatHistory || null,
@@ -370,14 +370,14 @@ export class ExamsService {
       }
 
       // Check if solution image exists
-      if (!submittedDescriptive.solutionImageUrl) {
+      if (!submittedDescriptive.solutionImageFileName) {
         await this.handleMissingSolutionImage(submission.id, submittedDescriptive.id);
         return;
       }
 
       // Download image and call Math API
       const evaluateMathApiUrl = this.getEvaluationApiUrl();
-      const imageBuffer = await this.downloadSolutionImage(submittedDescriptive.solutionImageUrl);
+      const imageBuffer = await this.downloadSolutionImage(submittedDescriptive.solutionImageFileName);
       const apiResult = await this.callMathEvaluationAPI(
         evaluateMathApiUrl,
         imageBuffer,
@@ -455,22 +455,22 @@ export class ExamsService {
   /**
    * Download solution image from URL (S3 or regular URL)
    */
-  private async downloadSolutionImage(imageUrl: string): Promise<Buffer> {
-    this.logger.log(`Downloading image from URL: ${imageUrl}`);
+  private async downloadSolutionImage(imageFileName: string): Promise<Buffer> {
+    this.logger.log(`Downloading image from URL: ${imageFileName}`);
 
     // Check if it's an S3 URL
-    if (imageUrl.includes('.s3.') || imageUrl.includes('s3.amazonaws.com')) {
-      return this.downloadFromS3(imageUrl);
+    if (imageFileName.includes('.s3.') || imageFileName.includes('s3.amazonaws.com')) {
+      return this.downloadFromS3(imageFileName);
     } else {
-      return this.downloadFromUrl(imageUrl);
+      return this.downloadFromUrl(imageFileName);
     }
   }
 
   /**
    * Download image from S3 using AWS SDK
    */
-  private async downloadFromS3(imageUrl: string): Promise<Buffer> {
-    const url = new URL(imageUrl);
+  private async downloadFromS3(imageFileName: string): Promise<Buffer> {
+    const url = new URL(imageFileName);
     const key = url.pathname.substring(1);
     
     this.logger.log(`Detected S3 URL, extracting key: ${key}`);
@@ -508,8 +508,8 @@ export class ExamsService {
   /**
    * Download image from regular URL
    */
-  private async downloadFromUrl(imageUrl: string): Promise<Buffer> {
-    const imageResponse = await axios.get(imageUrl, {
+  private async downloadFromUrl(imageFileName: string): Promise<Buffer> {
+    const imageResponse = await axios.get(imageFileName, {
       responseType: 'arraybuffer',
     });
     const buffer = Buffer.from(imageResponse.data);

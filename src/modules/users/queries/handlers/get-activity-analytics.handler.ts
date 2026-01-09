@@ -756,7 +756,7 @@ export class GetActivityAnalyticsHandler
     };
 
     submissionsWithTime.forEach((s) => {
-      const difficulty = s.question?.difficulty_level?.toLowerCase();
+      const difficulty = s.question?.difficultyLevel?.toLowerCase();
       const duration =
         (new Date(s.endedAt).getTime() - new Date(s.beganAt).getTime()) / 60000;
 

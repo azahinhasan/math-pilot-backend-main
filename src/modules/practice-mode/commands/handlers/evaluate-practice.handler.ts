@@ -9,6 +9,8 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
+import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
+import { Readable } from 'stream';
 
 /**
  * Handler for evaluating practice question submissions.
@@ -76,20 +78,93 @@ export class EvaluatePracticeHandler implements ICommandHandler<EvaluatePractice
     // Get the correct answer from the descriptive solution
 
     const descriptiveSolution = solutionBase.solutionDescriptives[0];
-    if (!descriptiveSolution.descriptiveSolution) {
+    if (
+      !descriptiveSolution.descriptiveSolution &&
+      !descriptiveSolution.descriptiveSolutionImage
+    ) {
       throw new NotFoundException(
         'Correct answer for descriptive solution is not set.',
       );
     }
 
     const correctAnswer = descriptiveSolution.descriptiveSolution;
+    const descriptiveSolutionImage =
+      descriptiveSolution.descriptiveSolutionImage;
 
     // Prepare form data for AI evaluation API
     // Includes question text, correct answer, step count, chat history, and images
 
     const formData = new FormData();
     formData.append('question', question.questionText);
-    formData.append('correct_answer', correctAnswer.toString());
+
+    // Handle correct_answer: fetch from S3 if descriptiveSolution is empty but image exists
+    if (!correctAnswer && descriptiveSolutionImage) {
+      // Fetch image from S3
+      const awsAccessKeyId =
+        this.configService.get<string>('AWS_ACCESS_KEY_ID');
+      const awsSecretAccessKey = this.configService.get<string>(
+        'AWS_SECRET_ACCESS_KEY',
+      );
+      const awsRegion = this.configService.get<string>('AWS_REGION');
+      const awsS3Bucket = this.configService.get<string>('AWS_S3_BUCKET');
+
+      if (
+        !awsAccessKeyId ||
+        !awsSecretAccessKey ||
+        !awsRegion ||
+        !awsS3Bucket
+      ) {
+        throw new InternalServerErrorException(
+          'AWS S3 configuration is missing.',
+        );
+      }
+
+      const s3Client = new S3Client({
+        region: awsRegion,
+        credentials: {
+          accessKeyId: awsAccessKeyId,
+          secretAccessKey: awsSecretAccessKey,
+        },
+      });
+
+
+      try {
+        console.log(descriptiveSolutionImage, 'descriptiveSolutionImage');
+        const command = new GetObjectCommand({
+          Bucket: awsS3Bucket,
+          Key: descriptiveSolutionImage, //file name with folder name
+        });
+
+        const response = await s3Client.send(command);
+        const stream = response.Body as Readable;
+
+        // Convert stream to buffer
+        const chunks: Buffer[] = [];
+        for await (const chunk of stream) {
+          chunks.push(Buffer.from(chunk));
+        }
+        const imageBuffer = Buffer.concat(chunks);
+
+        // Append image as file to form data
+        formData.append(
+          'correct_answer',
+          imageBuffer,
+          descriptiveSolutionImage,
+        );
+      } catch (error) {
+        throw new InternalServerErrorException(
+          `Failed to fetch image from S3: ${error.message}`,
+        );
+      }
+    } else if (correctAnswer) {
+      // Use text answer as before
+      formData.append('correct_answer', correctAnswer.toString());
+    } else {
+      throw new NotFoundException(
+        'Correct answer for descriptive solution is not set.',
+      );
+    }
+
     formData.append('current_step_count', currentStepCount);
     if (chatHistory) {
       formData.append('chat_history', chatHistory);
@@ -210,16 +285,14 @@ export class EvaluatePracticeHandler implements ICommandHandler<EvaluatePractice
               voided: false,
             },
           });
-          console.log(previousSubmission, 'previousSubmission');
 
-          const existingTopicDetails =
-            await tx.studentTopicDetails.findFirst({
-              where: {
-                studentId: student.id,
-                topicId: question.topicId,
-                type: 'Practice',
-              },
-            });
+          const existingTopicDetails = await tx.studentTopicDetails.findFirst({
+            where: {
+              studentId: student.id,
+              topicId: question.topicId,
+              type: 'Practice',
+            },
+          });
 
           // Get total practice questions for this topic
           const totalPracticeQuestions = await tx.question.count({
@@ -258,7 +331,7 @@ export class EvaluatePracticeHandler implements ICommandHandler<EvaluatePractice
           );
 
           const uniqueAttempts = new Set(
-            correctSubmissions.map((sub) => sub.questionId)
+            correctSubmissions.map((sub) => sub.questionId),
           );
 
           // Add current question if it's correct and finished

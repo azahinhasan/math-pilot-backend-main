@@ -39,7 +39,8 @@ export class GetMockPastPapersHandler implements IQueryHandler<GetMockPastPapers
       orderBy: [{ year: 'desc' }, { season: 'asc' }, { name: 'asc' }],
     });
 
-    return pastPapers.map((paper) => ({
+
+    const data = pastPapers.map((paper) => ({
       id: paper.id,
       name: paper.name,
       year: paper.year,
@@ -55,5 +56,10 @@ export class GetMockPastPapersHandler implements IQueryHandler<GetMockPastPapers
         : null,
       moduleId: paper.moduleId,
     }));
+
+    return {
+      message:"Mock Past Papers Fetched Successfully",
+      data
+    }
   }
 }
