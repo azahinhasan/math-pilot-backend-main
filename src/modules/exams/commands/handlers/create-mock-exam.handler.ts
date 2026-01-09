@@ -16,18 +16,12 @@ export class CreateMockExamHandler implements ICommandHandler<CreateMockExamComm
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(command: CreateMockExamCommand) {
-    const { name, questionSetName, year, season, moduleId, boardId } =
-      command.payload;
+    const { mockExamId } = command.payload;
 
     // 1. Find the Past Paper based on the provided details
-    const pastPaper = await this.prisma.pastPaper.findFirst({
+    const pastPaper = await this.prisma.pastPaper.findUnique({
       where: {
-        name: questionSetName,
-        year,
-        season,
-        moduleId,
-        boardId,
-        voided: false,
+        id: mockExamId,
       },
       include: {
         questionSets: {
@@ -39,7 +33,7 @@ export class CreateMockExamHandler implements ICommandHandler<CreateMockExamComm
 
     if (!pastPaper) {
       throw new BadRequestException(
-        `No Past Paper found for Name: ${questionSetName}, Year: ${year}, Season: ${season}, Module: ${moduleId}, Board: ${boardId}`,
+        `No Past Paper found for ID: ${mockExamId}`,
       );
     }
 
@@ -68,9 +62,12 @@ export class CreateMockExamHandler implements ICommandHandler<CreateMockExamComm
           uniqueQuestionIds,
         );
 
+        const dateStr = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+        const examName = `${pastPaper.name} - ${dateStr}`;
+
         const exam = await tx.exam.create({
           data: {
-            name: name?.trim() ? name.trim() : `Mock Exam - ${questionSetName}`,
+            name: examName,
             startTime,
             endTime,
             type: ExamType.Mock,
@@ -90,7 +87,7 @@ export class CreateMockExamHandler implements ICommandHandler<CreateMockExamComm
             questionId,
             serialNo: idx + 1,
             pastPaperId: pastPaper.id,
-            moduleId,
+            moduleId: pastPaper.moduleId,
           })),
           skipDuplicates: true,
         });
