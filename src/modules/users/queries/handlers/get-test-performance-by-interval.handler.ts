@@ -21,7 +21,7 @@ interface IntervalPerformance {
 }
 
 interface TestPerformanceByInterval {
-  studentId: string;
+  // studentId: string;
   interval: TimeInterval;
   startDate: Date;
   endDate: Date;
@@ -86,19 +86,23 @@ export class GetTestPerformanceByIntervalHandler implements IQueryHandler<GetTes
       },
     });
 
-    const intervalBuckets = this.groupByInterval(
-      submissions,
-      interval,
-      start,
-      end,
-    );
+    let performanceData: IntervalPerformance[] = [];
 
-    const performanceData = intervalBuckets.map((bucket) =>
-      this.calculateIntervalPerformance(bucket),
-    );
+    if (submissions.length > 0) {
+      const intervalBuckets = this.groupByInterval(
+        submissions,
+        interval,
+        start,
+        end,
+      );
+
+      performanceData = intervalBuckets.map((bucket) =>
+        this.calculateIntervalPerformance(bucket),
+      );
+    }
 
     return {
-      studentId,
+      // studentId,
       interval,
       startDate: start,
       endDate: end,

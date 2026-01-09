@@ -20,19 +20,19 @@ interface ModulePerformance {
 
 interface SubjectPerformance {
   subject: Subject;
-  testQuestionsAttempted: number;
-  testQuestionsCorrect: number;
-  totalMarksObtained: number;
-  totalMarksPossible: number;
-  accuracyPercentage: number;
+  // testQuestionsAttempted: number;
+  // testQuestionsCorrect: number;
+  // totalMarksObtained: number;
+  // totalMarksPossible: number;
+  // accuracyPercentage: number;
   performancePercentage: number;
-  averageScore: number;
-  modules: ModulePerformance[];
+  // averageScore: number;
+  // modules: ModulePerformance[];
 }
 
 interface SubjectPerformanceResponse {
-  studentId: string;
-  studentName: string;
+  // studentId: string;
+  // studentName: string;
   overallPerformance: {
     // testQuestionsAttempted: number;
     // testQuestionsCorrect: number;
@@ -43,10 +43,10 @@ interface SubjectPerformanceResponse {
     // averageScore: number;
   };
   subjects: SubjectPerformance[];
-  dateRange: {
-    startDate: Date;
-    endDate: Date;
-  };
+  // dateRange: {
+  //   startDate: Date;
+  //   endDate: Date;
+  // };
 }
 
 // ==================== Handler ====================
@@ -241,14 +241,14 @@ export class GetSubjectPerformanceHandler implements IQueryHandler<GetSubjectPer
 
       subjects.push({
         subject: subj,
-        testQuestionsAttempted: subjectAttempted,
-        testQuestionsCorrect: subjectCorrect,
-        totalMarksObtained: subjectMarksObtained,
-        totalMarksPossible: subjectMarksPossible,
-        accuracyPercentage,
+        // testQuestionsAttempted: subjectAttempted,
+        // testQuestionsCorrect: subjectCorrect,
+        // totalMarksObtained: subjectMarksObtained,
+        // totalMarksPossible: subjectMarksPossible,
+        // accuracyPercentage,
         performancePercentage,
-        averageScore,
-        modules,
+        // averageScore,
+        // modules,
       });
 
       overallAttempted += subjectAttempted;
@@ -258,8 +258,8 @@ export class GetSubjectPerformanceHandler implements IQueryHandler<GetSubjectPer
     }
 
     return {
-      studentId: student.id,
-      studentName: student.fullName,
+      // studentId: student.id,
+      // studentName: student.fullName,
       overallPerformance: {
         // testQuestionsAttempted: overallAttempted,
         // testQuestionsCorrect: overallCorrect,
@@ -279,10 +279,10 @@ export class GetSubjectPerformanceHandler implements IQueryHandler<GetSubjectPer
         //     : 0,
       },
       subjects,
-      dateRange: {
-        startDate: currentStart,
-        endDate: currentEnd,
-      },
+      // dateRange: {
+      //   startDate: currentStart,
+      //   endDate: currentEnd,
+      // },
     };
   }
 }

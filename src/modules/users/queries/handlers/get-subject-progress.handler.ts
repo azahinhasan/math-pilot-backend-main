@@ -33,12 +33,12 @@ interface SubjectProgress {
   // completedPracticeQuestions: number;
   progressPercentage: number;
   // timeSpentInSeconds: number;
-  modules: ModuleProgress[];
+  // modules: ModuleProgress[];
 }
 
 interface SubjectProgressResponse {
-  studentId: string;
-  studentName: string;
+  // studentId: string;
+  // studentName: string;
   overallProgress: {
     // totalPracticeQuestions: number;
     // attemptedPracticeQuestions: number;
@@ -46,10 +46,10 @@ interface SubjectProgressResponse {
     progressPercentage: number;
   };
   subjects: SubjectProgress[];
-  dateRange: {
-    startDate: Date;
-    endDate: Date;
-  };
+  // dateRange: {
+  //   startDate: Date;
+  //   endDate: Date;
+  // };
 }
 
 // ==================== Handler ====================
@@ -270,15 +270,15 @@ export class GetSubjectProgressHandler implements IQueryHandler<GetSubjectProgre
             ? Math.round((subjectCompleted / subjectTotal) * 100)
             : 0,
         // timeSpentInSeconds: subjectTimeSpent,
-        modules: modules.map((m) => ({
-          moduleId: m.moduleId,
-          moduleName: m.moduleName,
-          // totalPracticeQuestions: m.totalPracticeQuestions,
-          // attemptedPracticeQuestions: m.attemptedPracticeQuestions,
-          // completedPracticeQuestions: m.completedPracticeQuestions,
-          progressPercentage: m.progressPercentage,
-          // timeSpentInSeconds: m.timeSpentInSeconds,
-        })),
+        // modules: modules.map((m) => ({
+        //   moduleId: m.moduleId,
+        //   moduleName: m.moduleName,
+        //   // totalPracticeQuestions: m.totalPracticeQuestions,
+        //   // attemptedPracticeQuestions: m.attemptedPracticeQuestions,
+        //   // completedPracticeQuestions: m.completedPracticeQuestions,
+        //   progressPercentage: m.progressPercentage,
+        //   // timeSpentInSeconds: m.timeSpentInSeconds,
+        // })),
       });
 
       overallTotalQuestions += subjectTotal;
@@ -287,8 +287,8 @@ export class GetSubjectProgressHandler implements IQueryHandler<GetSubjectProgre
     }
 
     return {
-      studentId: student.id,
-      studentName: student.fullName,
+      // studentId: student.id,
+      // studentName: student.fullName,
       overallProgress: {
         // totalPracticeQuestions: overallTotalQuestions,
         // attemptedPracticeQuestions: overallAttemptedQuestions,
@@ -301,10 +301,10 @@ export class GetSubjectProgressHandler implements IQueryHandler<GetSubjectProgre
             : 0,
       },
       subjects,
-      dateRange: {
-        startDate: currentStart,
-        endDate: currentEnd,
-      },
+      // dateRange: {
+      //   startDate: currentStart,
+      //   endDate: currentEnd,
+      // },
     };
   }
 }
