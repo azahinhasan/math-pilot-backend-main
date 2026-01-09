@@ -164,7 +164,7 @@ async function seedPastPapers() {
             serialNo: i,
             contentBy: ContentBy.AI,
             questionFor: QuestionFor.Practice,
-            difficulty_level: DifficultyLevel.Medium,
+            difficultyLevel: DifficultyLevel.Medium,
           },
         });
 

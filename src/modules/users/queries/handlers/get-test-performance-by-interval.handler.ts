@@ -76,7 +76,7 @@ export class GetTestPerformanceByIntervalHandler implements IQueryHandler<GetTes
       include: {
         question: {
           select: {
-            difficulty_level: true,
+            difficultyLevel: true,
             totalMarks: true,
           },
         },
@@ -286,7 +286,7 @@ export class GetTestPerformanceByIntervalHandler implements IQueryHandler<GetTes
     let totalQuestions = submissions.length;
 
     submissions.forEach((submission) => {
-      const difficulty = submission.question?.difficulty_level;
+      const difficulty = submission.question?.difficultyLevel;
       const totalMarks = submission.question?.totalMarks || 0;
       const awardedMarks = submission.awardedMarks || 0;
 

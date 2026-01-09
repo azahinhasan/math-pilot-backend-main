@@ -523,7 +523,7 @@ export class GetProgressAnalyticsHandler
     });
 
     submissions.forEach((s) => {
-      const difficulty = s.question?.difficulty_level;
+      const difficulty = s.question?.difficultyLevel;
       if (difficulty && difficultyData.has(difficulty)) {
         const data = difficultyData.get(difficulty)!;
         data.total++;
@@ -851,13 +851,13 @@ export class GetProgressAnalyticsHandler
     // Current distribution
     const total = submissions.length;
     const easyCount = submissions.filter(
-      (s) => s.question?.difficulty_level === 'Easy',
+      (s) => s.question?.difficultyLevel === 'Easy',
     ).length;
     const mediumCount = submissions.filter(
-      (s) => s.question?.difficulty_level === 'Medium',
+      (s) => s.question?.difficultyLevel === 'Medium',
     ).length;
     const hardCount = submissions.filter(
-      (s) => s.question?.difficulty_level === 'Hard',
+      (s) => s.question?.difficultyLevel === 'Hard',
     ).length;
 
     const currentDistribution = {
@@ -872,7 +872,7 @@ export class GetProgressAnalyticsHandler
 
     // Progression metrics
     const hardSubmissions = submissions.filter(
-      (s) => s.question?.difficulty_level === 'Hard',
+      (s) => s.question?.difficultyLevel === 'Hard',
     );
     const firstHardDate =
       hardSubmissions.length > 0 ? new Date(hardSubmissions[0].beganAt) : null;
@@ -893,7 +893,7 @@ export class GetProgressAnalyticsHandler
     const progressionRate = latestMonthHard - firstMonthHard;
 
     const mediumSubmissions = submissions.filter(
-      (s) => s.question?.difficulty_level === 'Medium',
+      (s) => s.question?.difficultyLevel === 'Medium',
     );
     const mediumAccuracy =
       mediumSubmissions.length > 0
@@ -908,7 +908,7 @@ export class GetProgressAnalyticsHandler
     const easyAccuracy =
       easyCount > 0
         ? (submissions
-            .filter((s) => s.question?.difficulty_level === 'Easy')
+            .filter((s) => s.question?.difficultyLevel === 'Easy')
             .reduce((sum, s) => sum + (s.correctAnswersCount || 0), 0) /
             easyCount) *
           100
@@ -969,7 +969,7 @@ export class GetProgressAnalyticsHandler
       const data = monthMap.get(monthKey)!;
       data.total++;
 
-      const difficulty = s.question?.difficulty_level?.toLowerCase();
+      const difficulty = s.question?.difficultyLevel?.toLowerCase();
       if (difficulty === 'easy') data.easy++;
       else if (difficulty === 'medium') data.medium++;
       else if (difficulty === 'hard') data.hard++;
