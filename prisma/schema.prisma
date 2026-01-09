@@ -267,10 +267,10 @@ model Question {
   timeLimit           Int?        @map("time_limit")
   hint                String?
   explanation         String?
-  givenContext        String?
-  findObjective       String?
+  givenContext        String?     @map("given_context")
+  findObjective       String?     @map("find_objective")
 
-  imageFileName   String?         @map("image-file-name")
+  imageFileName   String?         @map("image_file_name")
   difficultyLevel DifficultyLevel @default(Easy) @map("difficulty_level")
   stepCount       Int             @map("step_count")
   serialNo        Int             @map("serial_no")
@@ -326,6 +326,7 @@ model SolutionMcq {
 model SolutionDescriptive {
   id                       String   @id @default(uuid()) @map("descriptive_id")
   solutionBaseId           String   @unique @map("solution_base_id")
+  // XOR constraint: exactly one of descriptiveSolution OR descriptiveSolutionImage must have a value (not both, not neither)
   descriptiveSolution      String?  @map("descriptive_solution") //correct_ans
   descriptiveSolutionImage String?  @map("descriptive_solution_image")
   markingStepsJson         Json?    @map("marking_steps_json")
