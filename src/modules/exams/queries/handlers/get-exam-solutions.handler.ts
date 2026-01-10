@@ -92,8 +92,17 @@ export class GetExamSolutionsHandler implements IQueryHandler<GetExamSolutionsQu
           name: question.name,
           type,
           questionText: question.questionText,
-          // solutionBases contains the actual answers/marking schemes
-          solutions: question.solutionBases,
+          // Flatten the solutions array to remove the intermediate solutionBase layer
+          solutions: question.solutionBases.flatMap((sb): any[] => {
+            if (sb.solutionMCQs?.length > 0) {
+              return sb.solutionMCQs;
+            } else if (sb.solutionDescriptives?.length > 0) {
+              return sb.solutionDescriptives;
+            } else if (sb.solutionMatchingPairs?.length > 0) {
+              return sb.solutionMatchingPairs;
+            }
+            return [];
+          }),
         };
       });
 
