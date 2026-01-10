@@ -1,18 +1,18 @@
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
-import { GetExamSolutionsQuery } from '../get-exam-solutions.query';
+import { GetExamQuestionsQuery } from '../get-exam-questions.query';
 import { NotFoundException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 /**
- * Handler for the GetExamSolutionsQuery.
- * Retrieves all questions and their solutions associated with an exam through its question sets.
+ * Handler for the GetExamQuestionsQuery.
+ * Retrieves all questions for an exam with solutions modified to hide correct answers.
  */
 @Injectable()
-@QueryHandler(GetExamSolutionsQuery)
-export class GetExamSolutionsHandler implements IQueryHandler<GetExamSolutionsQuery> {
+@QueryHandler(GetExamQuestionsQuery)
+export class GetExamQuestionsHandler implements IQueryHandler<GetExamQuestionsQuery> {
   constructor(private readonly prisma: PrismaService) {}
 
-  async execute(query: GetExamSolutionsQuery) {
+  async execute(query: GetExamQuestionsQuery) {
     const { examId } = query;
 
     // 1. Check if the exam exists
@@ -93,11 +93,22 @@ export class GetExamSolutionsHandler implements IQueryHandler<GetExamSolutionsQu
           type,
           questionText: question.questionText,
           // Flatten the solutions array to remove the intermediate solutionBase layer
+          // and sanitize sensitive fields (e.g. isCorrect)
           solutions: question.solutionBases.flatMap((sb): any[] => {
             if (sb.solutionMCQs?.length > 0) {
-              return sb.solutionMCQs;
+              // Hide isCorrect for MCQ/Boolean
+              return sb.solutionMCQs.map(
+                ({ isCorrect, ...mcqRest }) => mcqRest,
+              );
             } else if (sb.solutionDescriptives?.length > 0) {
-              return sb.solutionDescriptives;
+              // Hide descriptiveSolution and descriptiveSolutionImage for Descriptive/ShortAnswer
+              return sb.solutionDescriptives.map(
+                ({
+                  descriptiveSolution,
+                  descriptiveSolutionImage,
+                  ...descRest
+                }) => descRest,
+              );
             } else if (sb.solutionMatchingPairs?.length > 0) {
               return sb.solutionMatchingPairs;
             }
@@ -107,7 +118,7 @@ export class GetExamSolutionsHandler implements IQueryHandler<GetExamSolutionsQu
       });
 
     return {
-      message: 'Exam solutions retrieved successfully',
+      message: 'Exam questions retrieved successfully',
       examId: exam.id,
       examName: exam.name,
       totalQuestions: questionsWithSolutions.length,
