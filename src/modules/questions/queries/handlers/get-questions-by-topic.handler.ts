@@ -124,8 +124,6 @@ export class GetQuestionsByTopicHandler implements IQueryHandler<GetQuestionsByT
               solutionDescriptives: {
                 select: {
                   id: true,
-                  descriptiveSolution: true,
-                  descriptiveSolutionImage: true,
                   markingStepsJson: true,
                   maxMarks: true,
                   isInputCanvases: true
