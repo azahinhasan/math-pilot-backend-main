@@ -4,6 +4,9 @@ import {
   Req,
   Post,
   Body,
+  Query,
+  ParseIntPipe,
+  DefaultValuePipe,
 } from '@nestjs/common';
 import { CommandBus, QueryBus, } from '@nestjs/cqrs';
 import { GetQuestionsByTopicQuery } from './queries/get-questions-by-topic.query';
@@ -18,11 +21,16 @@ export class QuestionsController {
   constructor(private readonly commandBus: CommandBus, private readonly queryBus: QueryBus) {}
 
   @Get('practice-mode/topic/:topicId')
-  async getQuestionsByTopic(@Param('topicId') topicId: string, @Req() req) {
+  async getQuestionsByTopic(
+    @Param('topicId') topicId: string, 
+    @Req() req,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
+  ) {
     const clerkId = req.user.sub;
 
     return this.queryBus.execute(
-      new GetQuestionsByTopicQuery(topicId, clerkId),
+      new GetQuestionsByTopicQuery(topicId, clerkId, page, limit),
     );
   }
 
