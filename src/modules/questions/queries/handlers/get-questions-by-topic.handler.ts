@@ -86,7 +86,7 @@ export class GetQuestionsByTopicHandler implements IQueryHandler<GetQuestionsByT
           serialNo: true,
           questionText: true,
           questionContentLink: true,
-
+          name:true,
           questionTypeId: true,
           questionFor: true,
           totalMarks: true,
