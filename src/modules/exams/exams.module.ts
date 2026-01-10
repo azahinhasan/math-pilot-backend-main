@@ -9,6 +9,7 @@ import { CreateExamHandler } from './commands/handlers/create-exam.handler';
 import { CreateMockExamHandler } from './commands/handlers/create-mock-exam.handler';
 import { SubmitTestHandler } from './commands/handlers/submit-test.handler';
 import { GetExamHistoryHandler } from './queries/handlers/get-exam-history.handler';
+import { GetExamQuestionsHandler } from './queries/handlers/get-exam-questions.handler';
 import { GetExamSolutionsHandler } from './queries/handlers/get-exam-solutions.handler';
 import { GetMockPastPapersHandler } from './queries/handlers/get-mock-past-papers.handler';
 
@@ -21,6 +22,7 @@ export const CommandHandlers = [
 
 // List of all Query Handlers to be registered as providers
 export const QueryHandlers = [
+  GetExamQuestionsHandler,
   GetExamSolutionsHandler,
   GetExamHistoryHandler,
   GetMockPastPapersHandler,
