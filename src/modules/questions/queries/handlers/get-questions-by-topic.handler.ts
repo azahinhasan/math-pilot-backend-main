@@ -1,26 +1,36 @@
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { GetQuestionsByTopicQuery } from '../get-questions-by-topic.query';
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 @QueryHandler(GetQuestionsByTopicQuery)
-export class GetQuestionsByTopicHandler
-  implements IQueryHandler<GetQuestionsByTopicQuery>
-{
+export class GetQuestionsByTopicHandler implements IQueryHandler<GetQuestionsByTopicQuery> {
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(query: GetQuestionsByTopicQuery) {
-    const { topicId, clerkId } = query;
+    const { topicId, clerkId, page, limit } = query;
 
     const authData = await this.prisma.auth.findUnique({
       where: {
         clerkId,
       },
-      include: {
+      select: {
+        id: true,
+        clerkId: true,
         student: {
-          include: {
-            boardAgeLevel: true,
+          select: {
+            id: true,
+            boardAgeLevelId: true,
+            boardAgeLevel: {
+              select: {
+                id: true,
+              },
+            },
           },
         },
       },
@@ -44,11 +54,12 @@ export class GetQuestionsByTopicHandler
       where: {
         id: topicId,
       },
-      include: {
+      select: {
+        id: true,
+        name: true,
         module: {
           select: {
             boardAgeLevelId: true,
-            voided: true,
           },
         },
       },
@@ -62,41 +73,93 @@ export class GetQuestionsByTopicHandler
       throw new BadRequestException('Topic does not belong to student board');
     }
 
-    const questions = await this.prisma.question.findMany({
-      where: {
-        topicId,
-        voided: false,
-      },
-      include: {
-        questionType: true,
-        solutionBases: {
-          include: {
-            solutionMCQs: {
-              where: {
-                voided: false,
+    const skip = (page - 1) * limit;
+
+    const [questions, totalCount] = await Promise.all([
+      this.prisma.question.findMany({
+        where: {
+          topicId,
+          voided: false,
+        },
+        select: {
+          id: true,
+          serialNo: true,
+          questionText: true,
+          questionContentLink: true,
+
+          questionTypeId: true,
+          questionFor: true,
+          totalMarks: true,
+          timeLimit: true,
+          hint: true,
+          explanation: true,
+          givenContext: true,
+          findObjective: true,
+          imageFileName: true,
+          difficultyLevel: true,
+          stepCount: true,
+
+          questionType: {
+            select: {
+              id: true,
+              name: true,
+              description: true
+            },
+          },
+          solutionBases: {
+            select: {
+              id: true,
+              questionId: true,
+              solutionMCQs: {
+                select: {
+                  id: true,
+                  optionText: true,
+                  isCorrect: true,
+                  voided: true,
+                },
+                where: {
+                  voided: false,
+                },
+              },
+              solutionDescriptives: {
+                select: {
+                  id: true,
+                  descriptiveSolution: true,
+                  descriptiveSolutionImage: true,
+                  markingStepsJson: true,
+                  maxMarks: true,
+                  isInputCanvases: true
+                },
+                where: {
+                  voided: false,
+                },
               },
             },
-            solutionDescriptives: {
-              where: {
-                voided: false,
-              },
+          },
+          submissions: {
+            select: {
+              id: true,
+            },
+            where: {
+              studentId: studentId,
+              status: 'Graded',
             },
           },
         },
-        submissions: {
-          where: {
-            studentId: studentId,
-            status: 'Submitted'
-          },
-          select: {
-            id: true,
-          },
+        orderBy: {
+          serialNo: 'asc',
         },
-      },
-      orderBy: {
-        serialNo: 'asc',
-      },
-    });
+        skip,
+        take: limit,
+      }),
+
+      this.prisma.question.count({
+        where: {
+          topicId,
+          voided: false,
+        },
+      }),
+    ]);
 
     const questionsWithCompletionStatus = questions.map((question) => ({
       ...question,
@@ -108,6 +171,11 @@ export class GetQuestionsByTopicHandler
       message: 'Questions retrieved successfully',
       topicId,
       data: questionsWithCompletionStatus,
+      pagination: {
+        currentPage: page,
+        totalCount,
+        limit,
+      },
     };
   }
 }
