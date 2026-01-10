@@ -124,7 +124,7 @@ export class CreateQuestionDto {
   @IsOptional()
   @IsString()
   @IsUrl()
-  imageUrl?: string;
+  imageFileName?: string;
 
   @IsOptional()
   @IsIn([

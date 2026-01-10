@@ -156,7 +156,7 @@ export class GetPerformanceAnalyticsHandler
         submissionFilter.question.moduleId = moduleId;
       }
       if (difficulty) {
-        submissionFilter.question.difficulty_level = difficulty;
+        submissionFilter.question.difficultyLevel = difficulty;
       }
     }
 
@@ -307,7 +307,7 @@ export class GetPerformanceAnalyticsHandler
     });
 
     completedSubmissions.forEach((s) => {
-      const difficulty = s.question?.difficulty_level;
+      const difficulty = s.question?.difficultyLevel;
       if (difficulty) {
         const stats = difficultyMetrics.get(difficulty);
         if (stats) {
@@ -401,7 +401,7 @@ export class GetPerformanceAnalyticsHandler
     });
 
     submissions.forEach((submission) => {
-      const difficulty = submission.question?.difficulty_level;
+      const difficulty = submission.question?.difficultyLevel;
       if (!difficulty) return;
 
       const stats = difficultyMap.get(difficulty);

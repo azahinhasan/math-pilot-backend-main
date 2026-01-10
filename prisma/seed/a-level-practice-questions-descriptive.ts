@@ -18,7 +18,12 @@ function normalizeString(str: string): string {
 async function main() {
   console.log('Seeding practice questions...');
 
-  const practiceQusPath = path.join(__dirname, 'json', 'dummy', 'Level-A-Math-Question-desc.json');
+  const practiceQusPath = path.join(
+    __dirname,
+    'json',
+    'dummy',
+    'Level-A-Math-Question-desc.json',
+  );
   const practiceQusFile = fs.readFileSync(practiceQusPath, 'utf-8');
   const practiceQusData = JSON.parse(practiceQusFile);
 
@@ -27,7 +32,9 @@ async function main() {
   });
 
   if (!descriptiveQuestionType) {
-    console.error('"Descriptive" question type not found. Please seed question types first.');
+    console.error(
+      '"Descriptive" question type not found. Please seed question types first.',
+    );
     return;
   }
 
@@ -70,7 +77,9 @@ async function main() {
       });
 
       if (!topic) {
-        console.error(`Topic "${tutorialName}" not found for question: ${questionTitle}`);
+        console.error(
+          `Topic "${tutorialName}" not found for question: ${questionTitle}`,
+        );
         continue;
       }
 
@@ -85,7 +94,9 @@ async function main() {
       });
 
       if (!subtopic) {
-        console.error(`Subtopic "${subtopicName}" not found in topic "${tutorialName}" for question: ${questionTitle}`);
+        console.error(
+          `Subtopic "${subtopicName}" not found in topic "${tutorialName}" for question: ${questionTitle}`,
+        );
         continue;
       }
 
@@ -111,8 +122,12 @@ async function main() {
           hint: hint,
           totalMarks: questionData.total_marks || 1,
           timeLimit: questionData.time_limit_in_min || 1,
-          imageUrl: '',
-          difficulty_level: difficultyMap[questionData.question_difficulty] || DifficultyLevel.Easy,
+          imageFileName: questionData.image_file_name
+            ? 'question-images/' + questionData.image_file_name
+            : '',
+          difficultyLevel:
+            difficultyMap[questionData.question_difficulty] ||
+            DifficultyLevel.Easy,
           stepCount: 1,
           serialNo: serialNo++,
           questionTypeId: descriptiveQuestionType.id,
@@ -124,13 +139,20 @@ async function main() {
               solutionDescriptives: {
                 create: {
                   descriptiveSolution: correctAnswer,
+                  descriptiveSolutionImage:
+                    questionData.descriptive_solution_image
+                      ? 'question-solution-images/' +
+                        questionData.descriptive_solution_image
+                      : '',
                 },
               },
             },
           },
         },
       });
-      console.log(`Created question with id: ${newQuestion.id} - ${questionTitle}`);
+      console.log(
+        `Created question with id: ${newQuestion.id} - ${questionTitle}`,
+      );
       createdCount++;
     }
   }

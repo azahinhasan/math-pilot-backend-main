@@ -267,20 +267,20 @@ model Question {
   timeLimit           Int?        @map("time_limit")
   hint                String?
   explanation         String?
-  givenContext        String?
-  findObjective       String?
+  givenContext        String?     @map("given_context")
+  findObjective       String?     @map("find_objective")
 
-  imageUrl         String?         @map("image_url")
-  difficulty_level DifficultyLevel @default(Easy) @map("difficulty_level")
-  stepCount        Int             @map("step_count")
-  serialNo         Int             @map("serial_no")
-  questionTypeId   String          @map("question_type_id")
-  moduleId         String          @map("module_id")
-  topicId          String          @map("topic_id")
-  subtopicId       String          @map("subtopic_id")
-  createdAt        DateTime        @default(now()) @map("created_at")
-  updatedAt        DateTime        @updatedAt @map("updated_at")
-  voided           Boolean         @default(false)
+  imageFileName   String?         @map("image_file_name")
+  difficultyLevel DifficultyLevel @default(Easy) @map("difficulty_level")
+  stepCount       Int             @map("step_count")
+  serialNo        Int             @map("serial_no")
+  questionTypeId  String          @map("question_type_id")
+  moduleId        String          @map("module_id")
+  topicId         String          @map("topic_id")
+  subtopicId      String          @map("subtopic_id")
+  createdAt       DateTime        @default(now()) @map("created_at")
+  updatedAt       DateTime        @updatedAt @map("updated_at")
+  voided          Boolean         @default(false)
 
   questionType   QuestionType    @relation(fields: [questionTypeId], references: [id])
   module         Module          @relation(fields: [moduleId], references: [id])
@@ -326,6 +326,7 @@ model SolutionMcq {
 model SolutionDescriptive {
   id                       String   @id @default(uuid()) @map("descriptive_id")
   solutionBaseId           String   @unique @map("solution_base_id")
+  // XOR constraint: exactly one of descriptiveSolution OR descriptiveSolutionImage must have a value (not both, not neither)
   descriptiveSolution      String?  @map("descriptive_solution") //correct_ans
   descriptiveSolutionImage String?  @map("descriptive_solution_image")
   markingStepsJson         Json?    @map("marking_steps_json")
@@ -398,7 +399,7 @@ model SubmittedDescriptive {
   submissionId               String   @map("submission_id")
   solutionId                 String   @map("solution_id")
   descriptiveSubmittedAnswer String?  @map("descriptive_submitted_answer")
-  solutionImageUrl           String?  @map("solution_image_url")
+  solutionImageFileName           String?  @map("solution_image_file_name")
   canvasData                 String   @map("canvas_data")
   isCorrect                  Boolean  @default(false) @map("is_correct")
   awardedMarks               Int?     @map("awarded_marks")

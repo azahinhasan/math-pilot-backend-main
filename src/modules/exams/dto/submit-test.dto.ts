@@ -37,7 +37,7 @@ export class DescriptiveSubmissionDataDto {
 
   @IsString()
   @IsOptional()
-  solutionImageUrl?: string;
+  solutionImageFileName?: string;
 
   @IsObject()
   @IsOptional()
