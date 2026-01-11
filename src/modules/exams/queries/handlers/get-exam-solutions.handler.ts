@@ -97,7 +97,10 @@ export class GetExamSolutionsHandler implements IQueryHandler<GetExamSolutionsQu
             if (sb.solutionMCQs?.length > 0) {
               return sb.solutionMCQs;
             } else if (sb.solutionDescriptives?.length > 0) {
-              return sb.solutionDescriptives;
+              return sb.solutionDescriptives.map((sd) => ({
+                ...sd,
+                mark: sd.maxMarks,
+              }));
             } else if (sb.solutionMatchingPairs?.length > 0) {
               return sb.solutionMatchingPairs;
             }
