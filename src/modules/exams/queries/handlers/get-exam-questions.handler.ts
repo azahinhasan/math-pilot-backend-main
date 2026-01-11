@@ -92,6 +92,7 @@ export class GetExamQuestionsHandler implements IQueryHandler<GetExamQuestionsQu
           name: question.name,
           type,
           questionText: question.questionText,
+          imageFileName: question.imageFileName,
           // Flatten the solutions array to remove the intermediate solutionBase layer
           // and sanitize sensitive fields (e.g. isCorrect)
           solutions: question.solutionBases.flatMap((sb): any[] => {
