@@ -8,12 +8,35 @@ import {
 import { PrismaService } from '../../prisma/prisma.service';
 import { ConfigService } from '@nestjs/config';
 import { HttpService } from '@nestjs/axios';
-import { SubmitTestDto, QuestionTypeEnum } from './dto/submit-test.dto';
-import { SubmissionStatus } from '@prisma/client';
+import {
+  SubmitTestDto,
+  QuestionTypeEnum,
+  QuestionSubmissionDto,
+  DescriptiveSubmissionDataDto,
+  MCQSubmissionDataDto,
+} from './dto/submit-test.dto';
+import {
+  Question,
+  SubmissionStatus,
+  QuestionType,
+  Topic,
+  SolutionDescriptive,
+  SolutionMcq,
+} from '@prisma/client';
 import { firstValueFrom } from 'rxjs';
 import FormData = require('form-data');
 import { AxiosError } from 'axios';
 import axios from 'axios';
+
+interface QuestionWithRelations extends Question {
+  questionType: QuestionType;
+  topic: Topic;
+  solutionBases: {
+    id: string;
+    solutionDescriptives: SolutionDescriptive[];
+    solutionMCQs: SolutionMcq[];
+  }[];
+}
 
 interface SavedSubmissionData {
   submission: any;
@@ -38,7 +61,7 @@ export class ExamsService {
   async submitTest(dto: SubmitTestDto, clerkId: string) {
     this.logger.log('=== TEST SUBMISSION START ===');
     this.logger.log(`Number of submissions: ${dto.submissions.length}`);
-
+    
     const student = await this.prisma.student.findFirst({
       where: {
         auth: {
@@ -108,7 +131,11 @@ export class ExamsService {
     const savedSubmissions: SavedSubmissionData[] = [];
 
     for (const submission of dto.submissions) {
-      const savedData = await this.processSingleSubmission(dto, submission, studentId);
+      const savedData = await this.processSingleSubmission(
+        dto,
+        submission,
+        studentId,
+      );
       savedSubmissions.push(savedData);
     }
 
@@ -120,7 +147,7 @@ export class ExamsService {
    */
   private async processSingleSubmission(
     dto: SubmitTestDto,
-    submission: any,
+    submission: QuestionSubmissionDto,
     studentId: string,
   ): Promise<SavedSubmissionData> {
     // Fetch question with topic
@@ -142,12 +169,13 @@ export class ExamsService {
       submission,
       savedSubmission.id,
       solutionBase.id,
+      question,
     );
 
     return {
       submission: savedSubmission,
       submissionData,
-      questionType: submission.questionType,
+      questionType: question.questionType.name as QuestionTypeEnum,
       solutionBase,
     };
   }
@@ -155,10 +183,22 @@ export class ExamsService {
   /**
    * Fetch question with topic information
    */
-  private async fetchQuestionWithTopic(questionId: string) {
+  private async fetchQuestionWithTopic(
+    questionId: string,
+  ): Promise<QuestionWithRelations> {
     const question = await this.prisma.question.findUnique({
       where: { id: questionId },
-      include: { topic: true },
+      include: {
+        solutionBases: {
+          select: {
+            id: true,
+            solutionDescriptives: true,
+            solutionMCQs: true,
+          },
+        },
+        topic: true,
+        questionType: true,
+      },
     });
 
     if (!question) {
@@ -173,8 +213,8 @@ export class ExamsService {
    */
   private async createSubmissionRecord(
     dto: SubmitTestDto,
-    submission: any,
-    question: any,
+    submission: QuestionSubmissionDto,
+    question: QuestionWithRelations,
     studentId: string,
   ) {
     return this.prisma.submission.create({
@@ -216,12 +256,14 @@ export class ExamsService {
    * Save submission data based on question type
    */
   private async saveSubmissionDataByType(
-    submission: any,
+    submission: QuestionSubmissionDto,
     submissionId: string,
     solutionId: string,
+    question: QuestionWithRelations,
   ) {
-    switch (submission.questionType) {
+    switch (question.questionType.name) {
       case QuestionTypeEnum.MCQ:
+        return this.saveMcqSubmission(submission, submissionId, solutionId);
       case QuestionTypeEnum.TrueFalse:
         return this.saveMcqSubmission(submission, submissionId, solutionId);
 
@@ -230,11 +272,12 @@ export class ExamsService {
           submission,
           submissionId,
           solutionId,
+          question,
         );
 
       default:
         throw new BadRequestException(
-          `Unknown question type: ${submission.questionType}`,
+          `Unknown question type: ${question.questionType}`,
         );
     }
   }
@@ -243,7 +286,7 @@ export class ExamsService {
    * Save MCQ or True/False submission
    */
   private async saveMcqSubmission(
-    submission: any,
+    submission: QuestionSubmissionDto,
     submissionId: string,
     solutionId: string,
   ) {
@@ -251,7 +294,8 @@ export class ExamsService {
       data: {
         submissionId,
         solutionId,
-        submittedOption: (submission.data as any).submittedOption,
+        submittedOption: (submission.data as MCQSubmissionDataDto)
+          .submittedOption,
         isCorrect: false, // Will be updated during evaluation
         awardedMark: null,
       },
@@ -262,11 +306,20 @@ export class ExamsService {
    * Save Descriptive submission
    */
   private async saveDescriptiveSubmission(
-    submission: any,
+    submission: QuestionSubmissionDto,
     submissionId: string,
     solutionId: string,
+    question: QuestionWithRelations,
   ) {
-    const descriptiveData = submission.data as any;
+    const descriptiveData = submission.data as DescriptiveSubmissionDataDto;
+
+    if (
+      !descriptiveData ||
+      !question.questionType ||
+      question.questionType.name !== 'Descriptive'
+    ) {
+      throw new BadRequestException('Descriptive data is required');
+    }
 
     return this.prisma.submittedDescriptive.create({
       data: {
@@ -274,10 +327,12 @@ export class ExamsService {
         solutionId,
         descriptiveSubmittedAnswer:
           descriptiveData.descriptiveSubmittedAnswer || null,
-        solutionImageFileName: descriptiveData.solutionImageFileName || null,
-        canvasData: descriptiveData.canvasData || {},
-        hint: descriptiveData.hint || null,
-        chatHistory: descriptiveData.chatHistory || null,
+        solutionImageFileName:
+          question.solutionBases[0]?.solutionDescriptives?.[0]
+            ?.descriptiveSolutionImage || null,
+        canvasData: descriptiveData.canvasData || "",
+        hint: question.hint || null,
+        // chatHistory: descriptiveData.chatHistory || null,
         isCorrect: false, // Will be updated during evaluation
         awardedMarks: null,
       },
