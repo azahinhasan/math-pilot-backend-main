@@ -28,6 +28,7 @@ import { GetMockPastPapersQuery } from './queries/get-mock-past-papers.query';
  * Controller for managing Exam-related operations, including creation and historical retrieval.
  */
 @Controller('exams')
+@UseGuards(ClerkAuthGuard)
 export class ExamsController {
   constructor(
     private readonly commandBus: CommandBus,
@@ -41,7 +42,6 @@ export class ExamsController {
    * Protected by ClerkAuthGuard.
    */
   @Post()
-  @UseGuards(ClerkAuthGuard)
   async createExam(@Body() dto: CreateExamDto) {
     return this.commandBus.execute(new CreateExamCommand(dto));
   }
@@ -51,7 +51,6 @@ export class ExamsController {
    * Protected by ClerkAuthGuard.
    */
   @Post('mock')
-  @UseGuards(ClerkAuthGuard)
   async createMockExam(@Body() dto: CreateMockExamDto) {
     return this.commandBus.execute(new CreateMockExamCommand(dto));
   }
@@ -62,7 +61,6 @@ export class ExamsController {
    * Protected by ClerkAuthGuard.
    */
   @Get('mock/past-papers')
-  @UseGuards(ClerkAuthGuard)
   async getMockPastPapers(
     @Query('moduleId') moduleId?: string,
     @Query('boardId') boardId?: string,
@@ -76,7 +74,6 @@ export class ExamsController {
    * Authenticated via Clerk JWT.
    */
   @Get('history')
-  @UseGuards(ClerkAuthGuard)
   async getExamHistory(@Req() req, @Query() dto: GetExamHistoryDto) {
     // 1. Extract Clerk ID from the authenticated request's JWT claims
     const clerkId = req.user.sub;
@@ -123,7 +120,6 @@ export class ExamsController {
    ** @returns A promise that resolves to the exam solutions.
    */
   @Get(':examId/solutions')
-  @UseGuards(ClerkAuthGuard)
   async getExamSolutions(@Param('examId') examId: string) {
     return this.queryBus.execute(new GetExamSolutionsQuery(examId));
   }
@@ -134,9 +130,8 @@ export class ExamsController {
    * Protected by ClerkAuthGuard.
    */
   @Post('submit')
-  @UseGuards(ClerkAuthGuard)
-  async submitTest(@Body() dto: SubmitTestDto) {
-    return this.commandBus.execute(new SubmitTestCommand(dto));
+  async submitTest(@Body() dto: SubmitTestDto, @Req() req) {
+    return this.commandBus.execute(new SubmitTestCommand(dto, req.user.sub));
   }
 
   /**
@@ -146,7 +141,6 @@ export class ExamsController {
    * Protected by ClerkAuthGuard.
    */
   @Get('status')
-  @UseGuards(ClerkAuthGuard)
   async getExamStatuses(@Req() req) {
     // 1. Extract Clerk ID from the authenticated request's JWT claims
     const clerkId = req.user.sub;

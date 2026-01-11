@@ -35,21 +35,17 @@ export class DescriptiveSubmissionDataDto {
   @IsOptional()
   descriptiveSubmittedAnswer?: string;
 
-  @IsString()
-  @IsOptional()
-  solutionImageFileName?: string;
-
   @IsObject()
   @IsOptional()
   canvasData?: any;
 
-  @IsString()
-  @IsOptional()
-  hint?: string;
+  // @IsString()
+  // @IsOptional()
+  // hint?: string;
 
-  @IsString()
-  @IsOptional()
-  chatHistory?: string;
+  // @IsString()
+  // @IsOptional()
+  // chatHistory?: string;
 }
 
 export class QuestionSubmissionDto {
@@ -57,9 +53,9 @@ export class QuestionSubmissionDto {
   @IsNotEmpty()
   questionId: string;
 
-  @IsEnum(QuestionTypeEnum)
-  @IsNotEmpty()
-  questionType: QuestionTypeEnum;
+  // @IsEnum(QuestionTypeEnum)
+  // @IsNotEmpty()
+  // questionType: QuestionTypeEnum;
 
   @IsObject()
   @IsNotEmpty()
@@ -67,9 +63,9 @@ export class QuestionSubmissionDto {
 }
 
 export class SubmitTestDto {
-  @IsString()
-  @IsNotEmpty()
-  studentId: string;
+  // @IsString()
+  // @IsNotEmpty()
+  // studentId: string;
 
   @IsString()
   @IsOptional()

@@ -399,7 +399,7 @@ model SubmittedDescriptive {
   submissionId               String   @map("submission_id")
   solutionId                 String   @map("solution_id")
   descriptiveSubmittedAnswer String?  @map("descriptive_submitted_answer")
-  solutionImageFileName           String?  @map("solution_image_file_name")
+  solutionImageFileName      String?  @map("solution_image_file_name")
   canvasData                 String   @map("canvas_data")
   isCorrect                  Boolean  @default(false) @map("is_correct")
   awardedMarks               Int?     @map("awarded_marks")
