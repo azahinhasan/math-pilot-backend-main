@@ -107,7 +107,7 @@ export class GetExamQuestionsHandler implements IQueryHandler<GetExamQuestionsQu
                   descriptiveSolution,
                   descriptiveSolutionImage,
                   ...descRest
-                }) => descRest,
+                }) => ({ ...descRest, mark: descRest.maxMarks }),
               );
             } else if (sb.solutionMatchingPairs?.length > 0) {
               return sb.solutionMatchingPairs;
