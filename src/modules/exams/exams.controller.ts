@@ -16,6 +16,7 @@ import { CreateMockExamCommand } from './commands/create-mock-exam.command';
 import { GetExamSolutionsQuery } from './queries/get-exam-solutions.query';
 import { ClerkAuthGuard } from '../../clerk-auth-guard';
 import { GetExamHistoryQuery } from './queries/get-exam-history.query';
+import { GetExamQuestionsQuery } from './queries/get-exam-questions.query';
 import { GetExamHistoryDto } from './dto/get-exam-history.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { SubmitTestDto } from './dto/submit-test.dto';
@@ -95,6 +96,21 @@ export class ExamsController {
     // 3. Dispatch the query to the handler to fetch and aggregate exam submissions
     return this.queryBus.execute(new GetExamHistoryQuery(auth.student.id, dto));
   }
+
+  /**
+   *
+   * GET /exams/:examId/questions
+   * Retrieves all questions for a specific exam (without solutions).
+   * Protected by ClerkAuthGuard.
+   ** @param examId The ID of the exam to retrieve questions for.
+   ** @returns A promise that resolves to the exam questions.
+   */
+  @Get(':examId/questions')
+  @UseGuards(ClerkAuthGuard)
+  async getExamQuestions(@Param('examId') examId: string) {
+    return this.queryBus.execute(new GetExamQuestionsQuery(examId));
+  }
+
   /**
    *
    * GET /exams/:examId/solutions
