@@ -129,7 +129,6 @@ export class EvaluatePracticeHandler implements ICommandHandler<EvaluatePractice
 
 
       try {
-        console.log(descriptiveSolutionImage, 'descriptiveSolutionImage');
         const command = new GetObjectCommand({
           Bucket: awsS3Bucket,
           Key: descriptiveSolutionImage, //file name with folder name

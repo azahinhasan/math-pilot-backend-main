@@ -1,13 +1,42 @@
-import { Injectable, Logger, NotFoundException, BadRequestException, InternalServerErrorException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  NotFoundException,
+  BadRequestException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { ConfigService } from '@nestjs/config';
 import { HttpService } from '@nestjs/axios';
-import { SubmitTestDto, QuestionTypeEnum } from './dto/submit-test.dto';
-import { SubmissionStatus } from '@prisma/client';
+import {
+  SubmitTestDto,
+  QuestionTypeEnum,
+  QuestionSubmissionDto,
+  DescriptiveSubmissionDataDto,
+  MCQSubmissionDataDto,
+} from './dto/submit-test.dto';
+import {
+  Question,
+  SubmissionStatus,
+  QuestionType,
+  Topic,
+  SolutionDescriptive,
+  SolutionMcq,
+} from '@prisma/client';
 import { firstValueFrom } from 'rxjs';
 import FormData = require('form-data');
 import { AxiosError } from 'axios';
 import axios from 'axios';
+
+interface QuestionWithRelations extends Question {
+  questionType: QuestionType;
+  topic: Topic;
+  solutionBases: {
+    id: string;
+    solutionDescriptives: SolutionDescriptive[];
+    solutionMCQs: SolutionMcq[];
+  }[];
+}
 
 interface SavedSubmissionData {
   submission: any;
@@ -29,22 +58,33 @@ export class ExamsService {
   /**
    * Submit test and start evaluation process
    */
-  async submitTest(dto: SubmitTestDto) {
+  async submitTest(dto: SubmitTestDto, clerkId: string) {
     this.logger.log('=== TEST SUBMISSION START ===');
-    this.logger.log(`Student ID: ${dto.studentId}, Exam ID: ${dto.examId || 'N/A'}`);
     this.logger.log(`Number of submissions: ${dto.submissions.length}`);
+    
+    const student = await this.prisma.student.findFirst({
+      where: {
+        auth: {
+          clerkId: clerkId,
+        },
+      },
+    });
+
+    if (!student) {
+      throw new NotFoundException('Student not found.');
+    }
 
     try {
       // Validate student and exam
-      await this.validateStudentAndExam(dto.studentId, dto.examId);
+      await this.validateStudentAndExam(student.id, dto.examId);
 
       // Process all submissions
-      const savedSubmissions = await this.processSubmissions(dto);
+      const savedSubmissions = await this.processSubmissions(dto, student.id);
 
       this.logger.log('✅ All submissions saved with Submitted status');
 
       // Start background evaluation (non-blocking)
-      this.startBackgroundEvaluation(savedSubmissions, dto.studentId);
+      this.startBackgroundEvaluation(savedSubmissions, student.id);
 
       return this.buildSubmissionResponse(savedSubmissions);
     } catch (error) {
@@ -56,7 +96,10 @@ export class ExamsService {
   /**
    * Validate that student and exam (if provided) exist
    */
-  private async validateStudentAndExam(studentId: string, examId?: string): Promise<void> {
+  private async validateStudentAndExam(
+    studentId: string,
+    examId?: string,
+  ): Promise<void> {
     // Verify student exists
     const student = await this.prisma.student.findUnique({
       where: { id: studentId },
@@ -81,11 +124,18 @@ export class ExamsService {
   /**
    * Process all submissions and save to database
    */
-  private async processSubmissions(dto: SubmitTestDto): Promise<SavedSubmissionData[]> {
+  private async processSubmissions(
+    dto: SubmitTestDto,
+    studentId: string,
+  ): Promise<SavedSubmissionData[]> {
     const savedSubmissions: SavedSubmissionData[] = [];
 
     for (const submission of dto.submissions) {
-      const savedData = await this.processSingleSubmission(dto, submission);
+      const savedData = await this.processSingleSubmission(
+        dto,
+        submission,
+        studentId,
+      );
       savedSubmissions.push(savedData);
     }
 
@@ -97,13 +147,19 @@ export class ExamsService {
    */
   private async processSingleSubmission(
     dto: SubmitTestDto,
-    submission: any,
+    submission: QuestionSubmissionDto,
+    studentId: string,
   ): Promise<SavedSubmissionData> {
     // Fetch question with topic
     const question = await this.fetchQuestionWithTopic(submission.questionId);
 
     // Create main submission record
-    const savedSubmission = await this.createSubmissionRecord(dto, submission, question);
+    const savedSubmission = await this.createSubmissionRecord(
+      dto,
+      submission,
+      question,
+      studentId,
+    );
 
     // Get solution base
     const solutionBase = await this.fetchSolutionBase(submission.questionId);
@@ -113,12 +169,13 @@ export class ExamsService {
       submission,
       savedSubmission.id,
       solutionBase.id,
+      question,
     );
 
     return {
       submission: savedSubmission,
       submissionData,
-      questionType: submission.questionType,
+      questionType: question.questionType.name as QuestionTypeEnum,
       solutionBase,
     };
   }
@@ -126,10 +183,22 @@ export class ExamsService {
   /**
    * Fetch question with topic information
    */
-  private async fetchQuestionWithTopic(questionId: string) {
+  private async fetchQuestionWithTopic(
+    questionId: string,
+  ): Promise<QuestionWithRelations> {
     const question = await this.prisma.question.findUnique({
       where: { id: questionId },
-      include: { topic: true },
+      include: {
+        solutionBases: {
+          select: {
+            id: true,
+            solutionDescriptives: true,
+            solutionMCQs: true,
+          },
+        },
+        topic: true,
+        questionType: true,
+      },
     });
 
     if (!question) {
@@ -142,10 +211,15 @@ export class ExamsService {
   /**
    * Create main submission record
    */
-  private async createSubmissionRecord(dto: SubmitTestDto, submission: any, question: any) {
+  private async createSubmissionRecord(
+    dto: SubmitTestDto,
+    submission: QuestionSubmissionDto,
+    question: QuestionWithRelations,
+    studentId: string,
+  ) {
     return this.prisma.submission.create({
       data: {
-        studentId: dto.studentId,
+        studentId: studentId,
         questionId: submission.questionId,
         topicId: question.topicId,
         type: dto.examId ? 'Exam' : 'Practice',
@@ -170,7 +244,9 @@ export class ExamsService {
     });
 
     if (!solutionBase) {
-      throw new NotFoundException(`Solution not found for question "${questionId}"`);
+      throw new NotFoundException(
+        `Solution not found for question "${questionId}"`,
+      );
     }
 
     return solutionBase;
@@ -180,32 +256,46 @@ export class ExamsService {
    * Save submission data based on question type
    */
   private async saveSubmissionDataByType(
-    submission: any,
+    submission: QuestionSubmissionDto,
     submissionId: string,
     solutionId: string,
+    question: QuestionWithRelations,
   ) {
-    switch (submission.questionType) {
+    switch (question.questionType.name) {
       case QuestionTypeEnum.MCQ:
+        return this.saveMcqSubmission(submission, submissionId, solutionId);
       case QuestionTypeEnum.TrueFalse:
         return this.saveMcqSubmission(submission, submissionId, solutionId);
 
       case QuestionTypeEnum.Descriptive:
-        return this.saveDescriptiveSubmission(submission, submissionId, solutionId);
+        return this.saveDescriptiveSubmission(
+          submission,
+          submissionId,
+          solutionId,
+          question,
+        );
 
       default:
-        throw new BadRequestException(`Unknown question type: ${submission.questionType}`);
+        throw new BadRequestException(
+          `Unknown question type: ${question.questionType}`,
+        );
     }
   }
 
   /**
    * Save MCQ or True/False submission
    */
-  private async saveMcqSubmission(submission: any, submissionId: string, solutionId: string) {
+  private async saveMcqSubmission(
+    submission: QuestionSubmissionDto,
+    submissionId: string,
+    solutionId: string,
+  ) {
     return this.prisma.submittedMcq.create({
       data: {
         submissionId,
         solutionId,
-        submittedOption: (submission.data as any).submittedOption,
+        submittedOption: (submission.data as MCQSubmissionDataDto)
+          .submittedOption,
         isCorrect: false, // Will be updated during evaluation
         awardedMark: null,
       },
@@ -216,21 +306,33 @@ export class ExamsService {
    * Save Descriptive submission
    */
   private async saveDescriptiveSubmission(
-    submission: any,
+    submission: QuestionSubmissionDto,
     submissionId: string,
     solutionId: string,
+    question: QuestionWithRelations,
   ) {
-    const descriptiveData = submission.data as any;
-    
+    const descriptiveData = submission.data as DescriptiveSubmissionDataDto;
+
+    if (
+      !descriptiveData ||
+      !question.questionType ||
+      question.questionType.name !== 'Descriptive'
+    ) {
+      throw new BadRequestException('Descriptive data is required');
+    }
+
     return this.prisma.submittedDescriptive.create({
       data: {
         submissionId,
         solutionId,
-        descriptiveSubmittedAnswer: descriptiveData.descriptiveSubmittedAnswer || null,
-        solutionImageFileName: descriptiveData.solutionImageFileName || null,
-        canvasData: descriptiveData.canvasData || {},
-        hint: descriptiveData.hint || null,
-        chatHistory: descriptiveData.chatHistory || null,
+        descriptiveSubmittedAnswer:
+          descriptiveData.descriptiveSubmittedAnswer || null,
+        solutionImageFileName:
+          question.solutionBases[0]?.solutionDescriptives?.[0]
+            ?.descriptiveSolutionImage || null,
+        canvasData: descriptiveData.canvasData || "",
+        hint: question.hint || null,
+        // chatHistory: descriptiveData.chatHistory || null,
         isCorrect: false, // Will be updated during evaluation
         awardedMarks: null,
       },
@@ -244,9 +346,11 @@ export class ExamsService {
     savedSubmissions: SavedSubmissionData[],
     studentId: string,
   ): void {
-    this.evaluateSubmissionsInBackground(savedSubmissions, studentId).catch((error) => {
-      this.logger.error('Background evaluation error:', error);
-    });
+    this.evaluateSubmissionsInBackground(savedSubmissions, studentId).catch(
+      (error) => {
+        this.logger.error('Background evaluation error:', error);
+      },
+    );
   }
 
   /**
@@ -272,18 +376,33 @@ export class ExamsService {
   ) {
     this.logger.log('=== BACKGROUND EVALUATION START ===');
 
-    for (const { submission, submissionData, questionType, solutionBase } of savedSubmissions) {
+    for (const {
+      submission,
+      submissionData,
+      questionType,
+      solutionBase,
+    } of savedSubmissions) {
       try {
-        this.logger.log(`Evaluating submission ${submission.id} (${questionType})`);
+        this.logger.log(
+          `Evaluating submission ${submission.id} (${questionType})`,
+        );
 
         switch (questionType) {
           case QuestionTypeEnum.MCQ:
           case QuestionTypeEnum.TrueFalse:
-            await this.evaluateMCQOrTrueFalse(submission, submissionData, solutionBase);
+            await this.evaluateMCQOrTrueFalse(
+              submission,
+              submissionData,
+              solutionBase,
+            );
             break;
 
           case QuestionTypeEnum.Descriptive:
-            await this.evaluateDescriptive(submission, submissionData, solutionBase);
+            await this.evaluateDescriptive(
+              submission,
+              submissionData,
+              solutionBase,
+            );
             break;
         }
 
@@ -293,10 +412,15 @@ export class ExamsService {
           data: { status: SubmissionStatus.Graded },
         });
 
-        this.logger.log(`✅ Submission ${submission.id} evaluated successfully`);
+        this.logger.log(
+          `✅ Submission ${submission.id} evaluated successfully`,
+        );
       } catch (error) {
-        this.logger.error(`❌ Error evaluating submission ${submission.id}:`, error.message);
-        
+        this.logger.error(
+          `❌ Error evaluating submission ${submission.id}:`,
+          error.message,
+        );
+
         // Update submission status to Submitted (evaluation failed)
         await this.prisma.submission.update({
           where: { id: submission.id },
@@ -311,22 +435,29 @@ export class ExamsService {
   /**
    * Evaluate MCQ or True/False question
    */
-  private async evaluateMCQOrTrueFalse(submission: any, submittedMcq: any, solutionBase: any) {
+  private async evaluateMCQOrTrueFalse(
+    submission: any,
+    submittedMcq: any,
+    solutionBase: any,
+  ) {
     this.logger.log(`Evaluating MCQ/TrueFalse for submission ${submission.id}`);
 
     // Find the correct option
-    const correctOption = solutionBase.solutionMCQs.find((mcq: any) => mcq.isCorrect);
+    const correctOption = solutionBase.solutionMCQs.find(
+      (mcq: any) => mcq.isCorrect,
+    );
 
     if (!correctOption) {
       throw new Error('No correct option found in solution');
     }
 
     // Compare submitted option with correct option
-    const isCorrect = submittedMcq.submittedOption.trim().toLowerCase() === 
-                      correctOption.optionText.trim().toLowerCase();
+    const isCorrect =
+      submittedMcq.submittedOption.trim().toLowerCase() ===
+      correctOption.optionText.trim().toLowerCase();
 
     // Calculate marks
-    const awardedMark = isCorrect ? (correctOption.mark || 1) : 0;
+    const awardedMark = isCorrect ? correctOption.mark || 1 : 0;
 
     // Update submitted MCQ
     await this.prisma.submittedMcq.update({
@@ -346,13 +477,19 @@ export class ExamsService {
       },
     });
 
-    this.logger.log(`MCQ/TrueFalse evaluated: ${isCorrect ? 'Correct' : 'Incorrect'}, Marks: ${awardedMark}`);
+    this.logger.log(
+      `MCQ/TrueFalse evaluated: ${isCorrect ? 'Correct' : 'Incorrect'}, Marks: ${awardedMark}`,
+    );
   }
 
   /**
    * Evaluate Descriptive question using external AI API
    */
-  private async evaluateDescriptive(submission: any, submittedDescriptive: any, solutionBase: any) {
+  private async evaluateDescriptive(
+    submission: any,
+    submittedDescriptive: any,
+    solutionBase: any,
+  ) {
     this.logger.log(`Evaluating Descriptive for submission ${submission.id}`);
 
     try {
@@ -371,13 +508,18 @@ export class ExamsService {
 
       // Check if solution image exists
       if (!submittedDescriptive.solutionImageFileName) {
-        await this.handleMissingSolutionImage(submission.id, submittedDescriptive.id);
+        await this.handleMissingSolutionImage(
+          submission.id,
+          submittedDescriptive.id,
+        );
         return;
       }
 
       // Download image and call Math API
       const evaluateMathApiUrl = this.getEvaluationApiUrl();
-      const imageBuffer = await this.downloadSolutionImage(submittedDescriptive.solutionImageFileName);
+      const imageBuffer = await this.downloadSolutionImage(
+        submittedDescriptive.solutionImageFileName,
+      );
       const apiResult = await this.callMathEvaluationAPI(
         evaluateMathApiUrl,
         imageBuffer,
@@ -403,7 +545,9 @@ export class ExamsService {
         submittedDescriptive,
       );
 
-      this.logger.log(`Descriptive evaluated: ${apiResult.verdict}, Marks: ${awardedMarks}`);
+      this.logger.log(
+        `Descriptive evaluated: ${apiResult.verdict}, Marks: ${awardedMarks}`,
+      );
     } catch (error) {
       await this.handleDescriptiveEvaluationError(
         error,
@@ -417,7 +561,10 @@ export class ExamsService {
   /**
    * Handle missing solution image
    */
-  private async handleMissingSolutionImage(submissionId: string, submittedDescriptiveId: string) {
+  private async handleMissingSolutionImage(
+    submissionId: string,
+    submittedDescriptiveId: string,
+  ) {
     this.logger.warn('No solution image URL provided for descriptive question');
 
     await this.prisma.submittedDescriptive.update({
@@ -443,7 +590,7 @@ export class ExamsService {
    */
   private getEvaluationApiUrl(): string {
     const apiUrl = this.configService.get<string>('EVALUATE_MATH_API_URL');
-    
+
     if (!apiUrl) {
       throw new InternalServerErrorException('Math API URL not configured');
     }
@@ -459,7 +606,10 @@ export class ExamsService {
     this.logger.log(`Downloading image from URL: ${imageFileName}`);
 
     // Check if it's an S3 URL
-    if (imageFileName.includes('.s3.') || imageFileName.includes('s3.amazonaws.com')) {
+    if (
+      imageFileName.includes('.s3.') ||
+      imageFileName.includes('s3.amazonaws.com')
+    ) {
       return this.downloadFromS3(imageFileName);
     } else {
       return this.downloadFromUrl(imageFileName);
@@ -472,14 +622,16 @@ export class ExamsService {
   private async downloadFromS3(imageFileName: string): Promise<Buffer> {
     const url = new URL(imageFileName);
     const key = url.pathname.substring(1);
-    
+
     this.logger.log(`Detected S3 URL, extracting key: ${key}`);
 
     const { S3Client, GetObjectCommand } = await import('@aws-sdk/client-s3');
 
     const region = this.configService.get<string>('AWS_REGION');
     const accessKeyId = this.configService.get<string>('AWS_ACCESS_KEY_ID');
-    const secretAccessKey = this.configService.get<string>('AWS_SECRET_ACCESS_KEY');
+    const secretAccessKey = this.configService.get<string>(
+      'AWS_SECRET_ACCESS_KEY',
+    );
     const bucket = this.configService.get<string>('AWS_S3_BUCKET');
 
     if (!region || !accessKeyId || !secretAccessKey || !bucket) {
@@ -535,7 +687,10 @@ export class ExamsService {
 
     formData.append('question', question.questionText);
     formData.append('currentStepCount', question.stepCount.toString());
-    formData.append('correct_answer', solutionDescriptive.descriptiveSolution || '');
+    formData.append(
+      'correct_answer',
+      solutionDescriptive.descriptiveSolution || '',
+    );
 
     if (submittedDescriptive.chatHistory) {
       formData.append('chat_history', submittedDescriptive.chatHistory);
@@ -562,7 +717,11 @@ export class ExamsService {
   /**
    * Calculate marks based on AI verdict
    */
-  private calculateMarks(apiResult: any, solutionDescriptive: any, question: any) {
+  private calculateMarks(
+    apiResult: any,
+    solutionDescriptive: any,
+    question: any,
+  ) {
     let awardedMarks = 0;
     let isCorrect = false;
 
@@ -702,7 +861,7 @@ export class ExamsService {
       const inProgressCount = Number(examStat.in_progress_count);
 
       // Determine exam status: graded if all submissions are graded, otherwise submitted
-      const examStatus: 'graded' | 'submitted' = 
+      const examStatus: 'graded' | 'submitted' =
         gradedCount === totalSubmissions ? 'graded' : 'submitted';
 
       return {
@@ -732,4 +891,3 @@ export class ExamsService {
     };
   }
 }
-
