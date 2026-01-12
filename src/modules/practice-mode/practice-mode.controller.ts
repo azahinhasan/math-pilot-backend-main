@@ -62,12 +62,10 @@ export class PracticeModeController {
       }
     }
 
-    const parsedCanvasData = JSON.parse(evaluatePracticeDto.canvasData);
-
     return this.commandBus.execute(
       new EvaluatePracticeCommand(
         evaluatePracticeDto.questionId,
-        parsedCanvasData,
+        evaluatePracticeDto.canvasData,
         images,
         evaluatePracticeDto.currentStepCount,
         req.user.sub,
