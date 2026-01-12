@@ -399,10 +399,9 @@ export class EvaluatePracticeHandler implements ICommandHandler<EvaluatePractice
           nextStepCount: aiResponse.nextStepCount,
           imagesProcessed: aiResponse.images_processed,
           totalImages: aiResponse.total_images,
-          chatHistory: aiResponse.chatHistory,
+          chatHistory: aiResponse.chat_history || null,
           beganAt: submission.beganAt,
-          endedAt: submission.endedAt,
-          canvasData: aiResponse.canvas_json,
+          endedAt: submission.endedAt
         };
 
         console.log('\n=== Formatted Response ===');

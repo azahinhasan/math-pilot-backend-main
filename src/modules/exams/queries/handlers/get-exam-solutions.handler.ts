@@ -92,6 +92,7 @@ export class GetExamSolutionsHandler implements IQueryHandler<GetExamSolutionsQu
           name: question.name,
           type,
           questionText: question.questionText,
+          imageFileName: question.imageFileName,
           // Flatten the solutions array to remove the intermediate solutionBase layer
           solutions: question.solutionBases.flatMap((sb): any[] => {
             if (sb.solutionMCQs?.length > 0) {
