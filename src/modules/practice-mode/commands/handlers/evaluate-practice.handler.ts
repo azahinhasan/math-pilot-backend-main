@@ -396,7 +396,6 @@ export class EvaluatePracticeHandler implements ICommandHandler<EvaluatePractice
           verdict: aiResponse.verdict,
           isCorrect,
           isFinished,
-          nextStepCount: aiResponse.nextStepCount,
           imagesProcessed: aiResponse.images_processed,
           totalImages: aiResponse.total_images,
           chatHistory: aiResponse.chat_history || null,

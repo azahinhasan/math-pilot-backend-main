@@ -6,8 +6,8 @@ import * as path from 'path';
 const prisma = new PrismaClient();
 
 function removeComments(text: string): string {
-  if (!text) return text;
-  return text;
+  if (!text || text.trim() === '') return text;
+  return text.trim();
   //return text.replace(/\/\//g, '');
 }
 
@@ -44,7 +44,6 @@ async function main() {
     Hard: DifficultyLevel.Hard,
   };
 
-  let serialNo = 1;
   let createdCount = 0;
   let skippedCount = 0;
 
@@ -62,6 +61,7 @@ async function main() {
       const questionTitle = removeComments(questionData.question_title || '');
       const questionText = removeComments(questionData.question_text || '');
       const hint = removeComments(questionData.hint || '');
+      const serialNo = removeComments(questionData.seriel_no.toString() || '');
       const correctAnswer = removeComments(questionData.correct_answer || '');
 
       const topic = await prisma.topic.findFirst({
@@ -109,7 +109,7 @@ async function main() {
       });
 
       if (existingQuestion) {
-        console.log(`Skipping duplicate question: ${questionTitle}`);
+        console.log(`Skipping duplicate question: ${questionTitle} - ${existingQuestion.id}`);
         skippedCount++;
         continue;
       }
@@ -122,14 +122,14 @@ async function main() {
           hint: hint,
           totalMarks: questionData.total_marks || 1,
           timeLimit: questionData.time_limit_in_min || 1,
-          imageFileName: questionData.image_file_name
-            ? 'question-images/' + questionData.image_file_name
+          imageFileName: questionData.question_image
+            ? 'question-images/' + questionData.question_image
             : '',
           difficultyLevel:
             difficultyMap[questionData.question_difficulty] ||
             DifficultyLevel.Easy,
           stepCount: 1,
-          serialNo: serialNo++,
+          serialNo: serialNo,
           questionTypeId: descriptiveQuestionType.id,
           moduleId: topic.module.id,
           topicId: topic.id,
@@ -138,12 +138,15 @@ async function main() {
             create: {
               solutionDescriptives: {
                 create: {
+                  isInputCanvases:
+                    questionData.Canvas == 'Yes' || questionData.canvas == 'Yes'
+                      ? true
+                      : false,
                   descriptiveSolution: correctAnswer,
-                  descriptiveSolutionImage:
-                    questionData.descriptive_solution_image
-                      ? 'question-solution-images/' +
-                        questionData.descriptive_solution_image
-                      : '',
+                  descriptiveSolutionImage: questionData.correct_answer_image
+                    ? 'question-solution-images/' +
+                      questionData.correct_answer_image
+                    : '',
                 },
               },
             },

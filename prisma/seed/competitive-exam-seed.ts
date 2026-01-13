@@ -194,7 +194,7 @@ async function main() {
         difficultyLevel: DifficultyLevel.Easy,
         contentBy: ContentBy.AI,
         questionFor: QuestionFor.Practice,
-        serialNo: serialNo,
+        serialNo: serialNo.toString(),
         stepCount: 1,
         totalMarks: (qData as any).maxMarks || 1, // Default to 1 if not specified
       },
