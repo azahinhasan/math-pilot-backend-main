@@ -7,6 +7,8 @@ import {
   Req,
   UseGuards,
   Param,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { CreateExamDto } from './dto/create-exam.dto';
@@ -14,6 +16,7 @@ import { CreateExamCommand } from './commands/create-exam.command';
 import { CreateMockExamDto } from './dto/create-mock-exam.dto';
 import { CreateMockExamCommand } from './commands/create-mock-exam.command';
 import { GetExamSolutionsQuery } from './queries/get-exam-solutions.query';
+import { GetExamSubmissionsQuery } from './queries/get-exam-submissions.query';
 import { ClerkAuthGuard } from '../../clerk-auth-guard';
 import { GetExamHistoryQuery } from './queries/get-exam-history.query';
 import { GetExamQuestionsQuery } from './queries/get-exam-questions.query';
@@ -122,6 +125,31 @@ export class ExamsController {
   @Get(':examId/solutions')
   async getExamSolutions(@Param('examId') examId: string) {
     return this.queryBus.execute(new GetExamSolutionsQuery(examId));
+  }
+
+  /**
+   *
+   * GET /exams/:examId/submissions
+   * Retrieves all question submissions for a specific exam for the logged-in student.
+   * Protected by ClerkAuthGuard.
+   ** @param examId The ID of the exam to retrieve submissions for.
+   ** @returns A promise that resolves to the exam submissions.
+   */
+  @Get(':examId/submissions')
+  async getExamSubmissions(@Param('examId') examId: string, @Req() req) {
+    const clerkId = req.user.sub;
+    const auth = await this.prisma.auth.findUnique({
+      where: { clerkId },
+      include: { student: true },
+    });
+
+    if (!auth?.student) {
+      throw new HttpException('User is not a student', HttpStatus.BAD_REQUEST);
+    }
+
+    return this.queryBus.execute(
+      new GetExamSubmissionsQuery(examId, auth.student.id),
+    );
   }
 
   /**
