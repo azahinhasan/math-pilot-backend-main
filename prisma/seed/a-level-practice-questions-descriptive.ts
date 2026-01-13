@@ -46,6 +46,8 @@ async function main() {
 
   let createdCount = 0;
   let skippedCount = 0;
+  let notFoundTopic = 0;
+  let notFoundSubtopic = 0;
 
   for (const [topicKey, questions] of Object.entries(practiceQusData)) {
     console.log(`\nProcessing topic: ${topicKey}`);
@@ -80,6 +82,7 @@ async function main() {
         console.error(
           `Topic "${tutorialName}" not found for question: ${questionTitle}`,
         );
+        notFoundTopic++;
         continue;
       }
 
@@ -97,6 +100,7 @@ async function main() {
         console.error(
           `Subtopic "${subtopicName}" not found in topic "${tutorialName}" for question: ${questionTitle}`,
         );
+        notFoundSubtopic++;
         continue;
       }
 
@@ -163,6 +167,8 @@ async function main() {
   console.log('\n=== Seeding Summary ===');
   console.log(`Created: ${createdCount} questions`);
   console.log(`Skipped: ${skippedCount} duplicate questions`);
+  console.log(`Not found topic: ${notFoundTopic} questions`);
+  console.log(`Not found subtopic: ${notFoundSubtopic} questions`);
   console.log('Finished seeding practice questions.');
 }
 
