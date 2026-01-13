@@ -1,0 +1,56 @@
+{
+  "submission": {
+    "studentAuthId": "auth_student_01",
+    "examName": "Competitive Exam - Beginner Level",
+    "answers": [
+      {
+        "questionText": "Which of the following is the standard form of a quadratic equation?",
+        "type": "MCQ",
+        "answer": "ax^2 + bx + c = 0",
+        "isCorrect": true
+      },
+      {
+        "questionText": "The graph of a quadratic function is called a:",
+        "type": "MCQ",
+        "answer": "Circle",
+        "isCorrect": false
+      },
+      {
+        "questionText": "A quadratic equation always has two real roots.",
+        "type": "Boolean",
+        "answer": "False",
+        "isCorrect": true
+      },
+      {
+        "questionText": "The vertex is the turning point of a parabola.",
+        "type": "Boolean",
+        "answer": "False",
+        "isCorrect": false
+      },
+      {
+        "questionText": "What is the value of the discriminant for the equation x^2 + 2x + 1 = 0?",
+        "type": "ShortAnswer",
+        "answer": "0",
+        "isCorrect": true
+      },
+      {
+        "questionText": "Write the coordinates of the vertex for y = x^2.",
+        "type": "ShortAnswer",
+        "answer": "(1,1)",
+        "isCorrect": false
+      },
+      {
+        "questionText": "Sketch the graph of y = x^2 - 4x. Show the x-intercepts and the vertex.",
+        "type": "Descriptive",
+        "answer": "Parabola opening upwards. Intercepts at (0,0) and (4,0). Vertex at (2, -4).",
+        "isCorrect": true
+      },
+      {
+        "questionText": "Explain how the value of the discriminant determines the nature of the roots of a quadratic equation.",
+        "type": "Descriptive",
+        "answer": "I don't know.",
+        "isCorrect": false
+      }
+    ]
+  }
+}
