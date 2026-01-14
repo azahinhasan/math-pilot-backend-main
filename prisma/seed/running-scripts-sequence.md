@@ -3,3 +3,4 @@
 - npx ts-node prisma/seed/a-level-pure-mathematics-1-topics-subtopics.ts
 - npx ts-node prisma/seed/a-level-practice-questions-descriptive.ts
 - npx ts-node prisma/seed/seed-past-papers.ts
+- npx ts-node prisma/seed/competitive-exam-seed.ts

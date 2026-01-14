@@ -150,7 +150,7 @@ export class CreateQuestionHandler implements ICommandHandler<CreateQuestionComm
       imageFileName: dto.imageFileName?.trim(),
       difficultyLevel: dto.difficultyLevel,
       stepCount: dto.stepCount,
-      serialNo: dto.serialNo,
+      serialNo: dto.serialNo.toString(),
       questionType: { connect: { id: questionTypeId } },
     };
   }

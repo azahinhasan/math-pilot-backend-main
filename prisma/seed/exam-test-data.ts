@@ -136,7 +136,7 @@ async function main() {
         timeLimit: q.timeLimit,
         difficultyLevel: q.difficultyLevel,
         stepCount: q.stepCount,
-        serialNo: q.serialNo,
+        serialNo: q.serialNo.toString(),
         questionTypeId: q.questionTypeId,
         questionFor: q.questionFor,
         topicId: q.topicId,
