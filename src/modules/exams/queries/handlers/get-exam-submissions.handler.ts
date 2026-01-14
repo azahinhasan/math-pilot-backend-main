@@ -15,7 +15,7 @@ export class GetExamSubmissionsHandler implements IQueryHandler<GetExamSubmissio
     // 1. Check if the exam exists
     const exam = await this.prisma.exam.findUnique({
       where: { id: examId },
-      select: { id: true, name: true },
+      select: { id: true, name: true, timeLimit: true },
     });
 
     if (!exam) {
@@ -263,31 +263,42 @@ export class GetExamSubmissionsHandler implements IQueryHandler<GetExamSubmissio
           let flattenedSubmission: any = null;
           if (latestGraded) {
             // Helper to build the flat object
-            const buildFlat = (details: any, typeSpecificData: any) => ({
-              id: typeSpecificData.id,
-              submittedAnswerId: latestGraded.submittedAnswers?.[0]?.id,
-              submissionId: latestGraded.id,
-              solutionId: typeSpecificData.solutionId,
+            const buildFlat = (details: any, typeSpecificData: any) => {
+              let optionId = null;
+              if (typeSpecificData.submittedOption) {
+                const match = solutions.find(
+                  (s: any) => s.optionText === typeSpecificData.submittedOption,
+                );
+                if (match) optionId = match.id;
+              }
 
-              // Type specific fields
-              submittedOption: typeSpecificData.submittedOption, // MCQ/Boolean
-              descriptiveSubmittedAnswer:
-                typeSpecificData.descriptiveSubmittedAnswer, // Descriptive
+              return {
+                id: typeSpecificData.id,
+                optionId,
+                submittedAnswerId: latestGraded.submittedAnswers?.[0]?.id,
+                submissionId: latestGraded.id,
+                solutionId: typeSpecificData.solutionId,
 
-              isCorrect: typeSpecificData.isCorrect,
-              awardedMark:
-                typeSpecificData.awardedMark ?? typeSpecificData.awardedMarks,
+                // Type specific fields
+                submittedOption: typeSpecificData.submittedOption, // MCQ/Boolean
+                descriptiveSubmittedAnswer:
+                  typeSpecificData.descriptiveSubmittedAnswer, // Descriptive
 
-              timeTakenInSeconds:
-                latestGraded.submittedAnswers?.[0]?.timeTakenInSeconds,
-              createdAt: typeSpecificData.createdAt,
-              updatedAt: typeSpecificData.updatedAt,
-              voided: typeSpecificData.voided,
+                isCorrect: typeSpecificData.isCorrect,
+                awardedMark:
+                  typeSpecificData.awardedMark ?? typeSpecificData.awardedMarks,
 
-              // Descriptive extras if needed
-              verdict: typeSpecificData.verdict,
-              evaluation: typeSpecificData.evaluation,
-            });
+                timeTakenInSeconds:
+                  latestGraded.submittedAnswers?.[0]?.timeTakenInSeconds,
+                createdAt: typeSpecificData.createdAt,
+                updatedAt: typeSpecificData.updatedAt,
+                voided: typeSpecificData.voided,
+
+                // Descriptive extras if needed
+                verdict: typeSpecificData.verdict,
+                evaluation: typeSpecificData.evaluation,
+              };
+            };
 
             if (latestGraded.submittedMcqs?.length > 0) {
               const mcq = latestGraded.submittedMcqs[0];
@@ -371,6 +382,7 @@ export class GetExamSubmissionsHandler implements IQueryHandler<GetExamSubmissio
       message: 'Exam submissions retrieved successfully',
       examId: exam.id,
       examName: exam.name,
+      timeLimitInSeconds: exam.timeLimit ? exam.timeLimit * 60 : null,
       totalQuestions,
       aggregatedData: {
         ...currentStats,
