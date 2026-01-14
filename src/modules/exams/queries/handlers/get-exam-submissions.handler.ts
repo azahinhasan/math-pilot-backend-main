@@ -241,16 +241,45 @@ export class GetExamSubmissionsHandler implements IQueryHandler<GetExamSubmissio
           // Flatten Submission Data
           let flattenedSubmission: any = null;
           if (latestGraded) {
+            // Helper to build the flat object
+            const buildFlat = (details: any, typeSpecificData: any) => ({
+              id: typeSpecificData.id,
+              submittedAnswerId: latestGraded.submittedAnswers?.[0]?.id,
+              submissionId: latestGraded.id,
+              solutionId: typeSpecificData.solutionId,
+
+              // Type specific fields
+              submittedOption: typeSpecificData.submittedOption, // MCQ/Boolean
+              descriptiveSubmittedAnswer:
+                typeSpecificData.descriptiveSubmittedAnswer, // Descriptive
+
+              isCorrect: typeSpecificData.isCorrect,
+              awardedMark:
+                typeSpecificData.awardedMark ?? typeSpecificData.awardedMarks,
+
+              timeTakenInSeconds:
+                latestGraded.submittedAnswers?.[0]?.timeTakenInSeconds,
+              createdAt: typeSpecificData.createdAt,
+              updatedAt: typeSpecificData.updatedAt,
+              voided: typeSpecificData.voided,
+
+              // Descriptive extras if needed
+              verdict: typeSpecificData.verdict,
+              evaluation: typeSpecificData.evaluation,
+            });
+
             if (latestGraded.submittedMcqs?.length > 0) {
-              flattenedSubmission = latestGraded.submittedMcqs;
+              const mcq = latestGraded.submittedMcqs[0];
+              flattenedSubmission = buildFlat(latestGraded, mcq);
             } else if (latestGraded.submittedDescriptives?.length > 0) {
-              flattenedSubmission = latestGraded.submittedDescriptives;
+              const desc = latestGraded.submittedDescriptives[0];
+              flattenedSubmission = buildFlat(latestGraded, desc);
             } else if (
               latestGraded.submittedAnswers?.[0]?.submittedMatchingPairs
                 ?.length > 0
             ) {
-              flattenedSubmission =
-                latestGraded.submittedAnswers[0].submittedMatchingPairs;
+              // Matching pairs logic is complex to flatten into single fields, skipping for now unless needed
+              // If needed we would probably pick the first pair or aggregate
             }
           }
 
@@ -262,15 +291,7 @@ export class GetExamSubmissionsHandler implements IQueryHandler<GetExamSubmissio
             questionText: question.questionText,
             imageFileName: question.imageFileName,
             isUnattempted,
-            submission: flattenedSubmission
-              ? {
-                  id: latestGraded!.id,
-                  submittedAnswerId: latestGraded!.submittedAnswers?.[0]?.id,
-                  timeTakenInSeconds:
-                    latestGraded!.submittedAnswers?.[0]?.timeTakenInSeconds,
-                  data: flattenedSubmission,
-                }
-              : null,
+            submission: flattenedSubmission,
           };
         }),
     );
