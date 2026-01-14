@@ -355,6 +355,90 @@ async function main() {
     }
   }
 
+  // 7. Seed Previous Submission from JSON (for comparison stats)
+  const prevJsonFilePath = path.join(
+    __dirname,
+    'json',
+    'competitive-exam-previous-submission.json',
+  );
+
+  if (fs.existsSync(prevJsonFilePath)) {
+    console.log('Seeding Previous Submissions from JSON...');
+    const rawData = fs.readFileSync(prevJsonFilePath, 'utf-8');
+    const submissionData = JSON.parse(rawData).submission;
+
+    const student = await prisma.student.findFirst({
+      where: { auth: { email: 'test.john@example.com' } },
+    });
+
+    if (student) {
+      for (const answer of submissionData.answers) {
+        const question = await prisma.question.findFirst({
+          where: {
+            questionText: answer.questionText,
+            questionSets: { some: { examId: exam.id } },
+          },
+          include: { solutionBases: true },
+        });
+
+        if (!question) continue;
+
+        // Create Submission (Older date)
+        const submission = await prisma.submission.create({
+          data: {
+            studentId: student.id,
+            questionId: question.id,
+            examId: exam.id,
+            type: SubmissionType.Exam,
+            status: SubmissionStatus.Graded,
+            beganAt: new Date(Date.now() - 86400000 * 2), // 2 days ago
+            endedAt: new Date(Date.now() - 86400000 * 2),
+            correctAnswersCount: answer.isCorrect ? 1 : 0,
+            updatedAt: new Date(Date.now() - 86400000 * 2), // Ensure it appears older
+          },
+        });
+
+        const solutionBaseId = question.solutionBases[0]?.id;
+        if (!solutionBaseId) continue;
+
+        await prisma.submittedAnswer.create({
+          data: {
+            submissionId: submission.id,
+            solutionId: solutionBaseId,
+            timeTakenInSeconds: 45,
+          },
+        });
+
+        if (answer.type === 'MCQ' || answer.type === 'Boolean') {
+          await prisma.submittedMcq.create({
+            data: {
+              submissionId: submission.id,
+              solutionId: solutionBaseId,
+              submittedOption: answer.answer,
+              isCorrect: answer.isCorrect,
+              awardedMark: answer.isCorrect ? 1 : 0,
+            },
+          });
+        } else if (
+          answer.type === 'ShortAnswer' ||
+          answer.type === 'Descriptive'
+        ) {
+          await prisma.submittedDescriptive.create({
+            data: {
+              submissionId: submission.id,
+              solutionId: solutionBaseId,
+              descriptiveSubmittedAnswer: answer.answer,
+              isCorrect: answer.isCorrect,
+              verdict: answer.isCorrect ? 'Correct' : 'Incorrect',
+              isFinished: true,
+              canvasData: '',
+            },
+          });
+        }
+      }
+    }
+  }
+
   console.log('Seeding Completed successfully.');
 }
 
