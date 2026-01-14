@@ -161,7 +161,7 @@ async function seedPastPapers() {
             totalMarks: isMcq ? 1 : 4,
             timeLimit: isMcq ? 2 : 10,
             stepCount: 1,
-            serialNo: i,
+            serialNo: i.toString(),
             contentBy: ContentBy.AI,
             questionFor: QuestionFor.Practice,
             difficultyLevel: DifficultyLevel.Medium,
