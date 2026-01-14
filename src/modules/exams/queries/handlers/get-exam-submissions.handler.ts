@@ -39,9 +39,15 @@ export class GetExamSubmissionsHandler implements IQueryHandler<GetExamSubmissio
             solutionBases: {
               select: {
                 id: true,
-                solutionMCQs: true,
-                solutionMatchingPairs: true,
-                solutionDescriptives: true,
+                solutionMCQs: {
+                  where: { voided: false },
+                },
+                solutionMatchingPairs: {
+                  where: { voided: false },
+                },
+                solutionDescriptives: {
+                  where: { voided: false },
+                },
               },
             },
           },
@@ -238,6 +244,21 @@ export class GetExamSubmissionsHandler implements IQueryHandler<GetExamSubmissio
             }
           }
 
+          // Flatten Solutions Data (matches GetExamSolutionsHandler logic)
+          const solutions = question.solutionBases.flatMap((sb): any[] => {
+            if (sb.solutionMCQs?.length > 0) {
+              return sb.solutionMCQs;
+            } else if (sb.solutionDescriptives?.length > 0) {
+              return sb.solutionDescriptives.map((sd) => ({
+                ...sd,
+                mark: sd.maxMarks,
+              }));
+            } else if (sb.solutionMatchingPairs?.length > 0) {
+              return sb.solutionMatchingPairs;
+            }
+            return [];
+          });
+
           // Flatten Submission Data
           let flattenedSubmission: any = null;
           if (latestGraded) {
@@ -290,6 +311,7 @@ export class GetExamSubmissionsHandler implements IQueryHandler<GetExamSubmissio
             type,
             questionText: question.questionText,
             imageFileName: question.imageFileName,
+            solutions,
             isUnattempted,
             submission: flattenedSubmission,
           };
