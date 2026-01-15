@@ -56,7 +56,6 @@ export class GetSubmissionsHandler
             isCorrect: true,
             awardedMarks: true,
             hint: true,
-            chatHistory: true,
             verdict: true,
             createdAt: true,
             updatedAt: true,
