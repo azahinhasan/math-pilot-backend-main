@@ -6,7 +6,8 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { QuestionFor } from '@prisma/client';
+import { QuestionFor, SubmissionType } from '@prisma/client';
+import { Type } from 'class-transformer';
 
 @Injectable()
 @QueryHandler(GetQuestionsByTopicQuery)
@@ -143,6 +144,7 @@ export class GetQuestionsByTopicHandler implements IQueryHandler<GetQuestionsByT
             where: {
               studentId: studentId,
               status: 'Graded',
+              type: SubmissionType.Practice
             },
           },
         },
