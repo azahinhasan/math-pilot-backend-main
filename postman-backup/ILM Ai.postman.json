@@ -23,7 +23,7 @@
                                 "method": "POST",
                                 "body": {
                                     "mode": "raw",
-                                    "raw": "{\r\n    \"email\": \"john.wick@example.com\",\r\n    \"name\": \"John Wick\",\r\n    \"role\": \"teacher\",\r\n    \"password\": \"fZqGbXcPqGzrRnb1\",\r\n}",
+                                    "raw": "{\r\n    \"email\": \"test_john+clerk_test@example.com\",\r\n    \"name\": \"John Clerk\",\r\n    \"role\": \"student\",\r\n    \"password\": \"fZqGbXcPqGzrRnb1\"\r\n}",
                                     "options": {
                                         "raw": {
                                             "language": "json"
@@ -116,7 +116,7 @@
                                     "query": [
                                         {
                                             "key": "email",
-                                            "value": "test.john2@example.com",
+                                            "value": "test_john+clerk_test@example.com",
                                             "description": "",
                                             "type": "string"
                                         }
@@ -140,7 +140,7 @@
                                 "method": "POST",
                                 "body": {
                                     "mode": "raw",
-                                    "raw": "{\r\n  \"email\": \"test.john2@example.com\",\r\n  \"clerkId\": \"user_36tE8ua2ScBQJWAL4wR0W6VXwND\",\r\n  \"roleId\": \"4098ac9c-a35d-4ad4-bed1-3ce84f5a9218\",\r\n  \"fullName\": \"Test Student\",\r\n  \"boardAgeLevelId\": \"8c407092-7e65-4d36-b718-51b6660be326\",\r\n  \"country\": \"United Kingdom\"\r\n}",
+                                    "raw": "{\r\n  \"email\": \"test.john3@example.com\",\r\n  \"clerkId\": \"user_36tE8ua2ScBQJWAL4wR0W6VXwND\",\r\n  \"roleId\": \"70038a89-f6a8-42fb-8244-e992b0e5dd0c\",\r\n  \"fullName\": \"Test Student\",\r\n  \"boardAgeLevelId\": \"62082dae-0443-4335-85cd-e2a3e3cc7bb2\",\r\n  \"country\": \"United Kingdom\"\r\n  // \"institutionId\": \"cdc55f2d-adb5-4dfe-824d-f7f33eb0145c\"\r\n}",
                                     "options": {
                                         "raw": {
                                             "language": "json"
@@ -238,6 +238,91 @@
                     "description": "",
                     "item": [
                         {
+                            "name": "Evaluate math",
+                            "description": "Register a user on Clerk.",
+                            "event": [],
+                            "auth": {},
+                            "request": {
+                                "auth": {
+                                    "type": "bearer",
+                                    "bearer": [
+                                        {
+                                            "key": "token",
+                                            "value": "{{token}}",
+                                            "type": "string"
+                                        }
+                                    ]
+                                },
+                                "method": "POST",
+                                "body": {
+                                    "mode": "formdata",
+                                    "formdata": [
+                                        {
+                                            "key": "questionId",
+                                            "value": "eee25c0c-fc8f-48ee-a6c9-6ecc623f1a8b",
+                                            "type": "text",
+                                            "disabled": false
+                                        },
+                                        {
+                                            "key": "images",
+                                            "value": "file://C:\\Users\\Zahin\\Downloads\\3d-rendering-road-scenario (1).jpg",
+                                            "type": "file",
+                                            "disabled": false
+                                        },
+                                        {
+                                            "key": "canvasData",
+                                            "value": "\"[   {     version: '6.9.1',     objects: [ [Object] ],     background: 'transparent'   },   { version: '6.9.1', objects: [], background: 'transparent' } ]\"",
+                                            "type": "text",
+                                            "disabled": false
+                                        },
+                                        {
+                                            "key": "currentStepCount",
+                                            "value": "1",
+                                            "type": "text",
+                                            "disabled": false
+                                        },
+                                        {
+                                            "key": "chatHistory",
+                                            "type": "text",
+                                            "disabled": false
+                                        },
+                                        {
+                                            "key": "timeSpent",
+                                            "value": "100",
+                                            "description": "in seconds",
+                                            "type": "text",
+                                            "disabled": false
+                                        }
+                                    ]
+                                },
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json",
+                                        "description": "",
+                                        "type": "string"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{baseUrl}}/practice/evaluate",
+                                    "path": [
+                                        "practice",
+                                        "evaluate"
+                                    ],
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "query": [],
+                                    "variable": []
+                                }
+                            },
+                            "response": [],
+                            "protocolProfileBehavior": {
+                                "strictSSL": false,
+                                "followRedirects": true
+                            }
+                        },
+                        {
                             "name": "Submitted info user by qus id",
                             "description": "",
                             "event": [],
@@ -284,86 +369,6 @@
                             }
                         },
                         {
-                            "name": "Evaluate math",
-                            "description": "Register a user on Clerk.",
-                            "event": [],
-                            "auth": {},
-                            "request": {
-                                "auth": {},
-                                "method": "POST",
-                                "body": {
-                                    "mode": "formdata",
-                                    "formdata": [
-                                        {
-                                            "key": "field_name",
-                                            "value": "value",
-                                            "description": "example",
-                                            "type": "text",
-                                            "contentType": "validation",
-                                            "disabled": true
-                                        },
-                                        {
-                                            "key": "question_id",
-                                            "value": "6a6b600c-7737-46a9-bae8-6f9c3e7f3ae4",
-                                            "type": "text",
-                                            "disabled": false
-                                        },
-                                        {
-                                            "key": "images",
-                                            "value": [
-                                                "file://C:\\Users\\Ashak Zahin Hasan\\Downloads\\1.png",
-                                                "file://C:\\Users\\Ashak Zahin Hasan\\Downloads\\2.png"
-                                            ],
-                                            "type": "file",
-                                            "disabled": false
-                                        },
-                                        {
-                                            "key": "canvas_data",
-                                            "value": "[{\"serial_no\":1,\"canvas_json\":{\"version\":\"5.3.0\",\"objects\":[]}},{\"serial_no\":2,\"canvas_json\":{\"version\":\"5.3.0\",\"objects\":[]}}]",
-                                            "type": "text",
-                                            "disabled": false
-                                        },
-                                        {
-                                            "key": "current_step_count",
-                                            "value": "1",
-                                            "type": "text",
-                                            "disabled": false
-                                        },
-                                        {
-                                            "key": "chat_history",
-                                            "type": "text",
-                                            "disabled": false
-                                        }
-                                    ]
-                                },
-                                "header": [
-                                    {
-                                        "key": "Content-Type",
-                                        "value": "application/json",
-                                        "description": "",
-                                        "type": "string"
-                                    }
-                                ],
-                                "url": {
-                                    "raw": "{{baseUrl}}/practice/evaluate",
-                                    "path": [
-                                        "practice",
-                                        "evaluate"
-                                    ],
-                                    "host": [
-                                        "{{baseUrl}}"
-                                    ],
-                                    "query": [],
-                                    "variable": []
-                                }
-                            },
-                            "response": [],
-                            "protocolProfileBehavior": {
-                                "strictSSL": false,
-                                "followRedirects": true
-                            }
-                        },
-                        {
                             "name": "Try again",
                             "description": "Register a user on Clerk.",
                             "event": [],
@@ -373,7 +378,7 @@
                                 "method": "POST",
                                 "body": {
                                     "mode": "raw",
-                                    "raw": "{\r\n  \"question_id\": \"6a6b600c-7737-46a9-bae8-6f9c3e7f3ae4\"\r\n}",
+                                    "raw": "{\r\n  \"questionId\": \"6a6b600c-7737-46a9-bae8-6f9c3e7f3ae4\"\r\n}",
                                     "options": {
                                         "raw": {
                                             "language": "json"
@@ -399,6 +404,52 @@
                                     ],
                                     "query": [],
                                     "variable": []
+                                }
+                            },
+                            "response": [],
+                            "protocolProfileBehavior": {
+                                "strictSSL": false,
+                                "followRedirects": true
+                            }
+                        },
+                        {
+                            "name": "Get statistics by Module Id",
+                            "description": "",
+                            "event": [],
+                            "auth": {},
+                            "request": {
+                                "auth": {
+                                    "type": "bearer",
+                                    "bearer": [
+                                        {
+                                            "key": "token",
+                                            "value": "{{token}}",
+                                            "type": "string"
+                                        }
+                                    ]
+                                },
+                                "method": "GET",
+                                "body": {},
+                                "header": [],
+                                "url": {
+                                    "raw": "{{baseUrl}}/practice/statistics/:moduleId",
+                                    "path": [
+                                        "practice",
+                                        "statistics",
+                                        ":moduleId"
+                                    ],
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "query": [],
+                                    "variable": [
+                                        {
+                                            "key": "moduleId",
+                                            "value": "30031bd2-a668-4339-9b63-130b159aa811",
+                                            "description": "",
+                                            "type": "string"
+                                        }
+                                    ]
                                 }
                             },
                             "response": [],
@@ -735,15 +786,7 @@
                                     ]
                                 },
                                 "method": "GET",
-                                "body": {
-                                    "mode": "raw",
-                                    "raw": "{\r\n  \"name\": \"Algebra Fundamentals\",\r\n  \"description\": \"Introduction to algebraic concepts and equations\",\r\n  \"boardAgeLevelId\": \"your-board-age-level-uuid-here\",\r\n  \"subject\": \"Mathematics\",\r\n  \"formulaBookUrl\": \"https://example.com/algebra-formulas.pdf\",\r\n  \"logoFileName\": \"algebra-logo.png\"\r\n}",
-                                    "options": {
-                                        "raw": {
-                                            "language": "json"
-                                        }
-                                    }
-                                },
+                                "body": {},
                                 "header": [],
                                 "url": {
                                     "raw": "{{baseUrl}}/modules/subject/:subject",
@@ -875,6 +918,12 @@
                                             "value": "1",
                                             "description": "",
                                             "type": "string"
+                                        },
+                                        {
+                                            "key": "subject",
+                                            "value": "Mathematics",
+                                            "description": "",
+                                            "type": "string"
                                         }
                                     ],
                                     "variable": []
@@ -932,7 +981,7 @@
                             }
                         },
                         {
-                            "name": "Get by subject for Practice",
+                            "name": "Get by module for Practice",
                             "description": "",
                             "event": [],
                             "auth": {},
@@ -967,12 +1016,24 @@
                                             "value": "1",
                                             "description": "",
                                             "type": "string"
+                                        },
+                                        {
+                                            "key": "page",
+                                            "value": "1",
+                                            "description": "",
+                                            "type": "string"
+                                        },
+                                        {
+                                            "key": "limit",
+                                            "value": "10",
+                                            "description": "",
+                                            "type": "string"
                                         }
                                     ],
                                     "variable": [
                                         {
                                             "key": "moduleId",
-                                            "value": "e9e1623e-0e60-4071-a839-d0bfcc908447",
+                                            "value": "722aba33-416a-46a9-bc7f-48958a3c49ae",
                                             "description": "",
                                             "type": "string"
                                         }
@@ -1060,11 +1121,20 @@
                             "event": [],
                             "auth": {},
                             "request": {
-                                "auth": {},
+                                "auth": {
+                                    "type": "bearer",
+                                    "bearer": [
+                                        {
+                                            "key": "token",
+                                            "value": "{{token}}",
+                                            "type": "string"
+                                        }
+                                    ]
+                                },
                                 "method": "POST",
                                 "body": {
                                     "mode": "raw",
-                                    "raw": "{\n    \"type\": \"Competitive\",\n    \"difficulty\": \"Beginner\",\n    \"timeLimit\": 20,\n    \"questions\": 5,\n    \"name\": \"Seeded Exam Test\",\n    \"topics\": [\n      {\n        \"topicId\": \"95e239b8-b950-46a8-bacb-79506e0c97d7\",\n        \"subtopicIds\": [\n          \"cf039228-a540-4b9f-8ba0-20e8020a2bf6\",\n          \"97ffed7d-2277-4f73-9f2d-f5f223ed230e\"\n        ]\n      }\n    ]\n  }",
+                                    "raw": "{\n  \"type\": \"Competitive\",\n  \"difficulty\": \"Intermediate\", // difficulty must be one of: Easy, Medium, Hard (aliases: Beginner/Intermediate/Advanced accepted)\n  \"timeLimit\": 45,\n  \"questions\": 8,\n  \"name\": \"Chapter 2 - Quadratics - Quadratic graphs - Test\",\n  \"topics\": [\n    {\n      \"topicId\": \"34b9062b-6bc9-4697-b3c7-d01bf651426b\",\n      \"subtopicIds\": [\n        \"4cc49ee6-64e9-45a3-a32b-ea3bbc5cc20a\"\n      ]\n    }\n  ]\n}",
                                     "options": {
                                         "raw": {
                                             "language": "json"
@@ -1096,11 +1166,20 @@
                             "event": [],
                             "auth": {},
                             "request": {
-                                "auth": {},
+                                "auth": {
+                                    "type": "bearer",
+                                    "bearer": [
+                                        {
+                                            "key": "token",
+                                            "value": "{{token}}",
+                                            "type": "string"
+                                        }
+                                    ]
+                                },
                                 "method": "POST",
                                 "body": {
                                     "mode": "raw",
-                                    "raw": "{\n  \"name\": \"Mock Exam - 2020 Summer\",\n  \"timeLimit\": 20,\n  \"questionSetName\": \"General Mathematics\",\n  \"year\": 2020,\n  \"season\": \"Summer\",\n  \"markSchemeUrl\": \"https://example.com/mark-scheme.pdf\",\n  \"questionIds\": [\n    \"3e0788a8-901f-45a8-8547-3972119178f4\",\n    \"d8298a77-3143-4d83-b927-5c1f59bc0b1e\",\n    \"9e00b68d-b81b-49b6-9d53-214d5cdd51b7\",\n    \"a7303a9a-2833-45b9-8a39-c0cb5d5cd5c6\",\n    \"5d627dbb-a524-4e07-b8a3-1a47362296ad\"\n  ]\n}",
+                                    "raw": "{\n  \"mockExamId\": \"41e96e9c-707b-4dfd-bd2d-b649e19cd80d\"\n}",
                                     "options": {
                                         "raw": {
                                             "language": "json"
@@ -1119,6 +1198,383 @@
                                     ],
                                     "query": [],
                                     "variable": []
+                                }
+                            },
+                            "response": [],
+                            "protocolProfileBehavior": {
+                                "strictSSL": false,
+                                "followRedirects": true
+                            }
+                        },
+                        {
+                            "name": "Exam All Questions Solution",
+                            "description": "",
+                            "event": [],
+                            "auth": {},
+                            "request": {
+                                "auth": {
+                                    "type": "bearer",
+                                    "bearer": [
+                                        {
+                                            "key": "token",
+                                            "value": "{{token}}",
+                                            "type": "string"
+                                        }
+                                    ]
+                                },
+                                "method": "GET",
+                                "body": {},
+                                "header": [],
+                                "url": {
+                                    "raw": "{{baseUrl}}/exams/:examId/solutions",
+                                    "path": [
+                                        "exams",
+                                        ":examId",
+                                        "solutions"
+                                    ],
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "query": [],
+                                    "variable": [
+                                        {
+                                            "key": "examId",
+                                            "value": "9d9348b3-caf2-49f0-a617-56dc4ee084e1",
+                                            "description": "",
+                                            "type": "string"
+                                        }
+                                    ]
+                                }
+                            },
+                            "response": [],
+                            "protocolProfileBehavior": {
+                                "strictSSL": false,
+                                "followRedirects": true
+                            }
+                        },
+                        {
+                            "name": "Exam history api",
+                            "description": "",
+                            "event": [],
+                            "auth": {},
+                            "request": {
+                                "auth": {
+                                    "type": "bearer",
+                                    "bearer": [
+                                        {
+                                            "key": "token",
+                                            "value": "{{token}}",
+                                            "type": "string"
+                                        }
+                                    ]
+                                },
+                                "method": "GET",
+                                "body": {},
+                                "header": [],
+                                "url": {
+                                    "raw": "{{baseUrl}}/exams/history",
+                                    "path": [
+                                        "exams",
+                                        "history"
+                                    ],
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "query": [],
+                                    "variable": []
+                                }
+                            },
+                            "response": [
+                                {
+                                    "name": "Sorting & Searching & Pagination",
+                                    "originalRequest": {
+                                        "method": "GET",
+                                        "header": [],
+                                        "url": {
+                                            "raw": "{{baseUrl}}/exams/history",
+                                            "path": [
+                                                "exams",
+                                                "history"
+                                            ],
+                                            "host": [
+                                                "{{baseUrl}}"
+                                            ],
+                                            "query": [
+                                                {
+                                                    "key": "topic",
+                                                    "value": "Alg",
+                                                    "disabled": false
+                                                },
+                                                {
+                                                    "key": "sortBy",
+                                                    "value": "marks",
+                                                    "description": "sortBy must be one of the following values: marks, recent",
+                                                    "disabled": false
+                                                },
+                                                {
+                                                    "key": "page",
+                                                    "value": "1",
+                                                    "disabled": false
+                                                },
+                                                {
+                                                    "key": "limit",
+                                                    "value": "5",
+                                                    "disabled": false
+                                                },
+                                                {
+                                                    "key": "subtopics",
+                                                    "value": "Quadratics (Seeded)",
+                                                    "disabled": false
+                                                }
+                                            ],
+                                            "variable": []
+                                        },
+                                        "body": {
+                                            "undefined": ""
+                                        }
+                                    },
+                                    "cookie": [],
+                                    "status": "OK",
+                                    "code": 200,
+                                    "_postman_previewlanguage": "json",
+                                    "header": [
+                                        {
+                                            "key": "content-length",
+                                            "value": "390"
+                                        },
+                                        {
+                                            "key": "content-type",
+                                            "value": "application/json; charset=utf-8"
+                                        }
+                                    ],
+                                    "body": "{\"entries\":[{\"examId\":\"c8426bd8-b02d-45c0-acb3-9abb0ceca2e4\",\"examName\":\"Test Exam for API Verification\",\"topicNames\":[\"Algebra (Seeded)\"],\"subtopicNames\":[\"Quadratics (Seeded)\",\"Linear Equations (Seeded)\"],\"progress\":6,\"accuracy\":100,\"timeSpent\":21600,\"mistakes\":0,\"totalMarks\":6,\"maxMarks\":6,\"attemptedAt\":\"2025-12-23T17:41:46.504Z\"}],\"meta\":{\"total\":1,\"page\":1,\"limit\":5,\"totalPages\":1}}"
+                                }
+                            ],
+                            "protocolProfileBehavior": {
+                                "strictSSL": false,
+                                "followRedirects": true
+                            }
+                        },
+                        {
+                            "name": "Test Evaluation API",
+                            "description": "",
+                            "event": [],
+                            "auth": {},
+                            "request": {
+                                "auth": {
+                                    "type": "bearer",
+                                    "bearer": [
+                                        {
+                                            "key": "token",
+                                            "value": "{{token}}",
+                                            "type": "string"
+                                        }
+                                    ]
+                                },
+                                "method": "POST",
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"examId\": \"5984d4a6-68e1-419b-91f8-7dfdedf630a8\",\n  \"beganAt\": \"2023-10-27T10:00:00.000Z\",\n  \"endedAt\": \"2023-10-27T10:02:00.000Z\",\n  \"submissions\": [\n    {\n      \"questionId\": \"40843253-72e9-454a-a3e9-1a9dbf466bf8\",\n      \"data\": {\n        \"submittedOption\": \"True\"\n      }\n    },\n    {\n      \"questionId\": \"d63c6635-b8d3-4462-9f13-31e1fed4aadd\",\n      \"data\": {\n        \"submittedOption\": \"3\"\n      }\n    },\n    {\n      \"questionId\": \"249792a7-8fec-4fbf-9f3d-04259b497b62\",\n      \"data\": {\n        \"descriptiveSubmittedAnswer\": \"The logo of tailwind CSS.\", //pass value for textfield type descriptive qus\n        \"canvasData\": \"\" //pass value for canvas type\n      }\n    }\n  ]\n}",
+                                    "options": {
+                                        "raw": {
+                                            "language": "json"
+                                        }
+                                    }
+                                },
+                                "header": [],
+                                "url": {
+                                    "raw": "{{baseUrl}}/exams/submit",
+                                    "path": [
+                                        "exams",
+                                        "submit"
+                                    ],
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "query": [],
+                                    "variable": []
+                                }
+                            },
+                            "response": [],
+                            "protocolProfileBehavior": {
+                                "strictSSL": false,
+                                "followRedirects": true
+                            }
+                        },
+                        {
+                            "name": "Exam Status",
+                            "description": "",
+                            "event": [],
+                            "auth": {},
+                            "request": {
+                                "auth": {
+                                    "type": "bearer",
+                                    "bearer": [
+                                        {
+                                            "key": "token",
+                                            "value": "{{token}}",
+                                            "type": "string"
+                                        }
+                                    ]
+                                },
+                                "method": "GET",
+                                "body": {},
+                                "header": [],
+                                "url": {
+                                    "raw": "{{baseUrl}}/exams/status",
+                                    "path": [
+                                        "exams",
+                                        "status"
+                                    ],
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "query": [],
+                                    "variable": []
+                                }
+                            },
+                            "response": [],
+                            "protocolProfileBehavior": {
+                                "strictSSL": false,
+                                "followRedirects": true
+                            }
+                        },
+                        {
+                            "name": "Get Mock Past Papers",
+                            "description": "",
+                            "event": [],
+                            "auth": {},
+                            "request": {
+                                "auth": {
+                                    "type": "bearer",
+                                    "bearer": [
+                                        {
+                                            "key": "token",
+                                            "value": "{{token}}",
+                                            "type": "string"
+                                        }
+                                    ]
+                                },
+                                "method": "GET",
+                                "body": {},
+                                "header": [],
+                                "url": {
+                                    "raw": "{{baseUrl}}/exams/mock/past-papers",
+                                    "path": [
+                                        "exams",
+                                        "mock",
+                                        "past-papers"
+                                    ],
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "moduleId",
+                                            "value": "cbd1b4f0-5b47-41e3-8217-99f1a0dfa63b",
+                                            "description": "Id of module to get past papers for",
+                                            "type": "string"
+                                        },
+                                        {
+                                            "key": "boardId",
+                                            "value": "2ea9b07c-5ea5-4c6a-8ecd-b4d30077e88b",
+                                            "description": "Id of board/age level to get past papers for",
+                                            "type": "string"
+                                        }
+                                    ],
+                                    "variable": []
+                                }
+                            },
+                            "response": [],
+                            "protocolProfileBehavior": {
+                                "strictSSL": false,
+                                "followRedirects": true
+                            }
+                        },
+                        {
+                            "name": "Exam All Questions",
+                            "description": "",
+                            "event": [],
+                            "auth": {},
+                            "request": {
+                                "auth": {
+                                    "type": "bearer",
+                                    "bearer": [
+                                        {
+                                            "key": "token",
+                                            "value": "{{token}}",
+                                            "type": "string"
+                                        }
+                                    ]
+                                },
+                                "method": "GET",
+                                "body": {},
+                                "header": [],
+                                "url": {
+                                    "raw": "{{baseUrl}}/exams/:examId/questions",
+                                    "path": [
+                                        "exams",
+                                        ":examId",
+                                        "questions"
+                                    ],
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "query": [],
+                                    "variable": [
+                                        {
+                                            "key": "examId",
+                                            "value": "9d9348b3-caf2-49f0-a617-56dc4ee084e1",
+                                            "description": "",
+                                            "type": "string"
+                                        }
+                                    ]
+                                }
+                            },
+                            "response": [],
+                            "protocolProfileBehavior": {
+                                "strictSSL": false,
+                                "followRedirects": true
+                            }
+                        },
+                        {
+                            "name": "Get Exam Submissions",
+                            "description": "",
+                            "event": [],
+                            "auth": {},
+                            "request": {
+                                "auth": {
+                                    "type": "bearer",
+                                    "bearer": [
+                                        {
+                                            "key": "token",
+                                            "value": "{{token}}",
+                                            "type": "string"
+                                        }
+                                    ]
+                                },
+                                "method": "GET",
+                                "body": {},
+                                "header": [],
+                                "url": {
+                                    "raw": "{{baseUrl}}/exams/:examId/submissions",
+                                    "path": [
+                                        "exams",
+                                        ":examId",
+                                        "submissions"
+                                    ],
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "query": [],
+                                    "variable": [
+                                        {
+                                            "key": "examId",
+                                            "value": "c9bb1fe3-351b-4d2a-a1f8-6db59180f50f",
+                                            "description": "",
+                                            "type": "string"
+                                        }
+                                    ]
                                 }
                             },
                             "response": [],
@@ -1153,115 +1609,330 @@
                     "description": "",
                     "item": [
                         {
-                            "name": "MCQ",
+                            "name": "Get Solution for a specific question",
                             "description": "",
-                            "event": [],
-                            "auth": {},
-                            "request": {
-                                "auth": {},
-                                "method": "POST",
-                                "body": {
-                                    "mode": "raw",
-                                    "raw": "{\n    \"name\": \"Sample MCQ\",\n    \"questionText\": \"2 + 2 = ?\",\n    \"questionContentLink\": \"https://example.com/questions/mcq-1\",\n    \"hint\": \"Add the numbers\",\n    \"stepCount\": 1,\n    \"serialNo\": 1001,\n    \"questionTypeName\": \"MCQ\",\n    \"mcq\": {\n      \"options\": [\n        { \"optionText\": \"3\", \"isCorrect\": false, \"mark\": 0 },\n        { \"optionText\": \"4\", \"isCorrect\": true,  \"mark\": 1 }\n      ]\n    }\n  }",
-                                    "options": {
-                                        "raw": {
-                                            "language": "json"
+                            "item": [
+                                {
+                                    "name": "Get MCQ Solution",
+                                    "description": "",
+                                    "event": [],
+                                    "auth": {},
+                                    "request": {
+                                        "auth": {
+                                            "type": "bearer",
+                                            "bearer": [
+                                                {
+                                                    "key": "token",
+                                                    "value": "{{token}}",
+                                                    "type": "string"
+                                                }
+                                            ]
+                                        },
+                                        "method": "GET",
+                                        "body": {},
+                                        "header": [],
+                                        "url": {
+                                            "raw": "{{baseUrl}}/questions/:id/solution",
+                                            "path": [
+                                                "questions",
+                                                ":id",
+                                                "solution"
+                                            ],
+                                            "host": [
+                                                "{{baseUrl}}"
+                                            ],
+                                            "query": [],
+                                            "variable": [
+                                                {
+                                                    "key": "id",
+                                                    "value": "1ca02338-1579-41da-8911-697cdce6f4a5",
+                                                    "description": "",
+                                                    "type": "string"
+                                                }
+                                            ]
                                         }
+                                    },
+                                    "response": [],
+                                    "protocolProfileBehavior": {
+                                        "strictSSL": false,
+                                        "followRedirects": true
                                     }
                                 },
-                                "header": [],
-                                "url": {
-                                    "raw": "{{baseUrl}}/questions",
-                                    "path": [
-                                        "questions"
-                                    ],
-                                    "host": [
-                                        "{{baseUrl}}"
-                                    ],
-                                    "query": [],
-                                    "variable": []
-                                }
-                            },
-                            "response": [],
-                            "protocolProfileBehavior": {
-                                "strictSSL": false,
-                                "followRedirects": true
-                            }
-                        },
-                        {
-                            "name": "Descriptive",
-                            "description": "",
-                            "event": [],
-                            "auth": {},
-                            "request": {
-                                "auth": {},
-                                "method": "POST",
-                                "body": {
-                                    "mode": "raw",
-                                    "raw": "{\n    \"name\": \"Sample Descriptive\",\n    \"questionText\": \"Explain why division by zero is undefined.\",\n    \"questionContentLink\": \"https://example.com/questions/desc-1\",\n    \"hint\": \"Use the meaning of division\",\n    \"stepCount\": 3,\n    \"serialNo\": 1003,\n    \"questionTypeName\": \"Descriptive\",\n    \"descriptive\": {\n      \"descriptiveSolution\": \"Division asks: what number x makes 0*x equal the numerator. For nonzero numerator, no such x exists.\",\n      \"maxMarks\": 5,\n      \"markingStepsJson\": [\n        { \"step\": \"Define division as inverse of multiplication\", \"mark\": 2 },\n        { \"step\": \"Show 0*x = 0 for all x\", \"mark\": 2 },\n        { \"step\": \"Conclude no solution for nonzero numerator\", \"mark\": 1 }\n      ]\n    }\n  }",
-                                    "options": {
-                                        "raw": {
-                                            "language": "json"
+                                {
+                                    "name": "Get True False Solution",
+                                    "description": "",
+                                    "event": [],
+                                    "auth": {},
+                                    "request": {
+                                        "auth": {
+                                            "type": "bearer",
+                                            "bearer": [
+                                                {
+                                                    "key": "token",
+                                                    "value": "{{token}}",
+                                                    "type": "string"
+                                                }
+                                            ]
+                                        },
+                                        "method": "GET",
+                                        "body": {},
+                                        "header": [],
+                                        "url": {
+                                            "raw": "{{baseUrl}}/questions/:id/solution/",
+                                            "path": [
+                                                "questions",
+                                                ":id",
+                                                "solution"
+                                            ],
+                                            "host": [
+                                                "{{baseUrl}}"
+                                            ],
+                                            "query": [],
+                                            "variable": [
+                                                {
+                                                    "key": "id",
+                                                    "value": "993d44a5-538f-47b1-a5d7-96a87f0be8f0",
+                                                    "description": "",
+                                                    "type": "string"
+                                                }
+                                            ]
                                         }
+                                    },
+                                    "response": [],
+                                    "protocolProfileBehavior": {
+                                        "strictSSL": false,
+                                        "followRedirects": true
                                     }
                                 },
-                                "header": [],
-                                "url": {
-                                    "raw": "{{baseUrl}}/questions",
-                                    "path": [
-                                        "questions"
-                                    ],
-                                    "host": [
-                                        "{{baseUrl}}"
-                                    ],
-                                    "query": [],
-                                    "variable": []
-                                }
-                            },
-                            "response": [],
-                            "protocolProfileBehavior": {
-                                "strictSSL": false,
-                                "followRedirects": true
-                            }
-                        },
-                        {
-                            "name": "True False",
-                            "description": "",
-                            "event": [],
-                            "auth": {},
-                            "request": {
-                                "auth": {},
-                                "method": "POST",
-                                "body": {
-                                    "mode": "raw",
-                                    "raw": "{\n    \"name\": \"Sample TrueFalse\",\n    \"questionText\": \"The Earth is flat.\",\n    \"questionContentLink\": \"https://example.com/questions/tf-1\",\n    \"hint\": \"Think about space images\",\n    \"stepCount\": 1,\n    \"serialNo\": 1002,\n    \"questionTypeName\": \"TrueFalse\",\n    \"trueFalse\": { \"correct\": \"False\", \"mark\": 1 }\n  }",
-                                    "options": {
-                                        "raw": {
-                                            "language": "json"
+                                {
+                                    "name": "Get Descriptive Question Solution",
+                                    "description": "",
+                                    "event": [],
+                                    "auth": {},
+                                    "request": {
+                                        "auth": {
+                                            "type": "bearer",
+                                            "bearer": [
+                                                {
+                                                    "key": "token",
+                                                    "value": "{{token}}",
+                                                    "type": "string"
+                                                }
+                                            ]
+                                        },
+                                        "method": "GET",
+                                        "body": {},
+                                        "header": [],
+                                        "url": {
+                                            "raw": "{{baseUrl}}/questions/:id/solution/",
+                                            "path": [
+                                                "questions",
+                                                ":id",
+                                                "solution"
+                                            ],
+                                            "host": [
+                                                "{{baseUrl}}"
+                                            ],
+                                            "query": [],
+                                            "variable": [
+                                                {
+                                                    "key": "id",
+                                                    "value": "dd14bbaf-c6d7-483b-9c02-9f4f9c872ed7",
+                                                    "description": "",
+                                                    "type": "string"
+                                                }
+                                            ]
                                         }
+                                    },
+                                    "response": [],
+                                    "protocolProfileBehavior": {
+                                        "strictSSL": false,
+                                        "followRedirects": true
+                                    }
+                                }
+                            ],
+                            "event": [
+                                {
+                                    "listen": "prerequest",
+                                    "script": {
+                                        "exec": [],
+                                        "type": "text/javascript",
+                                        "packages": {}
                                     }
                                 },
-                                "header": [],
-                                "url": {
-                                    "raw": "{{baseUrl}}/questions",
-                                    "path": [
-                                        "questions"
-                                    ],
-                                    "host": [
-                                        "{{baseUrl}}"
-                                    ],
-                                    "query": [],
-                                    "variable": []
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [],
+                                        "type": "text/javascript",
+                                        "packages": {}
+                                    }
                                 }
-                            },
-                            "response": [],
-                            "protocolProfileBehavior": {
-                                "strictSSL": false,
-                                "followRedirects": true
-                            }
+                            ],
+                            "auth": {}
                         },
                         {
-                            "name": "Get Quss by topic for practice",
+                            "name": "Create Questions",
+                            "description": "",
+                            "item": [
+                                {
+                                    "name": "MCQ",
+                                    "description": "",
+                                    "event": [],
+                                    "auth": {},
+                                    "request": {
+                                        "auth": {
+                                            "type": "bearer",
+                                            "bearer": [
+                                                {
+                                                    "key": "token",
+                                                    "value": "{{token}}",
+                                                    "type": "string"
+                                                }
+                                            ]
+                                        },
+                                        "method": "POST",
+                                        "body": {
+                                            "mode": "raw",
+                                            "raw": "{\n    \"name\": \"Sample MCQ\",\n    \"questionText\": \"2 + 2 = ?\",\n    \"questionContentLink\": \"https://example.com/questions/mcq-1\",\n    \"hint\": \"Add the numbers\",\n    \"stepCount\": 1,\n    \"serialNo\": 1001,\n    \"questionTypeName\": \"MCQ\",\n    \"moduleId\":\"78dea0a7-d236-4f52-818d-93cd2a640f23\",\n    \"topicId\":\"457a2bdf-9fc0-46e8-9db4-9dcfb0d0c927\",\n    \"subtopicId\":\"93b36752-eec7-4e73-8315-89613ee500bb\",\n    \"mcq\": {\n      \"options\": [\n        { \"optionText\": \"3\", \"isCorrect\": false, \"mark\": 0 },\n        { \"optionText\": \"4\", \"isCorrect\": true,  \"mark\": 1 }\n      ]\n    }\n  }",
+                                            "options": {
+                                                "raw": {
+                                                    "language": "json"
+                                                }
+                                            }
+                                        },
+                                        "header": [],
+                                        "url": {
+                                            "raw": "{{baseUrl}}/questions",
+                                            "path": [
+                                                "questions"
+                                            ],
+                                            "host": [
+                                                "{{baseUrl}}"
+                                            ],
+                                            "query": [],
+                                            "variable": []
+                                        }
+                                    },
+                                    "response": [],
+                                    "protocolProfileBehavior": {
+                                        "strictSSL": false,
+                                        "followRedirects": true
+                                    }
+                                },
+                                {
+                                    "name": "Descriptive",
+                                    "description": "",
+                                    "event": [],
+                                    "auth": {},
+                                    "request": {
+                                        "auth": {
+                                            "type": "bearer",
+                                            "bearer": [
+                                                {
+                                                    "key": "token",
+                                                    "value": "{{token}}",
+                                                    "type": "string"
+                                                }
+                                            ]
+                                        },
+                                        "method": "POST",
+                                        "body": {
+                                            "mode": "raw",
+                                            "raw": "{\n    \"name\": \"Sample Descriptive\",\n    \"questionText\": \"Explain why division by zero is undefined.\",\n    \"questionContentLink\": \"https://example.com/questions/desc-1\",\n    \"hint\": \"Use the meaning of division\",\n    \"stepCount\": 3,\n    \"serialNo\": 1003,\n    \"questionTypeName\": \"Descriptive\",\n    \"moduleId\":\"78dea0a7-d236-4f52-818d-93cd2a640f23\",\n    \"topicId\":\"457a2bdf-9fc0-46e8-9db4-9dcfb0d0c927\",\n    \"subtopicId\":\"93b36752-eec7-4e73-8315-89613ee500bb\",\n    \"descriptive\": {\n      \"descriptiveSolution\": \"Division asks: what number x makes 0*x equal the numerator. For nonzero numerator, no such x exists.\",\n      \"maxMarks\": 5,\n      \"markingStepsJson\": [\n        { \"step\": \"Define division as inverse of multiplication\", \"mark\": 2 },\n        { \"step\": \"Show 0*x = 0 for all x\", \"mark\": 2 },\n        { \"step\": \"Conclude no solution for nonzero numerator\", \"mark\": 1 }\n      ]\n    }\n  }",
+                                            "options": {
+                                                "raw": {
+                                                    "language": "json"
+                                                }
+                                            }
+                                        },
+                                        "header": [],
+                                        "url": {
+                                            "raw": "{{baseUrl}}/questions",
+                                            "path": [
+                                                "questions"
+                                            ],
+                                            "host": [
+                                                "{{baseUrl}}"
+                                            ],
+                                            "query": [],
+                                            "variable": []
+                                        }
+                                    },
+                                    "response": [],
+                                    "protocolProfileBehavior": {
+                                        "strictSSL": false,
+                                        "followRedirects": true
+                                    }
+                                },
+                                {
+                                    "name": "True False",
+                                    "description": "",
+                                    "event": [],
+                                    "auth": {},
+                                    "request": {
+                                        "auth": {
+                                            "type": "bearer",
+                                            "bearer": [
+                                                {
+                                                    "key": "token",
+                                                    "value": "{{token}}",
+                                                    "type": "string"
+                                                }
+                                            ]
+                                        },
+                                        "method": "POST",
+                                        "body": {
+                                            "mode": "raw",
+                                            "raw": "{\n    \"name\": \"Sample TrueFalse\",\n    \"questionText\": \"The Earth is flat.\",\n    \"questionContentLink\": \"https://example.com/questions/tf-1\",\n    \"hint\": \"Think about space images\",\n    \"stepCount\": 1,\n    \"serialNo\": 1002,\n    \"moduleId\":\"78dea0a7-d236-4f52-818d-93cd2a640f23\",\n    \"topicId\":\"457a2bdf-9fc0-46e8-9db4-9dcfb0d0c927\",\n    \"subtopicId\":\"93b36752-eec7-4e73-8315-89613ee500bb\",\n    \"questionTypeName\": \"TrueFalse\",\n    \"trueFalse\": { \"correct\": \"False\", \"mark\": 1 }\n  }",
+                                            "options": {
+                                                "raw": {
+                                                    "language": "json"
+                                                }
+                                            }
+                                        },
+                                        "header": [],
+                                        "url": {
+                                            "raw": "{{baseUrl}}/questions",
+                                            "path": [
+                                                "questions"
+                                            ],
+                                            "host": [
+                                                "{{baseUrl}}"
+                                            ],
+                                            "query": [],
+                                            "variable": []
+                                        }
+                                    },
+                                    "response": [],
+                                    "protocolProfileBehavior": {
+                                        "strictSSL": false,
+                                        "followRedirects": true
+                                    }
+                                }
+                            ],
+                            "event": [
+                                {
+                                    "listen": "prerequest",
+                                    "script": {
+                                        "exec": [],
+                                        "type": "text/javascript",
+                                        "packages": {}
+                                    }
+                                },
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [],
+                                        "type": "text/javascript",
+                                        "packages": {}
+                                    }
+                                }
+                            ],
+                            "auth": {}
+                        },
+                        {
+                            "name": "Get Questions by topic for practice",
                             "description": "",
                             "event": [],
                             "auth": {},
@@ -1290,11 +1961,24 @@
                                     "host": [
                                         "{{baseUrl}}"
                                     ],
-                                    "query": [],
+                                    "query": [
+                                        {
+                                            "key": "page",
+                                            "value": "1",
+                                            "description": "",
+                                            "type": "string"
+                                        },
+                                        {
+                                            "key": "limit",
+                                            "value": "10",
+                                            "description": "",
+                                            "type": "string"
+                                        }
+                                    ],
                                     "variable": [
                                         {
                                             "key": "topicId",
-                                            "value": "a1dfe001-ef07-4518-8965-e95a954b1b0e",
+                                            "value": "1703a810-e011-40cf-9b4d-56ffca4cb2a7",
                                             "description": "",
                                             "type": "string"
                                         }
@@ -1430,7 +2114,7 @@
                                 "method": "POST",
                                 "body": {
                                     "mode": "raw",
-                                    "raw": "{\r\n  \"questionId\": \"4a6bddd5-abb0-475d-bec9-efd55d74abf6\",\r\n  \"hint\": \"string (optional)\",\r\n  \"canvasJson\": \"string\"\r\n}",
+                                    "raw": "{\r\n  \"questionId\": \"6a6b600c-7737-46a9-bae8-6f9c3e7f3ae4\",\r\n  \"hint\": \"string (optional)\",\r\n  \"canvasJson\": \"ffdasf fasdf\"\r\n}",
                                     "options": {
                                         "raw": {
                                             "language": "json"
@@ -1488,7 +2172,7 @@
                                     "variable": [
                                         {
                                             "key": "questionId",
-                                            "value": "4a6bddd5-abb0-475d-bec9-efd55d74abf6",
+                                            "value": "6a6b600c-7737-46a9-bae8-6f9c3e7f3ae4",
                                             "description": "",
                                             "type": "string"
                                         }
@@ -1532,29 +2216,30 @@
                             "event": [],
                             "auth": {},
                             "request": {
-                                "auth": {},
+                                "auth": {
+                                    "type": "bearer",
+                                    "bearer": [
+                                        {
+                                            "key": "token",
+                                            "value": "{{token}}",
+                                            "type": "string"
+                                        }
+                                    ]
+                                },
                                 "method": "GET",
                                 "body": {},
                                 "header": [],
                                 "url": {
-                                    "raw": "{{baseUrl}}/analytics/dashboard/:userId",
+                                    "raw": "{{baseUrl}}/analytics/progress-dashboard",
                                     "path": [
                                         "analytics",
-                                        "dashboard",
-                                        ":userId"
+                                        "progress-dashboard"
                                     ],
                                     "host": [
                                         "{{baseUrl}}"
                                     ],
                                     "query": [],
-                                    "variable": [
-                                        {
-                                            "key": "userId",
-                                            "value": "f08c9412-00b8-4cf4-8210-2ad3a508a204",
-                                            "description": "",
-                                            "type": "string"
-                                        }
-                                    ]
+                                    "variable": []
                                 }
                             },
                             "response": [
@@ -1564,11 +2249,10 @@
                                         "method": "GET",
                                         "header": [],
                                         "url": {
-                                            "raw": "{{baseUrl}}/analytics/dashboard/:userId",
+                                            "raw": "{{baseUrl}}/analytics/progress-dashboard",
                                             "path": [
                                                 "analytics",
-                                                "dashboard",
-                                                ":userId"
+                                                "progress-dashboard"
                                             ],
                                             "host": [
                                                 "{{baseUrl}}"
@@ -1578,7 +2262,6 @@
                                                 {
                                                     "key": "userId",
                                                     "value": "5adfd6eb-5308-40f4-8b4e-d5ec3859d341",
-                                                    "description": "",
                                                     "disabled": false
                                                 }
                                             ]
@@ -1615,16 +2298,24 @@
                             "event": [],
                             "auth": {},
                             "request": {
-                                "auth": {},
+                                "auth": {
+                                    "type": "bearer",
+                                    "bearer": [
+                                        {
+                                            "key": "token",
+                                            "value": "{{token}}",
+                                            "type": "string"
+                                        }
+                                    ]
+                                },
                                 "method": "GET",
                                 "body": {},
                                 "header": [],
                                 "url": {
-                                    "raw": "{{baseUrl}}/analytics/test-performance-by-interval/:userId",
+                                    "raw": "{{baseUrl}}/analytics/test-performance-by-interval",
                                     "path": [
                                         "analytics",
-                                        "test-performance-by-interval",
-                                        ":userId"
+                                        "test-performance-by-interval"
                                     ],
                                     "host": [
                                         "{{baseUrl}}"
@@ -1633,18 +2324,11 @@
                                         {
                                             "key": "interval",
                                             "value": "day",
-                                            "description": "",
+                                            "description": "day/month/week",
                                             "type": "string"
                                         }
                                     ],
-                                    "variable": [
-                                        {
-                                            "key": "userId",
-                                            "value": "f08c9412-00b8-4cf4-8210-2ad3a508a204",
-                                            "description": "",
-                                            "type": "string"
-                                        }
-                                    ]
+                                    "variable": []
                                 }
                             },
                             "response": [
@@ -1654,11 +2338,10 @@
                                         "method": "GET",
                                         "header": [],
                                         "url": {
-                                            "raw": "{{baseUrl}}/analytics/test-performance-by-interval/:userId",
+                                            "raw": "{{baseUrl}}/analytics/test-performance-by-interval",
                                             "path": [
                                                 "analytics",
-                                                "test-performance-by-interval",
-                                                ":userId"
+                                                "test-performance-by-interval"
                                             ],
                                             "host": [
                                                 "{{baseUrl}}"
@@ -1666,19 +2349,12 @@
                                             "query": [
                                                 {
                                                     "key": "interval",
-                                                    "value": "day",
-                                                    "description": "",
+                                                    "value": "day/week/month",
+                                                    "description": "day/month/week",
                                                     "disabled": false
                                                 }
                                             ],
-                                            "variable": [
-                                                {
-                                                    "key": "userId",
-                                                    "value": "f08c9412-00b8-4cf4-8210-2ad3a508a204",
-                                                    "description": "",
-                                                    "disabled": false
-                                                }
-                                            ]
+                                            "variable": []
                                         },
                                         "body": {
                                             "undefined": ""
@@ -1712,32 +2388,77 @@
                             "event": [],
                             "auth": {},
                             "request": {
-                                "auth": {},
+                                "auth": {
+                                    "type": "bearer",
+                                    "bearer": [
+                                        {
+                                            "key": "token",
+                                            "value": "{{token}}",
+                                            "type": "string"
+                                        }
+                                    ]
+                                },
                                 "method": "GET",
                                 "body": {},
                                 "header": [],
                                 "url": {
-                                    "raw": "{{baseUrl}}/analytics/subject-progress/:userId",
+                                    "raw": "{{baseUrl}}/analytics/subject-progress",
                                     "path": [
                                         "analytics",
-                                        "subject-progress",
-                                        ":userId"
+                                        "subject-progress"
                                     ],
                                     "host": [
                                         "{{baseUrl}}"
                                     ],
                                     "query": [],
-                                    "variable": [
-                                        {
-                                            "key": "userId",
-                                            "value": "f08c9412-00b8-4cf4-8210-2ad3a508a204",
-                                            "description": "",
-                                            "type": "string"
-                                        }
-                                    ]
+                                    "variable": []
                                 }
                             },
-                            "response": [],
+                            "response": [
+                                {
+                                    "name": "Success",
+                                    "originalRequest": {
+                                        "method": "GET",
+                                        "header": [],
+                                        "url": {
+                                            "raw": "{{baseUrl}}/analytics/subject-progress",
+                                            "path": [
+                                                "analytics",
+                                                "subject-progress"
+                                            ],
+                                            "host": [
+                                                "{{baseUrl}}"
+                                            ],
+                                            "query": [],
+                                            "variable": [
+                                                {
+                                                    "key": "userId",
+                                                    "value": "f08c9412-00b8-4cf4-8210-2ad3a508a204",
+                                                    "disabled": false
+                                                }
+                                            ]
+                                        },
+                                        "body": {
+                                            "undefined": ""
+                                        }
+                                    },
+                                    "cookie": [],
+                                    "status": "OK",
+                                    "code": 200,
+                                    "_postman_previewlanguage": "json",
+                                    "header": [
+                                        {
+                                            "key": "content-length",
+                                            "value": "1221"
+                                        },
+                                        {
+                                            "key": "content-type",
+                                            "value": "application/json; charset=utf-8"
+                                        }
+                                    ],
+                                    "body": "{\"success\":true,\"message\":\"Subject progress retrieved successfully\",\"data\":{\"studentId\":\"f08c9412-00b8-4cf4-8210-2ad3a508a204\",\"studentName\":\"Alice Johnson\",\"overallProgress\":{\"totalPracticeQuestions\":10,\"attemptedPracticeQuestions\":10,\"completedPracticeQuestions\":10,\"progressPercentage\":100},\"subjects\":[{\"subject\":\"Mathematics\",\"totalPracticeQuestions\":10,\"attemptedPracticeQuestions\":10,\"completedPracticeQuestions\":10,\"progressPercentage\":100,\"timeSpentInSeconds\":3890,\"modules\":[{\"moduleId\":\"7de307b8-f8f4-405d-a6c0-6a60decf9be3\",\"moduleName\":\"Algebra\",\"totalPracticeQuestions\":6,\"attemptedPracticeQuestions\":6,\"completedPracticeQuestions\":6,\"progressPercentage\":100,\"timeSpentInSeconds\":2750},{\"moduleId\":\"fa6ac1da-270d-4204-8de5-b5eb6f10dbbf\",\"moduleName\":\"Number\",\"totalPracticeQuestions\":1,\"attemptedPracticeQuestions\":1,\"completedPracticeQuestions\":1,\"progressPercentage\":100,\"timeSpentInSeconds\":0},{\"moduleId\":\"cf47d6f6-9eb5-4542-a846-7199d36914a6\",\"moduleName\":\"Geometry\",\"totalPracticeQuestions\":3,\"attemptedPracticeQuestions\":3,\"completedPracticeQuestions\":3,\"progressPercentage\":100,\"timeSpentInSeconds\":1140}]}],\"dateRange\":{\"startDate\":\"1970-01-01T00:00:00.000Z\",\"endDate\":\"2025-12-29T18:59:32.808Z\"}}}"
+                                }
+                            ],
                             "protocolProfileBehavior": {
                                 "strictSSL": false,
                                 "followRedirects": true
@@ -1749,32 +2470,77 @@
                             "event": [],
                             "auth": {},
                             "request": {
-                                "auth": {},
+                                "auth": {
+                                    "type": "bearer",
+                                    "bearer": [
+                                        {
+                                            "key": "token",
+                                            "value": "{{token}}",
+                                            "type": "string"
+                                        }
+                                    ]
+                                },
                                 "method": "GET",
                                 "body": {},
                                 "header": [],
                                 "url": {
-                                    "raw": "{{baseUrl}}/analytics/subject-performance/:userId",
+                                    "raw": "{{baseUrl}}/analytics/subject-performance",
                                     "path": [
                                         "analytics",
-                                        "subject-performance",
-                                        ":userId"
+                                        "subject-performance"
                                     ],
                                     "host": [
                                         "{{baseUrl}}"
                                     ],
                                     "query": [],
-                                    "variable": [
-                                        {
-                                            "key": "userId",
-                                            "value": "f08c9412-00b8-4cf4-8210-2ad3a508a204",
-                                            "description": "",
-                                            "type": "string"
-                                        }
-                                    ]
+                                    "variable": []
                                 }
                             },
-                            "response": [],
+                            "response": [
+                                {
+                                    "name": "Success",
+                                    "originalRequest": {
+                                        "method": "GET",
+                                        "header": [],
+                                        "url": {
+                                            "raw": "{{baseUrl}}/analytics/subject-performance",
+                                            "path": [
+                                                "analytics",
+                                                "subject-performance"
+                                            ],
+                                            "host": [
+                                                "{{baseUrl}}"
+                                            ],
+                                            "query": [],
+                                            "variable": [
+                                                {
+                                                    "key": "userId",
+                                                    "value": "f08c9412-00b8-4cf4-8210-2ad3a508a204",
+                                                    "disabled": false
+                                                }
+                                            ]
+                                        },
+                                        "body": {
+                                            "undefined": ""
+                                        }
+                                    },
+                                    "cookie": [],
+                                    "status": "OK",
+                                    "code": 200,
+                                    "_postman_previewlanguage": "json",
+                                    "header": [
+                                        {
+                                            "key": "content-length",
+                                            "value": "452"
+                                        },
+                                        {
+                                            "key": "content-type",
+                                            "value": "application/json; charset=utf-8"
+                                        }
+                                    ],
+                                    "body": "{\"success\":true,\"message\":\"Subject performance retrieved successfully\",\"data\":{\"studentId\":\"f08c9412-00b8-4cf4-8210-2ad3a508a204\",\"studentName\":\"Alice Johnson\",\"overallPerformance\":{\"testQuestionsAttempted\":0,\"testQuestionsCorrect\":0,\"totalMarksObtained\":0,\"totalMarksPossible\":0,\"accuracyPercentage\":0,\"performancePercentage\":0,\"averageScore\":0},\"subjects\":[],\"dateRange\":{\"startDate\":\"1970-01-01T00:00:00.000Z\",\"endDate\":\"2025-12-29T19:00:33.279Z\"}}}"
+                                }
+                            ],
                             "protocolProfileBehavior": {
                                 "strictSSL": false,
                                 "followRedirects": true
@@ -1786,16 +2552,312 @@
                             "event": [],
                             "auth": {},
                             "request": {
+                                "auth": {
+                                    "type": "bearer",
+                                    "bearer": [
+                                        {
+                                            "key": "token",
+                                            "value": "{{token}}",
+                                            "type": "string"
+                                        }
+                                    ]
+                                },
+                                "method": "GET",
+                                "body": {},
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "",
+                                        "description": "",
+                                        "type": "string"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{baseUrl}}/analytics/performance",
+                                    "path": [
+                                        "analytics",
+                                        "performance"
+                                    ],
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "query": [],
+                                    "variable": []
+                                }
+                            },
+                            "response": [
+                                {
+                                    "name": "Success",
+                                    "originalRequest": {
+                                        "method": "GET",
+                                        "header": [],
+                                        "url": {
+                                            "raw": "{{baseUrl}}/analytics/performance",
+                                            "path": [
+                                                "analytics",
+                                                "performance"
+                                            ],
+                                            "host": [
+                                                "{{baseUrl}}"
+                                            ],
+                                            "query": [],
+                                            "variable": [
+                                                {
+                                                    "key": "userId",
+                                                    "value": "f08c9412-00b8-4cf4-8210-2ad3a508a204",
+                                                    "disabled": false
+                                                }
+                                            ]
+                                        },
+                                        "body": {
+                                            "undefined": ""
+                                        }
+                                    },
+                                    "cookie": [],
+                                    "status": "OK",
+                                    "code": 200,
+                                    "_postman_previewlanguage": "json",
+                                    "header": [
+                                        {
+                                            "key": "content-length",
+                                            "value": "9916"
+                                        },
+                                        {
+                                            "key": "content-type",
+                                            "value": "application/json; charset=utf-8"
+                                        }
+                                    ],
+                                    "body": "{\"message\":\"Performance analytics retrieved successfully\",\"data\":{\"overall\":{\"counts\":{\"attempted\":44,\"correct\":41},\"marks\":{\"attempted\":122,\"correct\":114},\"time\":{\"attempted\":4120,\"correct\":3430},\"accuracyRate\":93.18,\"marksPercentage\":93.44,\"averageTimePerQuestion\":93.64,\"currentStreak\":15,\"longestStreak\":20,\"totalXp\":2500,\"lastActivity\":\"2025-12-23T07:48:36.524Z\",\"weightedAccuracy\":85,\"weightedMarksPercentage\":91.49},\"byDifficulty\":[{\"difficulty\":\"Easy\",\"counts\":{\"attempted\":21,\"correct\":21},\"marks\":{\"attempted\":37,\"correct\":37},\"time\":{\"attempted\":845,\"correct\":845},\"accuracyRate\":100,\"marksPercentage\":100,\"averageTimePerQuestion\":40.24,\"weight\":0.2},{\"difficulty\":\"Medium\",\"counts\":{\"attempted\":13,\"correct\":13},\"marks\":{\"attempted\":38,\"correct\":38},\"time\":{\"attempted\":1365,\"correct\":1365},\"accuracyRate\":100,\"marksPercentage\":100,\"averageTimePerQuestion\":105,\"weight\":0.3},{\"difficulty\":\"Hard\",\"counts\":{\"attempted\":10,\"correct\":7},\"marks\":{\"attempted\":47,\"correct\":39},\"time\":{\"attempted\":1910,\"correct\":1220},\"accuracyRate\":70,\"marksPercentage\":82.98,\"averageTimePerQuestion\":191,\"weight\":0.5}],\"byTopic\":[{\"topicId\":\"aa35ad78-e150-4971-8f48-349bf970c008\",\"topicName\":\"Linear Equations\",\"moduleName\":\"Algebra\",\"counts\":{\"attempted\":15,\"correct\":14},\"marks\":{\"attempted\":25,\"correct\":25},\"time\":{\"attempted\":535,\"correct\":535},\"accuracyRate\":93.33,\"marksPercentage\":100,\"averageTimePerQuestion\":35.67,\"lastAccessedAt\":\"2025-12-22T07:48:36.621Z\",\"isFavorite\":false,\"status\":\"Graded\"},{\"topicId\":\"c93509f4-b331-4d7f-b928-23116cdbd48b\",\"topicName\":\"Quadratic Equations\",\"moduleName\":\"Algebra\",\"counts\":{\"attempted\":12,\"correct\":10},\"marks\":{\"attempted\":46,\"correct\":41},\"time\":{\"attempted\":1860,\"correct\":1290},\"accuracyRate\":83.33,\"marksPercentage\":89.13,\"averageTimePerQuestion\":155,\"lastAccessedAt\":\"2025-12-22T07:48:36.621Z\",\"isFavorite\":true,\"status\":\"Graded\"},{\"topicId\":\"f8237a78-021a-4bb1-a510-c00e74e745b0\",\"topicName\":\"Triangles\",\"moduleName\":\"Geometry\",\"counts\":{\"attempted\":10,\"correct\":9},\"marks\":{\"attempted\":29,\"correct\":26},\"time\":{\"attempted\":1070,\"correct\":950},\"accuracyRate\":90,\"marksPercentage\":89.66,\"averageTimePerQuestion\":107,\"lastAccessedAt\":\"2025-12-21T07:48:36.621Z\",\"isFavorite\":false,\"status\":\"Graded\"},{\"topicId\":\"bb341496-7ba1-4130-958c-8b2cb4fe60c8\",\"topicName\":\"Angles\",\"moduleName\":\"Geometry\",\"counts\":{\"attempted\":7,\"correct\":6},\"marks\":{\"attempted\":10,\"correct\":10},\"time\":{\"attempted\":345,\"correct\":345},\"accuracyRate\":85.71,\"marksPercentage\":100,\"averageTimePerQuestion\":49.29,\"lastAccessedAt\":\"2025-12-20T07:48:36.621Z\",\"isFavorite\":false,\"status\":\"Graded\"}],\"byModule\":[{\"moduleId\":\"7de307b8-f8f4-405d-a6c0-6a60decf9be3\",\"moduleName\":\"Algebra\",\"counts\":{\"attempted\":26,\"correct\":24},\"marks\":{\"attempted\":71,\"correct\":66},\"time\":{\"attempted\":2395,\"correct\":1825},\"accuracyRate\":92.31,\"marksPercentage\":92.96,\"averageTimePerQuestion\":92.12,\"topicCount\":2},{\"moduleId\":\"fa6ac1da-270d-4204-8de5-b5eb6f10dbbf\",\"moduleName\":\"Number\",\"counts\":{\"attempted\":6,\"correct\":6},\"marks\":{\"attempted\":12,\"correct\":12},\"time\":{\"attempted\":310,\"correct\":310},\"accuracyRate\":100,\"marksPercentage\":100,\"averageTimePerQuestion\":51.67,\"topicCount\":1},{\"moduleId\":\"cf47d6f6-9eb5-4542-a846-7199d36914a6\",\"moduleName\":\"Geometry\",\"counts\":{\"attempted\":12,\"correct\":11},\"marks\":{\"attempted\":39,\"correct\":36},\"time\":{\"attempted\":1415,\"correct\":1295},\"accuracyRate\":91.67,\"marksPercentage\":92.31,\"averageTimePerQuestion\":117.92,\"topicCount\":2}],\"bySubmissionType\":[{\"type\":\"Exam\",\"counts\":{\"attempted\":34,\"correct\":32},\"marks\":{\"attempted\":92,\"correct\":86},\"time\":{\"attempted\":3035,\"correct\":2625},\"accuracyRate\":94.12,\"marksPercentage\":93.48,\"averageTimePerQuestion\":89.26},{\"type\":\"Homework\",\"counts\":{\"attempted\":0,\"correct\":0},\"marks\":{\"attempted\":0,\"correct\":0},\"time\":{\"attempted\":0,\"correct\":0},\"accuracyRate\":0,\"marksPercentage\":0,\"averageTimePerQuestion\":0},{\"type\":\"Practice\",\"counts\":{\"attempted\":10,\"correct\":9},\"marks\":{\"attempted\":30,\"correct\":28},\"time\":{\"attempted\":1085,\"correct\":805},\"accuracyRate\":90,\"marksPercentage\":93.33,\"averageTimePerQuestion\":108.5}],\"recentActivity\":[{\"submissionId\":\"ec270c2e-a67c-42ac-bd46-08d953462477\",\"questionName\":\"Quadratic word problem\",\"topicName\":\"Quadratic Equations\",\"submissionType\":\"Exam\",\"status\":\"Graded\",\"marksObtained\":6,\"totalMarks\":6,\"beganAt\":\"2025-12-23T07:48:36.621Z\",\"endedAt\":\"2025-12-23T07:53:06.621Z\"},{\"submissionId\":\"7b6a8f16-9184-40e4-a46d-9872c27fcdbc\",\"questionName\":\"What is 1/2 + 1/4?\",\"topicName\":\"Fractions\",\"submissionType\":\"Exam\",\"status\":\"Graded\",\"marksObtained\":2,\"totalMarks\":2,\"beganAt\":\"2025-12-22T07:48:36.621Z\",\"endedAt\":\"2025-12-22T07:49:21.621Z\"},{\"submissionId\":\"b24616d6-5049-4164-8609-071e3f65a4c4\",\"questionName\":\"Quadratic word problem\",\"topicName\":\"Quadratic Equations\",\"submissionType\":\"Practice\",\"status\":\"Graded\",\"marksObtained\":4,\"totalMarks\":6,\"beganAt\":\"2025-12-22T07:48:36.621Z\",\"endedAt\":\"2025-12-22T07:53:16.621Z\"},{\"submissionId\":\"7e9df487-dd46-4357-bfe2-883d50964ced\",\"questionName\":\"Simple linear equation\",\"topicName\":\"Linear Equations\",\"submissionType\":\"Exam\",\"status\":\"Graded\",\"marksObtained\":2,\"totalMarks\":2,\"beganAt\":\"2025-12-22T07:48:36.621Z\",\"endedAt\":\"2025-12-22T07:49:13.621Z\"},{\"submissionId\":\"a7bde41f-fc8b-40bd-be97-7f37e8a63d4d\",\"questionName\":\"Complex angle problem\",\"topicName\":\"Triangles\",\"submissionType\":\"Practice\",\"status\":\"Graded\",\"marksObtained\":3,\"totalMarks\":3,\"beganAt\":\"2025-12-21T07:48:36.621Z\",\"endedAt\":\"2025-12-21T07:50:06.621Z\"},{\"submissionId\":\"43d03255-fa11-41d9-b776-189ce1c17811\",\"questionName\":\"Corresponding angles with parallel lines\",\"topicName\":\"Angles\",\"submissionType\":\"Exam\",\"status\":\"Graded\",\"marksObtained\":2,\"totalMarks\":2,\"beganAt\":\"2025-12-21T07:48:36.621Z\",\"endedAt\":\"2025-12-21T07:49:48.621Z\"},{\"submissionId\":\"182c3e5a-2214-4c18-9356-e75e105d572b\",\"questionName\":\"Apply Pythagoras Theorem\",\"topicName\":\"Triangles\",\"submissionType\":\"Exam\",\"status\":\"Graded\",\"marksObtained\":5,\"totalMarks\":5,\"beganAt\":\"2025-12-20T07:48:36.621Z\",\"endedAt\":\"2025-12-20T07:51:41.621Z\"},{\"submissionId\":\"84825ae4-32ad-49c3-80a6-26b36dccb85f\",\"questionName\":\"Apply Pythagoras Theorem\",\"topicName\":\"Triangles\",\"submissionType\":\"Practice\",\"status\":\"Graded\",\"marksObtained\":5,\"totalMarks\":5,\"beganAt\":\"2025-12-20T07:48:36.621Z\",\"endedAt\":\"2025-12-20T07:51:56.621Z\"},{\"submissionId\":\"253d075d-361e-4e39-bd06-7de53f77dd84\",\"questionName\":\"Quadratic Formula Application\",\"topicName\":\"Quadratic Equations\",\"submissionType\":\"Practice\",\"status\":\"Graded\",\"marksObtained\":3,\"totalMarks\":3,\"beganAt\":\"2025-12-19T07:48:36.621Z\",\"endedAt\":\"2025-12-19T07:50:36.621Z\"},{\"submissionId\":\"9b16d6e0-1a82-403d-9e69-55870dfe7596\",\"questionName\":\"Quadratic Formula Application\",\"topicName\":\"Quadratic Equations\",\"submissionType\":\"Exam\",\"status\":\"Graded\",\"marksObtained\":3,\"totalMarks\":3,\"beganAt\":\"2025-12-19T07:48:36.621Z\",\"endedAt\":\"2025-12-19T07:50:31.621Z\"}],\"weakestTopics\":[{\"topicId\":\"c93509f4-b331-4d7f-b928-23116cdbd48b\",\"topicName\":\"Quadratic Equations\",\"moduleName\":\"Algebra\",\"counts\":{\"attempted\":12,\"correct\":10},\"marks\":{\"attempted\":46,\"correct\":41},\"time\":{\"attempted\":1860,\"correct\":1290},\"accuracyRate\":83.33,\"marksPercentage\":89.13,\"averageTimePerQuestion\":155,\"lastAccessedAt\":\"2025-12-22T07:48:36.621Z\",\"isFavorite\":true,\"status\":\"Graded\"},{\"topicId\":\"bb341496-7ba1-4130-958c-8b2cb4fe60c8\",\"topicName\":\"Angles\",\"moduleName\":\"Geometry\",\"counts\":{\"attempted\":7,\"correct\":6},\"marks\":{\"attempted\":10,\"correct\":10},\"time\":{\"attempted\":345,\"correct\":345},\"accuracyRate\":85.71,\"marksPercentage\":100,\"averageTimePerQuestion\":49.29,\"lastAccessedAt\":\"2025-12-20T07:48:36.621Z\",\"isFavorite\":false,\"status\":\"Graded\"},{\"topicId\":\"f8237a78-021a-4bb1-a510-c00e74e745b0\",\"topicName\":\"Triangles\",\"moduleName\":\"Geometry\",\"counts\":{\"attempted\":10,\"correct\":9},\"marks\":{\"attempted\":29,\"correct\":26},\"time\":{\"attempted\":1070,\"correct\":950},\"accuracyRate\":90,\"marksPercentage\":89.66,\"averageTimePerQuestion\":107,\"lastAccessedAt\":\"2025-12-21T07:48:36.621Z\",\"isFavorite\":false,\"status\":\"Graded\"},{\"topicId\":\"aa35ad78-e150-4971-8f48-349bf970c008\",\"topicName\":\"Linear Equations\",\"moduleName\":\"Algebra\",\"counts\":{\"attempted\":15,\"correct\":14},\"marks\":{\"attempted\":25,\"correct\":25},\"time\":{\"attempted\":535,\"correct\":535},\"accuracyRate\":93.33,\"marksPercentage\":100,\"averageTimePerQuestion\":35.67,\"lastAccessedAt\":\"2025-12-22T07:48:36.621Z\",\"isFavorite\":false,\"status\":\"Graded\"}],\"strongestTopics\":[{\"topicId\":\"aa35ad78-e150-4971-8f48-349bf970c008\",\"topicName\":\"Linear Equations\",\"moduleName\":\"Algebra\",\"counts\":{\"attempted\":15,\"correct\":14},\"marks\":{\"attempted\":25,\"correct\":25},\"time\":{\"attempted\":535,\"correct\":535},\"accuracyRate\":93.33,\"marksPercentage\":100,\"averageTimePerQuestion\":35.67,\"lastAccessedAt\":\"2025-12-22T07:48:36.621Z\",\"isFavorite\":false,\"status\":\"Graded\"},{\"topicId\":\"f8237a78-021a-4bb1-a510-c00e74e745b0\",\"topicName\":\"Triangles\",\"moduleName\":\"Geometry\",\"counts\":{\"attempted\":10,\"correct\":9},\"marks\":{\"attempted\":29,\"correct\":26},\"time\":{\"attempted\":1070,\"correct\":950},\"accuracyRate\":90,\"marksPercentage\":89.66,\"averageTimePerQuestion\":107,\"lastAccessedAt\":\"2025-12-21T07:48:36.621Z\",\"isFavorite\":false,\"status\":\"Graded\"},{\"topicId\":\"bb341496-7ba1-4130-958c-8b2cb4fe60c8\",\"topicName\":\"Angles\",\"moduleName\":\"Geometry\",\"counts\":{\"attempted\":7,\"correct\":6},\"marks\":{\"attempted\":10,\"correct\":10},\"time\":{\"attempted\":345,\"correct\":345},\"accuracyRate\":85.71,\"marksPercentage\":100,\"averageTimePerQuestion\":49.29,\"lastAccessedAt\":\"2025-12-20T07:48:36.621Z\",\"isFavorite\":false,\"status\":\"Graded\"},{\"topicId\":\"c93509f4-b331-4d7f-b928-23116cdbd48b\",\"topicName\":\"Quadratic Equations\",\"moduleName\":\"Algebra\",\"counts\":{\"attempted\":12,\"correct\":10},\"marks\":{\"attempted\":46,\"correct\":41},\"time\":{\"attempted\":1860,\"correct\":1290},\"accuracyRate\":83.33,\"marksPercentage\":89.13,\"averageTimePerQuestion\":155,\"lastAccessedAt\":\"2025-12-22T07:48:36.621Z\",\"isFavorite\":true,\"status\":\"Graded\"}]}}"
+                                }
+                            ],
+                            "protocolProfileBehavior": {
+                                "strictSSL": false,
+                                "followRedirects": true
+                            }
+                        },
+                        {
+                            "name": "Subject wise Progress",
+                            "description": "",
+                            "event": [],
+                            "auth": {},
+                            "request": {
+                                "auth": {
+                                    "type": "bearer",
+                                    "bearer": [
+                                        {
+                                            "key": "token",
+                                            "value": "{{token}}",
+                                            "type": "string"
+                                        }
+                                    ]
+                                },
+                                "method": "GET",
+                                "body": {},
+                                "header": [],
+                                "url": {
+                                    "raw": "{{baseUrl}}/analytics/subject-wise-progress",
+                                    "path": [
+                                        "analytics",
+                                        "subject-wise-progress"
+                                    ],
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "query": [],
+                                    "variable": []
+                                }
+                            },
+                            "response": [],
+                            "protocolProfileBehavior": {
+                                "strictSSL": false,
+                                "followRedirects": true
+                            }
+                        }
+                    ],
+                    "event": [
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "exec": [],
+                                "type": "text/javascript",
+                                "packages": {}
+                            }
+                        },
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [],
+                                "type": "text/javascript",
+                                "packages": {}
+                            }
+                        }
+                    ],
+                    "auth": {}
+                },
+                {
+                    "name": "User",
+                    "description": "",
+                    "item": [
+                        {
+                            "name": "User Config",
+                            "description": "",
+                            "event": [],
+                            "auth": {},
+                            "request": {
+                                "auth": {
+                                    "type": "bearer",
+                                    "bearer": [
+                                        {
+                                            "key": "token",
+                                            "value": "{{token}}",
+                                            "type": "string"
+                                        }
+                                    ]
+                                },
+                                "method": "PATCH",
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"username\": \"new_username\",\n  \"fullName\": \"New Full Name\",\n  \"country\": \"United Kingdom\",\n  \"boardAgeLevelId\": \"f11c72bd-8b0d-4b0b-b1ef-a39d6ec64a85\"\n}",
+                                    "options": {
+                                        "raw": {
+                                            "language": "json"
+                                        }
+                                    }
+                                },
+                                "header": [],
+                                "url": {
+                                    "raw": "{{baseUrl}}/users/config",
+                                    "path": [
+                                        "users",
+                                        "config"
+                                    ],
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "query": [],
+                                    "variable": []
+                                }
+                            },
+                            "response": [],
+                            "protocolProfileBehavior": {
+                                "strictSSL": false,
+                                "followRedirects": true
+                            }
+                        }
+                    ],
+                    "event": [
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "exec": [],
+                                "type": "text/javascript",
+                                "packages": {}
+                            }
+                        },
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [],
+                                "type": "text/javascript",
+                                "packages": {}
+                            }
+                        }
+                    ],
+                    "auth": {}
+                },
+                {
+                    "name": "Upload",
+                    "description": "",
+                    "item": [
+                        {
+                            "name": "Upload Image",
+                            "description": "",
+                            "event": [],
+                            "auth": {},
+                            "request": {
+                                "auth": {
+                                    "type": "bearer",
+                                    "bearer": [
+                                        {
+                                            "key": "token",
+                                            "value": "{{token}}",
+                                            "type": "string"
+                                        }
+                                    ]
+                                },
+                                "method": "POST",
+                                "body": {
+                                    "mode": "formdata",
+                                    "formdata": [
+                                        {
+                                            "key": "file",
+                                            "value": "cmMtdXBsb2FkLTE3NjcwOTAyMjAwMjMtMg==/tailwind.png",
+                                            "type": "file",
+                                            "disabled": false
+                                        }
+                                    ]
+                                },
+                                "header": [],
+                                "url": {
+                                    "raw": "{{baseUrl}}/upload/image",
+                                    "path": [
+                                        "upload",
+                                        "image"
+                                    ],
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "query": [],
+                                    "variable": []
+                                }
+                            },
+                            "response": [],
+                            "protocolProfileBehavior": {
+                                "strictSSL": false,
+                                "followRedirects": true
+                            }
+                        }
+                    ],
+                    "event": [
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "exec": [],
+                                "type": "text/javascript",
+                                "packages": {}
+                            }
+                        },
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [],
+                                "type": "text/javascript",
+                                "packages": {}
+                            }
+                        }
+                    ],
+                    "auth": {}
+                },
+                {
+                    "name": "Institutions",
+                    "description": "",
+                    "item": [
+                        {
+                            "name": "Get all Get boards by levels Copy",
+                            "description": "",
+                            "event": [],
+                            "auth": {},
+                            "request": {
                                 "auth": {},
                                 "method": "GET",
                                 "body": {},
                                 "header": [],
                                 "url": {
-                                    "raw": "{{baseUrl}}/analytics/performance/:userId",
+                                    "raw": "{{baseUrl}}/institutions/type/:type",
                                     "path": [
-                                        "analytics",
-                                        "performance",
-                                        ":userId"
+                                        "institutions",
+                                        "type",
+                                        ":type"
                                     ],
                                     "host": [
                                         "{{baseUrl}}"
@@ -1803,9 +2865,9 @@
                                     "query": [],
                                     "variable": [
                                         {
-                                            "key": "userId",
-                                            "value": "f08c9412-00b8-4cf4-8210-2ad3a508a204",
-                                            "description": "",
+                                            "key": "type",
+                                            "value": "University",
+                                            "description": "School or University",
                                             "type": "string"
                                         }
                                     ]
@@ -1837,6 +2899,97 @@
                         }
                     ],
                     "auth": {}
+                },
+                {
+                    "name": "Activity",
+                    "description": "",
+                    "item": [
+                        {
+                            "name": "Last activity",
+                            "description": "",
+                            "event": [],
+                            "auth": {},
+                            "request": {
+                                "auth": {
+                                    "type": "bearer",
+                                    "bearer": [
+                                        {
+                                            "key": "token",
+                                            "value": "{{token}}",
+                                            "type": "string"
+                                        }
+                                    ]
+                                },
+                                "method": "GET",
+                                "body": {},
+                                "header": [],
+                                "url": {
+                                    "raw": "{{baseUrl}}/activity/recent",
+                                    "path": [
+                                        "activity",
+                                        "recent"
+                                    ],
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "query": [],
+                                    "variable": []
+                                }
+                            },
+                            "response": [],
+                            "protocolProfileBehavior": {
+                                "strictSSL": false,
+                                "followRedirects": true
+                            }
+                        }
+                    ],
+                    "event": [
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "exec": [],
+                                "type": "text/javascript",
+                                "packages": {}
+                            }
+                        },
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [],
+                                "type": "text/javascript",
+                                "packages": {}
+                            }
+                        }
+                    ],
+                    "auth": {}
+                },
+                {
+                    "name": "Health check",
+                    "description": "",
+                    "event": [],
+                    "auth": {},
+                    "request": {
+                        "auth": {},
+                        "method": "GET",
+                        "body": {},
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/health",
+                            "path": [
+                                "health"
+                            ],
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "query": [],
+                            "variable": []
+                        }
+                    },
+                    "response": [],
+                    "protocolProfileBehavior": {
+                        "strictSSL": false,
+                        "followRedirects": true
+                    }
                 }
             ],
             "event": [

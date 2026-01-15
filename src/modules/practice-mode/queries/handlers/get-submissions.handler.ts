@@ -52,11 +52,11 @@ export class GetSubmissionsHandler
           select: {
             id: true,
             descriptiveSubmittedAnswer: true,
+            evaluation:true,
             canvasData: true,
             isCorrect: true,
             awardedMarks: true,
             hint: true,
-            chatHistory: true,
             verdict: true,
             createdAt: true,
             updatedAt: true,

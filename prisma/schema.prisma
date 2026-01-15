@@ -404,7 +404,6 @@ model SubmittedDescriptive {
   isCorrect                  Boolean  @default(false) @map("is_correct")
   awardedMarks               Int?     @map("awarded_marks")
   hint                       String?  @map("hint")
-  chatHistory                String?  @map("chat_history")
   verdict                    String?  @map("verdict") //on track, correct, incorrect
   evaluation                 String?  @map("evaluation") // LLM evaluation text
   ocrOutput                  String?  @map("ocr_output") // Extracted text from image
