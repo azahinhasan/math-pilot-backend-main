@@ -756,7 +756,6 @@ export class ExamsService {
         awardedMarks,
         verdict: apiResult.verdict,
         hint: apiResult.hint || submittedDescriptive.hint,
-        chatHistory: apiResult.chat_history || submittedDescriptive.chatHistory,
         evaluation: apiResult.evaluation || null,
         ocrOutput: apiResult.extracted_text || null,
         isFinished: apiResult.is_finished || null,

@@ -87,19 +87,39 @@ export class EvaluatePracticeHandler implements ICommandHandler<EvaluatePractice
       );
     }
 
+    // Find the student by clerkId for storing the submission
+    const student = await this.prisma.student.findFirst({
+      where: {
+        auth: {
+          clerkId: clerkId,
+        },
+      },
+    });
+
+    if (!student) {
+      throw new NotFoundException('Student not found.');
+    }
+
     const correctAnswer = descriptiveSolution.descriptiveSolution;
     const descriptiveSolutionImage =
       descriptiveSolution.descriptiveSolutionImage;
 
+    if (!correctAnswer && !descriptiveSolutionImage) {
+      throw new NotFoundException(
+        'Correct answer for descriptive solution is not set.',
+      );
+    }
+
     // Prepare form data for AI evaluation API
     // Includes question text, correct answer, step count, chat history, and images
-
     const formData = new FormData();
-    formData.append('question', question.questionText);
 
-    // Handle correct_answer: fetch from S3 if descriptiveSolution is empty but image exists
-    if (!correctAnswer && descriptiveSolutionImage) {
-      // Fetch image from S3
+    formData.append('user_id', student.authId);
+    formData.append('question_id', question.id);
+    formData.append('question_text', question.questionText);
+
+    // Append question_image_base64 if imageFileName is present
+    if (question.imageFileName) {
       const awsAccessKeyId =
         this.configService.get<string>('AWS_ACCESS_KEY_ID');
       const awsSecretAccessKey = this.configService.get<string>(
@@ -127,11 +147,10 @@ export class EvaluatePracticeHandler implements ICommandHandler<EvaluatePractice
         },
       });
 
-
       try {
         const command = new GetObjectCommand({
           Bucket: awsS3Bucket,
-          Key: descriptiveSolutionImage, //file name with folder name
+          Key: question.imageFileName,
         });
 
         const response = await s3Client.send(command);
@@ -144,30 +163,67 @@ export class EvaluatePracticeHandler implements ICommandHandler<EvaluatePractice
         }
         const imageBuffer = Buffer.concat(chunks);
 
-        // Append image as file to form data
-        formData.append(
-          'correct_answer',
-          imageBuffer,
-          descriptiveSolutionImage,
-        );
+        formData.append('question_image', imageBuffer, question.imageFileName);
       } catch (error) {
         throw new InternalServerErrorException(
-          `Failed to fetch image from S3: ${error.message}`,
+          `Failed to fetch question image from S3: ${error.message}`,
         );
       }
-    } else if (correctAnswer) {
-      // Use text answer as before
-      formData.append('correct_answer', correctAnswer.toString());
-    } else {
-      throw new NotFoundException(
-        'Correct answer for descriptive solution is not set.',
-      );
     }
 
-    formData.append('current_step_count', currentStepCount);
-    if (chatHistory) {
-      formData.append('chat_history', chatHistory);
+    // Append correct_answer (text) if present
+    if (correctAnswer) {
+      formData.append('solution_text', correctAnswer.toString());
     }
+
+    // Append correct_answer_image (image from S3) if present
+    if (descriptiveSolutionImage) {
+      const awsAccessKeyId =
+        this.configService.get<string>('AWS_ACCESS_KEY_ID');
+      const awsSecretAccessKey = this.configService.get<string>(
+        'AWS_SECRET_ACCESS_KEY',
+      );
+      const awsRegion = this.configService.get<string>('AWS_REGION');
+      const awsS3Bucket = this.configService.get<string>('AWS_S3_BUCKET');
+
+      if (
+        !awsAccessKeyId ||
+        !awsSecretAccessKey ||
+        !awsRegion ||
+        !awsS3Bucket
+      ) {
+        throw new InternalServerErrorException(
+          'AWS S3 configuration is missing.',
+        );
+      }
+
+      const s3Client = new S3Client({
+        region: awsRegion,
+        credentials: {
+          accessKeyId: awsAccessKeyId,
+          secretAccessKey: awsSecretAccessKey,
+        },
+      });
+
+      const command = new GetObjectCommand({
+        Bucket: awsS3Bucket,
+        Key: descriptiveSolutionImage,
+      });
+
+      const response = await s3Client.send(command);
+      const stream = response.Body as Readable;
+
+      // Convert stream to buffer
+      const chunks: Buffer[] = [];
+      for await (const chunk of stream) {
+        chunks.push(Buffer.from(chunk));
+      }
+      const imageBuffer = Buffer.concat(chunks);
+
+      // Append image as separate field
+      formData.append('solution_image', imageBuffer, descriptiveSolutionImage);
+    }
+
     files.forEach((file) => {
       formData.append('images', file.buffer, file.originalname);
     });
@@ -194,25 +250,10 @@ export class EvaluatePracticeHandler implements ICommandHandler<EvaluatePractice
         }),
       );
 
-      if (response.data.success) {
-        const aiResponse = response.data;
-
-        // Find the student by clerkId for storing the submission
-        const student = await this.prisma.student.findFirst({
-          where: {
-            auth: {
-              clerkId: clerkId,
-            },
-          },
-        });
-
-        if (!student) {
-          throw new NotFoundException('Student not found.');
-        }
-
+      if (response.status === 200 && response.data.generic) {
+        const aiResponse = response.data.generic;
         // Determine correctness and completion status from AI response
         const isCorrect = aiResponse.verdict === 'correct';
-        const isFinished = aiResponse.is_finished === true;
 
         // Execute all database operations in a transaction
         const submission = await this.prisma.$transaction(async (tx) => {
@@ -237,16 +278,16 @@ export class EvaluatePracticeHandler implements ICommandHandler<EvaluatePractice
                 studentId: student.id,
                 questionId,
                 type: 'Practice',
-                status: isFinished ? 'Graded' : 'InProgress',
+                status: isCorrect ? 'Graded' : 'InProgress',
                 beganAt: new Date(),
-                endedAt: isFinished ? new Date() : null,
+                endedAt: isCorrect ? new Date() : null,
               },
             });
           } else {
             submission = await tx.submission.update({
               where: { id: submission.id },
               data: {
-                status: isFinished ? 'Graded' : 'InProgress',
+                status: isCorrect ? 'Graded' : 'InProgress',
                 endedAt: new Date(),
               },
             });
@@ -268,7 +309,6 @@ export class EvaluatePracticeHandler implements ICommandHandler<EvaluatePractice
               descriptiveSubmittedAnswer: aiResponse.extracted_text,
               isCorrect: isCorrect,
               hint: aiResponse.hint,
-              chatHistory: aiResponse.chatHistory,
               verdict: aiResponse.verdict,
               canvasData: canvasData,
             },
@@ -334,7 +374,7 @@ export class EvaluatePracticeHandler implements ICommandHandler<EvaluatePractice
           );
 
           // Add current question if it's correct and finished
-          if (isCorrect && isFinished) {
+          if (isCorrect) {
             uniqueCorrectQuestions.add(questionId);
           }
 
@@ -395,12 +435,8 @@ export class EvaluatePracticeHandler implements ICommandHandler<EvaluatePractice
           hint: aiResponse.hint,
           verdict: aiResponse.verdict,
           isCorrect,
-          isFinished,
-          imagesProcessed: aiResponse.images_processed,
-          totalImages: aiResponse.total_images,
-          chatHistory: aiResponse.chat_history || null,
           beganAt: submission.beganAt,
-          endedAt: submission.endedAt
+          endedAt: submission.endedAt,
         };
 
         console.log('\n=== Formatted Response ===');
@@ -413,7 +449,7 @@ export class EvaluatePracticeHandler implements ICommandHandler<EvaluatePractice
         };
       }
       // Return failure response if AI evaluation was not successful
-      return { success: false, message: 'AI evaluation failed' };
+      // return { success: false, message: 'AI evaluation failed' };
     } catch (error) {
       // Log and throw error if API call fails
       console.log(error);
