@@ -253,7 +253,7 @@ export class EvaluatePracticeHandler implements ICommandHandler<EvaluatePractice
       if (response.status === 200 && response.data.generic) {
         const aiResponse = response.data.generic;
         // Determine correctness and completion status from AI response
-        const isCorrect = aiResponse.verdict === 'correct';
+        const isCorrect = aiResponse.verdict == 'correct';
 
         // Execute all database operations in a transaction
         const submission = await this.prisma.$transaction(async (tx) => {
