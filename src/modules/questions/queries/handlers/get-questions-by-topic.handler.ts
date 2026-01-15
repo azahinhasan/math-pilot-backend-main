@@ -6,6 +6,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { QuestionFor } from '@prisma/client';
 
 @Injectable()
 @QueryHandler(GetQuestionsByTopicQuery)
@@ -80,13 +81,14 @@ export class GetQuestionsByTopicHandler implements IQueryHandler<GetQuestionsByT
         where: {
           topicId,
           voided: false,
+          questionFor: QuestionFor.Practice,
         },
         select: {
           id: true,
           serialNo: true,
           questionText: true,
           questionContentLink: true,
-          name:true,
+          name: true,
           questionTypeId: true,
           questionFor: true,
           totalMarks: true,
@@ -103,7 +105,7 @@ export class GetQuestionsByTopicHandler implements IQueryHandler<GetQuestionsByT
             select: {
               id: true,
               name: true,
-              description: true
+              description: true,
             },
           },
           solutionBases: {
@@ -126,7 +128,7 @@ export class GetQuestionsByTopicHandler implements IQueryHandler<GetQuestionsByT
                   id: true,
                   markingStepsJson: true,
                   maxMarks: true,
-                  isInputCanvases: true
+                  isInputCanvases: true,
                 },
                 where: {
                   voided: false,
