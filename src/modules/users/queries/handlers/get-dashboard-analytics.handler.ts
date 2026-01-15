@@ -47,9 +47,7 @@ interface DashboardAnalytics {
 // ==================== Handler ====================
 
 @QueryHandler(GetDashboardAnalyticsQuery)
-export class GetDashboardAnalyticsHandler
-  implements IQueryHandler<GetDashboardAnalyticsQuery>
-{
+export class GetDashboardAnalyticsHandler implements IQueryHandler<GetDashboardAnalyticsQuery> {
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(
@@ -170,14 +168,28 @@ export class GetDashboardAnalyticsHandler
     topicProgress: any[],
   ) {
     // Exams Completed
-    const currentExams = currentSubmissions.filter(
-      (s) =>
-        s.type === SubmissionType.Exam && s.status === SubmissionStatus.Graded,
-    ).length;
-    const previousExams = previousSubmissions.filter(
-      (s) =>
-        s.type === SubmissionType.Exam && s.status === SubmissionStatus.Graded,
-    ).length;
+    const currentExams = new Set(
+      currentSubmissions
+        .filter(
+          (s) =>
+            s.type === SubmissionType.Exam &&
+            s.status === SubmissionStatus.Graded &&
+            s.examId,
+        )
+        .map((s) => s.examId),
+    ).size;
+
+    const previousExams = new Set(
+      previousSubmissions
+        .filter(
+          (s) =>
+            s.type === SubmissionType.Exam &&
+            s.status === SubmissionStatus.Graded &&
+            s.examId,
+        )
+        .map((s) => s.examId),
+    ).size;
+
     const examsChange = this.calculatePercentageChange(
       currentExams,
       previousExams,
@@ -446,7 +458,7 @@ export class GetDashboardAnalyticsHandler
         topicName: string;
         totalCorrect: number;
         totalAttempted: number;
-        examsCompleted: number;
+        completedExamIds: Set<string>;
       }
     >();
 
@@ -464,7 +476,7 @@ export class GetDashboardAnalyticsHandler
           topicName,
           totalCorrect: 0,
           totalAttempted: 0,
-          examsCompleted: 0,
+          completedExamIds: new Set(),
         });
       }
 
@@ -477,8 +489,8 @@ export class GetDashboardAnalyticsHandler
         topicData.totalCorrect += percentage;
       }
 
-      if (isExam && isGraded) {
-        topicData.examsCompleted++;
+      if (isExam && isGraded && submission.examId) {
+        topicData.completedExamIds.add(submission.examId);
       }
     });
 
@@ -492,7 +504,7 @@ export class GetDashboardAnalyticsHandler
           topicName,
           totalCorrect: 0,
           totalAttempted: 0,
-          examsCompleted: 0,
+          completedExamIds: new Set(),
         });
       }
 
@@ -516,7 +528,7 @@ export class GetDashboardAnalyticsHandler
             )
           : 0,
       questionsAttempted: data.totalAttempted,
-      examsCompleted: data.examsCompleted,
+      examsCompleted: data.completedExamIds.size,
     }));
 
     // Sort by accuracy percentage (highest to lowest)

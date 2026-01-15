@@ -144,7 +144,8 @@ export class GetQuestionsByTopicHandler implements IQueryHandler<GetQuestionsByT
             where: {
               studentId: studentId,
               status: 'Graded',
-              type: SubmissionType.Practice
+              type: SubmissionType.Practice,
+              voided:false
             },
           },
         },
