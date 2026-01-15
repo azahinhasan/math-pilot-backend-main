@@ -250,7 +250,7 @@ export class EvaluatePracticeHandler implements ICommandHandler<EvaluatePractice
         }),
       );
 
-      if (response.data.success) {
+      if (response.status === 200 && response.data.generic) {
         const aiResponse = response.data.generic;
         // Determine correctness and completion status from AI response
         const isCorrect = aiResponse.verdict === 'correct';
@@ -449,7 +449,7 @@ export class EvaluatePracticeHandler implements ICommandHandler<EvaluatePractice
         };
       }
       // Return failure response if AI evaluation was not successful
-      return { success: false, message: 'AI evaluation failed' };
+      // return { success: false, message: 'AI evaluation failed' };
     } catch (error) {
       // Log and throw error if API call fails
       console.log(error);
