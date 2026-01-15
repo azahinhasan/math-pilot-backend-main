@@ -38,8 +38,23 @@ async function seedGCSEMathTopicsSubtopics() {
     return;
   }
 
-  let topicSerialNumber = 1;
-  let subtopicSerialNumber = 1;
+  const maxTopicSerial = await prisma.topic.findFirst({
+    where: { moduleId: module.id },
+    orderBy: { serialNumber: 'desc' },
+    select: { serialNumber: true },
+  });
+
+  const maxSubtopicSerial = await prisma.subtopic.findFirst({
+    where: { boardAgeLevelId: module.boardAgeLevelId },
+    orderBy: { serialNumber: 'desc' },
+    select: { serialNumber: true },
+  });
+
+  let topicSerialNumber = (maxTopicSerial?.serialNumber || 0) + 1;
+  let subtopicSerialNumber = (maxSubtopicSerial?.serialNumber || 0) + 1;
+
+  const newTopics: string[] = [];
+  const newSubtopics: string[] = [];
 
   for (const chapterGroup of topicsData) {
     const chapterKeys = Object.keys(chapterGroup);
@@ -68,6 +83,7 @@ async function seedGCSEMathTopicsSubtopics() {
         console.log(
           `Created topic: ${topicName} (Serial: ${topicSerialNumber})`,
         );
+        newTopics.push(topicName);
         topicSerialNumber++;
       } else {
         console.log(
@@ -82,30 +98,37 @@ async function seedGCSEMathTopicsSubtopics() {
         },
       });
 
-      if (existingSubtopic) {
+      if (!existingSubtopic) {
+        await prisma.subtopic.create({
+          data: {
+            name: subtopicName,
+            topicId: topic.id,
+            serialNumber: subtopicSerialNumber,
+            boardAgeLevelId: module.boardAgeLevelId,
+          },
+        });
+
+        console.log(
+          `Created subtopic: ${subtopicName} under topic: ${topicName} (Serial: ${subtopicSerialNumber})`,
+        );
+        newSubtopics.push(subtopicName);
+        subtopicSerialNumber++;
+      } else {
         console.log(
           `Subtopic "${subtopicName}" already exists under topic "${topicName}". Skipping.`,
         );
-        continue;
       }
-
-      await prisma.subtopic.create({
-        data: {
-          name: subtopicName,
-          topicId: topic.id,
-          serialNumber: subtopicSerialNumber,
-          boardAgeLevelId: module.boardAgeLevelId,
-        },
-      });
-
-      console.log(
-        `Created subtopic: ${subtopicName} under topic: ${topicName} (Serial: ${subtopicSerialNumber})`,
-      );
-      subtopicSerialNumber++;
     }
   }
 
   console.log('Seeded GCSE Math topics and subtopics');
+  console.log('\n=== NEWLY CREATED ITEMS ===');
+  console.log('\nTopics not found (newly created):');
+  console.log(newTopics);
+  console.log('\nSubtopics not found (newly created):');
+  console.log(newSubtopics);
+  console.log(`\nTotal new topics: ${newTopics.length}`);
+  console.log(`Total new subtopics: ${newSubtopics.length}`);
 }
 
 // export default seedGCSEMathTopicsSubtopics;
