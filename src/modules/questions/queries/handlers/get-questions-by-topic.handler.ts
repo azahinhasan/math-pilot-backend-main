@@ -145,7 +145,7 @@ export class GetQuestionsByTopicHandler implements IQueryHandler<GetQuestionsByT
           },
         },
         orderBy: {
-          serialNo: 'asc',
+          createdAt: 'asc',
         },
         skip,
         take: limit,
