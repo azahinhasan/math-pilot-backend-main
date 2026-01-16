@@ -311,6 +311,7 @@ export class EvaluatePracticeHandler implements ICommandHandler<EvaluatePractice
               hint: aiResponse.hint,
               verdict: aiResponse.verdict,
               canvasData: canvasData,
+              evaluation: aiResponse.evaluation,
             },
           });
 
@@ -431,7 +432,7 @@ export class EvaluatePracticeHandler implements ICommandHandler<EvaluatePractice
           studentId: student.id,
           status: submission.status,
           evaluation: aiResponse.evaluation,
-          extractedText: aiResponse.extracted_text,
+          descriptiveSubmittedAnswer: aiResponse.extracted_text,
           hint: aiResponse.hint,
           verdict: aiResponse.verdict,
           isCorrect,
