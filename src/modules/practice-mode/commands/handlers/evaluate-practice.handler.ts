@@ -448,6 +448,10 @@ export class EvaluatePracticeHandler implements ICommandHandler<EvaluatePractice
           message: 'AI evaluation successful',
           data: formattedResponse,
         };
+      }else{
+        throw new InternalServerErrorException(
+        'AI evaluation failed',
+      );
       }
       // Return failure response if AI evaluation was not successful
       // return { success: false, message: 'AI evaluation failed' };
@@ -455,8 +459,8 @@ export class EvaluatePracticeHandler implements ICommandHandler<EvaluatePractice
       // Log and throw error if API call fails
       console.log(error);
       throw new InternalServerErrorException(
-        'Failed to call evaluation API.',
-        error.message,
+        'Failed to call AI evaluation API.',
+        error?.response?.statusText,
       );
     }
   }
