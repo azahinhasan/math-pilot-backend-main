@@ -1,19 +1,20 @@
 [
   {
-    "Chapter 1 - Algebraic expressions": "Mixed Exercise (Algebraic Equation)",
-    "Chapter 2 - Quadratics": "Mixed Exercise (Quadratic Equations)",
-    "Chapter 3 - Equations and inequalities": "Mixed Exercise (Equations and Inequalities)",
-    "Chapter 4 - Graphs and transformations": "Mixed Exercise (Graphs and Transformations)",
-    "Chapter 5 - Straight line graphs": "Mixed Exercise (Straight Line Graphs)",
-    "Chapter 6 - Circles": "Mixed Exercise (Circles)",
-    "Chapter 7 - Algebraic methods": "Mixed Exercise (Algebraic Methods)",
-    "Chapter 8 - The binomial expansion": "Mixed Exercise (Binomial Expansion)",
-    "Chapter 9 - Trigonometric ratios": "Mixed Exercise (Trigonometric Ratios)",
-    "Chapter 10 - Trigonometric identities and equations": "Mixed Exercise (Trigonometric Identities)",
-    "Chapter 11 - Vectors": "Mixed Exercise (Vectors)",
-    "Chapter 12 - Differentiation": "Mixed Exercise (Differentiation)",
-    "Chapter 13 - Integration": "Mixed Exercise (Integration)",
-    "Chapter 14 - Exponentials and logarithms": "Mixed Exercise (Exponentials and Logarithms)"
+    "Chapter 1 - Algebraic expressions": "Mixed exercise (Algebraic Equation)",
+    "Chapter 2 - Quadratics": "Mixed exercise (Quadratic Equations)",
+    "Chapter 3 - Equations and inequalities": "Mixed exercise (Equations and Inequalities)",
+    "Chapter 4 - Graphs and transformations": "Mixed exercise (Graphs and Transformations)",
+    "Chapter 5 - Straight line graphs": "Mixed exercise (Straight Line Graphs)",
+    "Chapter 6 - Circles": "Mixed exercise (Circles)",
+    "Chapter 7 - Algebraic methods": "Mixed exercise (Algebraic methods)",
+    "Chapter 8 - The binomial expansion": "Mixed exercise (Binomial expansion)",
+    "Chapter 9 - Trigonometric ratios": "Mixed exercise (Trigonometric ratios)",
+    "Chapter 10 - Trigonometric identities and equations": "Mixed exercise (Trigonometric identities)",
+    "Chapter 11 - Vectors": "Mixed exercise (Vectors)",
+    "Chapter 12 - Differentiation": "Mixed exercise (Differentiation)",
+    "Chapter 13 - Integration": "Mixed exercise (Integration)",
+    "Chapter 14 - Exponentials and logarithms": "Mixed exercise (Exponentials and Logarithms)"
+
   },
   {
     "Chapter 1 - Algebraic expressions": "Index laws",
@@ -33,7 +34,7 @@
   },
   {
     "Chapter 1 - Algebraic expressions": "Expanding brackets",
-    "Chapter 2 - Quadratics": "Completing the square ",
+    "Chapter 2 - Quadratics": "Completing the square",
     "Chapter 3 - Equations and inequalities": "Quadratic simultaneous equations",
     "Chapter 4 - Graphs and transformations": "Quartic graphs",
     "Chapter 5 - Straight line graphs": "Equations of straight lines",
@@ -49,7 +50,7 @@
   },
   {
     "Chapter 1 - Algebraic expressions": "Factorising",
-    "Chapter 2 - Quadratics": "Functions ",
+    "Chapter 2 - Quadratics": "Functions",
     "Chapter 3 - Equations and inequalities": "Simultaneous equations on graphs",
     "Chapter 4 - Graphs and transformations": "Reciprocal graphs",
     "Chapter 5 - Straight line graphs": "Parallel and perpendicular lines",
@@ -59,7 +60,7 @@
     "Chapter 9 - Trigonometric ratios": "Areas of triangles",
     "Chapter 10 - Trigonometric identities and equations": "Trigonometric identities",
     "Chapter 11 - Vectors": "Magnitude and direction",
-    "Chapter 12 - Differentiation": "Differentiating x",
+    "Chapter 12 - Differentiation": "Differentiating x\"",
     "Chapter 13 - Integration": "Finding functions",
     "Chapter 14 - Exponentials and logarithms": "Exponential modelling"
   },
@@ -108,6 +109,8 @@
   },
   {
     "Chapter 3 - Equations and inequalities": "Regions",
+    "Chapter 4 - Graphs and transformations": "Points of intersection",
+    "Chapter 10 - Trigonometric identities and equations": "Mixed exercise (Trigonometric ratios)",
     "Chapter 12 - Differentiation": "Increasing and decreasing functions",
     "Chapter 13 - Integration": "Areas between curves and lines",
     "Chapter 14 - Exponentials and logarithms": "Working with natural logarithms"
@@ -117,10 +120,12 @@
     "Chapter 14 - Exponentials and logarithms": "Logarithm and non-linear data"
   },
   {
-    "Chapter 12 - Differentiation": "Stationary points"
+    "Chapter 12 - Differentiation": "Stationary points",
+    "Chapter 14 - Exponentials and logarithms":"Exponential models"
   },
   {
-    "Chapter 12 - Differentiation": "Sketching gradient functions"
+    "Chapter 12 - Differentiation": "Sketching gradient functions",
+     "Chapter 14 - Exponentials and logarithms":"Exponentials"
   },
   {
     "Chapter 12 - Differentiation": "Modelling with differentiation"

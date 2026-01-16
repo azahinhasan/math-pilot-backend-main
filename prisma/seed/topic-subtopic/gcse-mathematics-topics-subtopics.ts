@@ -11,7 +11,6 @@ async function seedGCSEMathTopicsSubtopics() {
   console.log("Staring seeing topics and subtopics for AgeLevel: GCSE and Module: Mathematics");
   const jsonFilePath = path.join(
     __dirname,
-    'json',
     'GCSE-Mathematics Topics and subtopics.json',
   );
 

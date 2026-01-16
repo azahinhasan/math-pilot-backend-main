@@ -2,7 +2,7 @@ import { PrismaClient, DifficultyLevel } from '@prisma/client';
 import * as fs from 'fs';
 import * as path from 'path';
 
-// Run with: npx ts-node prisma/seed/a-level-practice-questions-descriptive.ts
+// Run with: npx ts-node prisma/seed/question/a-level-practice-questions-descriptive.ts
 const prisma = new PrismaClient();
 
 function removeComments(text: string): string {
@@ -20,9 +20,7 @@ async function main() {
 
   const practiceQusPath = path.join(
     __dirname,
-    'json',
-    'dummy',
-    'Level-A-Math-Question-desc.json',
+    'Level-A-Math-Question-desc-descriptive-practice.json',
   );
   const practiceQusFile = fs.readFileSync(practiceQusPath, 'utf-8');
   const practiceQusData = JSON.parse(practiceQusFile);
@@ -148,48 +146,48 @@ async function main() {
         continue;
       }
 
-      // const newQuestion = await prisma.question.create({
-      //   data: {
-      //     name: questionTitle,
-      //     questionText: questionText,
-      //     questionContentLink: '',
-      //     hint: hint,
-      //     totalMarks: questionData.total_marks || 1,
-      //     timeLimit: questionData.time_limit_in_min || 1,
-      //     imageFileName: questionData.question_image
-      //       ? 'question-images/' + questionData.question_image
-      //       : '',
-      //     difficultyLevel:
-      //       difficultyMap[questionData.question_difficulty] ||
-      //       DifficultyLevel.Easy,
-      //     stepCount: 1,
-      //     serialNo: serialNo,
-      //     questionTypeId: descriptiveQuestionType.id,
-      //     moduleId: topic.module.id,
-      //     topicId: topic.id,
-      //     subtopicId: subtopic.id,
-      //     solutionBases: {
-      //       create: {
-      //         solutionDescriptives: {
-      //           create: {
-      //             isInputCanvases:
-      //               questionData.Canvas == 'Yes' || questionData.canvas == 'Yes'
-      //                 ? true
-      //                 : false,
-      //             descriptiveSolution: correctAnswer,
-      //             descriptiveSolutionImage: questionData.correct_answer_image
-      //               ? 'question-solution-images/' +
-      //                 questionData.correct_answer_image
-      //               : '',
-      //           },
-      //         },
-      //       },
-      //     },
-      //   },
-      // });
-      // console.log(
-      //   `Created question with id: ${newQuestion.id} - ${questionTitle}`,
-      // );
+      const newQuestion = await prisma.question.create({
+        data: {
+          name: questionTitle,
+          questionText: questionText,
+          questionContentLink: '',
+          hint: hint,
+          totalMarks: questionData.total_marks || 1,
+          timeLimit: questionData.time_limit_in_min || 1,
+          imageFileName: questionData.question_image
+            ? 'question-images/' + questionData.question_image
+            : '',
+          difficultyLevel:
+            difficultyMap[questionData.question_difficulty] ||
+            DifficultyLevel.Easy,
+          stepCount: 1,
+          serialNo: serialNo,
+          questionTypeId: descriptiveQuestionType.id,
+          moduleId: topic.module.id,
+          topicId: topic.id,
+          subtopicId: subtopic.id,
+          solutionBases: {
+            create: {
+              solutionDescriptives: {
+                create: {
+                  isInputCanvases:
+                    questionData.Canvas == 'Yes' || questionData.canvas == 'Yes'
+                      ? true
+                      : false,
+                  descriptiveSolution: correctAnswer,
+                  descriptiveSolutionImage: questionData.correct_answer_image
+                    ? 'question-solution-images/' +
+                      questionData.correct_answer_image
+                    : '',
+                },
+              },
+            },
+          },
+        },
+      });
+      console.log(
+        `Created question with id: ${newQuestion.id} - ${questionTitle}`,
+      );
       createdCount++;
     }
   }
@@ -210,7 +208,9 @@ async function main() {
   if (notFoundSubtopics.length > 0) {
     console.log('\n=== Subtopics Not Found ===');
     notFoundSubtopics.forEach((item, index) => {
-      console.log(`${index + 1}. Topic: "${item.topic}" - Subtopic: "${item.subtopic}"`);
+      console.log(
+        `${index + 1}. Topic: "${item.topic}" - Subtopic: "${item.subtopic}"`,
+      );
     });
   }
 
