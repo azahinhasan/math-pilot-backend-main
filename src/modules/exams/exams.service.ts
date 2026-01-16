@@ -43,6 +43,7 @@ interface SavedSubmissionData {
   submissionData: any;
   questionType: QuestionTypeEnum;
   solutionBase: any;
+  imageFileName?: string; // Added to track uploaded file
 }
 
 @Injectable()
@@ -58,10 +59,14 @@ export class ExamsService {
   /**
    * Submit test and start evaluation process
    */
-  async submitTest(dto: SubmitTestDto, clerkId: string) {
+  async submitTest(
+    dto: SubmitTestDto,
+    clerkId: string,
+    files: Array<Express.Multer.File>,
+  ) {
     this.logger.log('=== TEST SUBMISSION START ===');
     this.logger.log(`Number of submissions: ${dto.submissions.length}`);
-    
+
     const student = await this.prisma.student.findFirst({
       where: {
         auth: {
@@ -84,7 +89,7 @@ export class ExamsService {
       this.logger.log('✅ All submissions saved with Submitted status');
 
       // Start background evaluation (non-blocking)
-      this.startBackgroundEvaluation(savedSubmissions, student.id);
+      this.startBackgroundEvaluation(savedSubmissions, student.id, files);
 
       return this.buildSubmissionResponse(savedSubmissions);
     } catch (error) {
@@ -172,11 +177,18 @@ export class ExamsService {
       question,
     );
 
+    let imageFileName: string | undefined;
+    if (question.questionType.name === QuestionTypeEnum.Descriptive) {
+      const data = submission.data as DescriptiveSubmissionDataDto;
+      imageFileName = data.imageFileName;
+    }
+
     return {
       submission: savedSubmission,
       submissionData,
       questionType: question.questionType.name as QuestionTypeEnum,
       solutionBase,
+      imageFileName,
     };
   }
 
@@ -330,7 +342,7 @@ export class ExamsService {
         solutionImageFileName:
           question.solutionBases[0]?.solutionDescriptives?.[0]
             ?.descriptiveSolutionImage || null,
-        canvasData: descriptiveData.canvasData || "",
+        canvasData: descriptiveData.canvasData || '',
         hint: question.hint || null,
         // chatHistory: descriptiveData.chatHistory || null,
         isCorrect: false, // Will be updated during evaluation
@@ -345,12 +357,15 @@ export class ExamsService {
   private startBackgroundEvaluation(
     savedSubmissions: SavedSubmissionData[],
     studentId: string,
+    files: Array<Express.Multer.File>,
   ): void {
-    this.evaluateSubmissionsInBackground(savedSubmissions, studentId).catch(
-      (error) => {
-        this.logger.error('Background evaluation error:', error);
-      },
-    );
+    this.evaluateSubmissionsInBackground(
+      savedSubmissions,
+      studentId,
+      files,
+    ).catch((error) => {
+      this.logger.error('Background evaluation error:', error);
+    });
   }
 
   /**
@@ -373,6 +388,7 @@ export class ExamsService {
   private async evaluateSubmissionsInBackground(
     savedSubmissions: SavedSubmissionData[],
     studentId: string,
+    files: Array<Express.Multer.File>,
   ) {
     this.logger.log('=== BACKGROUND EVALUATION START ===');
 
@@ -402,6 +418,10 @@ export class ExamsService {
               submission,
               submissionData,
               solutionBase,
+              files,
+              studentId,
+              savedSubmissions.find((s) => s.submission.id === submission.id)
+                ?.imageFileName,
             );
             break;
         }
@@ -489,6 +509,9 @@ export class ExamsService {
     submission: any,
     submittedDescriptive: any,
     solutionBase: any,
+    files: Array<Express.Multer.File>,
+    studentId: string,
+    imageFileName?: string,
   ) {
     this.logger.log(`Evaluating Descriptive for submission ${submission.id}`);
 
@@ -506,26 +529,46 @@ export class ExamsService {
         throw new Error('Question not found');
       }
 
-      // Check if solution image exists
-      if (!submittedDescriptive.solutionImageFileName) {
-        await this.handleMissingSolutionImage(
-          submission.id,
-          submittedDescriptive.id,
-        );
-        return;
+      // Get uploaded image
+      let uploadedFile: Express.Multer.File | undefined;
+      if (imageFileName) {
+        uploadedFile = files.find((f) => f.originalname === imageFileName);
       }
 
-      // Download image and call Math API
+      // Download question image if exists
+      let questionImageBuffer: Buffer | null = null;
+      if (question.imageFileName) {
+        try {
+          questionImageBuffer = await this.downloadSolutionImage(
+            question.imageFileName,
+          );
+        } catch (e) {
+          this.logger.warn(`Failed to download question image: ${e.message}`);
+        }
+      }
+
+      // Download solution image if exists
+      let solutionImageBuffer: Buffer | null = null;
+      if (solutionDescriptive.descriptiveSolutionImage) {
+        try {
+          solutionImageBuffer = await this.downloadSolutionImage(
+            solutionDescriptive.descriptiveSolutionImage,
+          );
+        } catch (e) {
+          this.logger.warn(`Failed to download solution image: ${e.message}`);
+        }
+      }
+
+      // Call Math API
       const evaluateMathApiUrl = this.getEvaluationApiUrl();
-      const imageBuffer = await this.downloadSolutionImage(
-        submittedDescriptive.solutionImageFileName,
-      );
       const apiResult = await this.callMathEvaluationAPI(
         evaluateMathApiUrl,
-        imageBuffer,
         question,
         solutionDescriptive,
-        submittedDescriptive,
+        studentId,
+        uploadedFile,
+        questionImageBuffer,
+        solutionImageBuffer,
       );
 
       // Calculate marks based on AI verdict
@@ -546,7 +589,7 @@ export class ExamsService {
       );
 
       this.logger.log(
-        `Descriptive evaluated: ${apiResult.verdict}, Marks: ${awardedMarks}`,
+        `Descriptive evaluated: ${apiResult.evaluation}, Score: ${awardedMarks}`,
       );
     } catch (error) {
       await this.handleDescriptiveEvaluationError(
@@ -674,26 +717,49 @@ export class ExamsService {
    */
   private async callMathEvaluationAPI(
     apiUrl: string,
-    imageBuffer: Buffer,
     question: any,
     solutionDescriptive: any,
-    submittedDescriptive: any,
+    studentId: string,
+    uploadedFile?: Express.Multer.File,
+    questionImageBuffer?: Buffer | null,
+    solutionImageBuffer?: Buffer | null,
   ) {
+    // Payload to handle: user_id, solution_text, total_marks, question_image, solution_image, images
+    /**
+     * Response:
+     * "extracted_text": "string",
+     * "evaluation": "string",
+     * "score": 0
+     */
     const formData = new FormData();
-    formData.append('image', imageBuffer, {
-      filename: 'image.jpg',
-      contentType: 'image/jpeg',
-    });
 
-    formData.append('question', question.questionText);
-    formData.append('currentStepCount', question.stepCount.toString());
+    formData.append('user_id', studentId);
+    formData.append('question_id', question.id);
+    formData.append('question_text', question.questionText || '');
+    formData.append('currentStepCount', (question.stepCount || 0).toString());
     formData.append(
-      'correct_answer',
+      'solution_text',
       solutionDescriptive.descriptiveSolution || '',
     );
+    formData.append('total_marks', (question.totalMarks || 0).toString());
 
-    if (submittedDescriptive.chatHistory) {
-      formData.append('chat_history', submittedDescriptive.chatHistory);
+    if (questionImageBuffer) {
+      formData.append('question_image', questionImageBuffer, {
+        filename: 'question_image.jpg',
+      });
+    }
+
+    if (solutionImageBuffer) {
+      formData.append('solution_image', solutionImageBuffer, {
+        filename: 'solution_image.jpg',
+      });
+    }
+
+    if (uploadedFile) {
+      formData.append('images', uploadedFile.buffer, {
+        filename: uploadedFile.originalname,
+        contentType: uploadedFile.mimetype,
+      });
     }
 
     this.logger.log('Sending request to Math API...');
@@ -722,17 +788,10 @@ export class ExamsService {
     solutionDescriptive: any,
     question: any,
   ) {
-    let awardedMarks = 0;
-    let isCorrect = false;
+    const awardedMarks = apiResult.score || 0;
+    // const maxMarks = solutionDescriptive.maxMarks || question.totalMarks || 0;
 
-    if (apiResult.verdict === 'correct' || apiResult.is_finished === true) {
-      isCorrect = true;
-      awardedMarks = solutionDescriptive.maxMarks || question.totalMarks || 0;
-    } else if (apiResult.verdict === 'on track') {
-      awardedMarks = Math.floor(
-        (solutionDescriptive.maxMarks || question.totalMarks || 0) * 0.5,
-      );
-    }
+    const isCorrect = awardedMarks > 0;
 
     return { isCorrect, awardedMarks };
   }
@@ -754,12 +813,12 @@ export class ExamsService {
       data: {
         isCorrect,
         awardedMarks,
-        verdict: apiResult.verdict,
-        hint: apiResult.hint || submittedDescriptive.hint,
+        // verdict: null,
+        // hint: null,
         evaluation: apiResult.evaluation || null,
         ocrOutput: apiResult.extracted_text || null,
-        isFinished: apiResult.is_finished || null,
-        nextStepCount: apiResult.nextStepCount || null,
+        // isFinished: null,
+        // nextStepCount: null,
       },
     });
 
