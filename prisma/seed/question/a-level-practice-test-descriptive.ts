@@ -152,7 +152,7 @@ async function main() {
           questionText: questionText,
           questionContentLink: '',
           hint: hint,
-          questionFor: QuestionFor.Practice,
+          questionFor: QuestionFor.Test,
           totalMarks: questionData.total_marks || 1,
           timeLimit: questionData.time_limit_in_min || 1,
           imageFileName: questionData.question_image
