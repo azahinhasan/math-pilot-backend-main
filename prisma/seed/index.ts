@@ -1,6 +1,8 @@
 import { PrismaClient, BoardName, AgeLevelName } from '@prisma/client';
 import seedQuestionTypes from './add-question-types';
 import seedModules from './add-modules';
+import { seedALevelMathTopicsSubtopics } from './topic-subtopic/a-level-pure-mathematics-1-topics-subtopics';
+import { seedGCSEMathTopicsSubtopics } from './topic-subtopic/gcse-mathematics-topics-subtopics';
 const prisma = new PrismaClient();
 
 async function main() {
@@ -104,6 +106,8 @@ async function main() {
 
   await seedQuestionTypes();
   await seedModules();
+  await seedGCSEMathTopicsSubtopics();
+  await seedALevelMathTopicsSubtopics();
 
 }
 
@@ -115,3 +119,4 @@ main()
   .finally(async () => {
     await prisma.$disconnect();
   });
+

@@ -7,8 +7,8 @@ const prisma = new PrismaClient();
 // Run with: npx ts-node prisma/seed/a-level-pure-mathematics-1-topics-subtopics.ts
 
 
-async function seedGCSEMathTopicsSubtopics() {
-  console.log("Staring seeing topics and subtopics for AgeLevel: GCSE and Module: Mathematics");
+export async function seedALevelMathTopicsSubtopics() {
+  console.log("Staring seeing topics and subtopics for AgeLevel: A Level and Module: Pure Mathematics 1");
   const jsonFilePath = path.join(
     __dirname,
     'A level-Pure Mathematics - 1 Topics and subtopics.json',
@@ -130,8 +130,7 @@ async function seedGCSEMathTopicsSubtopics() {
   console.log(`Total new subtopics: ${newSubtopics.length}`);
 }
 
-// export default seedGCSEMathTopicsSubtopics;
-seedGCSEMathTopicsSubtopics()
+seedALevelMathTopicsSubtopics()
   .catch((e) => {
     console.error(e);
     process.exit(1);
