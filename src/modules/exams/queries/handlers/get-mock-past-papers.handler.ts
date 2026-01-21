@@ -25,41 +25,44 @@ export class GetMockPastPapersHandler implements IQueryHandler<GetMockPastPapers
       where,
       include: {
         board: true,
-        _count: {
+        questionSets: {
+          where: {
+            questionId: { not: null },
+            voided: false,
+          },
           select: {
-            questionSets: {
-              where: {
-                questionId: { not: null },
-                voided: false,
-              },
-            },
+            questionId: true,
           },
         },
       },
       orderBy: [{ year: 'desc' }, { season: 'asc' }, { name: 'asc' }],
     });
 
-
-    const data = pastPapers.map((paper) => ({
-      id: paper.id,
-      name: paper.name,
-      year: paper.year,
-      season: paper.season,
-      timeLimit: paper.timeLimit,
-      numberOfQuestions: paper._count.questionSets,
-      board: paper.board
-        ? {
-            id: paper.board.id,
-            boardName: paper.board.boardName,
-            ageLevelName: paper.board.ageLevelName,
-          }
-        : null,
-      moduleId: paper.moduleId,
-    }));
+    const data = pastPapers.map((paper) => {
+      const uniqueQuestions = new Set(
+        paper.questionSets.map((qs) => qs.questionId),
+      );
+      return {
+        id: paper.id,
+        name: paper.name,
+        year: paper.year,
+        season: paper.season,
+        timeLimit: paper.timeLimit,
+        numberOfQuestions: uniqueQuestions.size,
+        board: paper.board
+          ? {
+              id: paper.board.id,
+              boardName: paper.board.boardName,
+              ageLevelName: paper.board.ageLevelName,
+            }
+          : null,
+        moduleId: paper.moduleId,
+      };
+    });
 
     return {
-      message:"Mock Past Papers Fetched Successfully",
-      data
-    }
+      message: 'Mock Past Papers Fetched Successfully',
+      data,
+    };
   }
 }

@@ -7,7 +7,7 @@ const prisma = new PrismaClient();
 // Run with: npx ts-node prisma/seed/gcse-mathematics-topics-subtopics.ts
 
 
-async function seedGCSEMathTopicsSubtopics() {
+export async function seedGCSEMathTopicsSubtopics() {
   console.log("Staring seeing topics and subtopics for AgeLevel: GCSE and Module: Mathematics");
   const jsonFilePath = path.join(
     __dirname,
@@ -107,7 +107,6 @@ async function seedGCSEMathTopicsSubtopics() {
   console.log('Seeded GCSE Math topics and subtopics');
 }
 
-// export default seedGCSEMathTopicsSubtopics;
 seedGCSEMathTopicsSubtopics()
   .catch((e) => {
     console.error(e);

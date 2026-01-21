@@ -96,9 +96,7 @@ interface PerformanceAnalytics {
 }
 
 @QueryHandler(GetPerformanceAnalyticsQuery)
-export class GetPerformanceAnalyticsHandler
-  implements IQueryHandler<GetPerformanceAnalyticsQuery>
-{
+export class GetPerformanceAnalyticsHandler implements IQueryHandler<GetPerformanceAnalyticsQuery> {
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(
@@ -483,6 +481,20 @@ export class GetPerformanceAnalyticsHandler
       }
     >();
 
+    // Map to store aggregated progress from StudentTopicDetails (combining Practice/Exam)
+    const topicAggregatedProgress = new Map<
+      string,
+      {
+        topicName: string;
+        moduleName: string;
+        questionsAttempted: number;
+        questionsCorrect: number;
+        lastAccessedAt: Date | null;
+        isFavorite: boolean;
+        status: string | null;
+      }
+    >();
+
     submissions.forEach((submission) => {
       const topicId = submission.question?.topicId;
       if (!topicId) return;
@@ -517,55 +529,100 @@ export class GetPerformanceAnalyticsHandler
           metrics.timeCorrect += timeDiff;
         }
       }
+
+      // If we encounter a topic in submissions that isn't in progress (e.g. legacy data), ensure it's tracked
+      if (!topicAggregatedProgress.has(topicId)) {
+        topicAggregatedProgress.set(topicId, {
+          topicName: submission.question?.topic?.name || 'Unknown',
+          moduleName: submission.question?.topic?.module?.name || 'Unknown',
+          questionsAttempted: 0,
+          questionsCorrect: 0,
+          lastAccessedAt: submission.beganAt,
+          isFavorite: false,
+          status: null,
+        });
+      }
     });
 
-    return topicProgress.map((progress) => {
-      const accuracyRate =
-        progress.questionsAttempted > 0
-          ? (progress.questionsCorrect / progress.questionsAttempted) * 100
-          : 0;
+    // Aggregate StudentTopicDetails (merging Practice and Exam types)
+    topicProgress.forEach((progress) => {
+      const existing = topicAggregatedProgress.get(progress.topicId);
+      if (existing) {
+        existing.questionsAttempted += progress.questionsAttempted || 0;
+        existing.questionsCorrect += progress.questionsCorrect || 0;
 
-      const metrics = topicMetricsMap.get(progress.topicId) || {
-        marksAttempted: 0,
-        marksCorrect: 0,
-        timeAttempted: 0,
-        timeCorrect: 0,
-      };
-
-      const marksPercentage =
-        metrics.marksAttempted > 0
-          ? (metrics.marksCorrect / metrics.marksAttempted) * 100
-          : 0;
-
-      const averageTimePerQuestion =
-        progress.questionsAttempted > 0
-          ? metrics.timeAttempted / progress.questionsAttempted
-          : 0;
-
-      return {
-        topicId: progress.topicId,
-        topicName: progress.topic?.name || 'Unknown',
-        moduleName: progress.topic?.module?.name || 'Unknown',
-        counts: {
-          attempted: progress.questionsAttempted || 0,
-          correct: progress.questionsCorrect || 0,
-        },
-        marks: {
-          attempted: metrics.marksAttempted,
-          correct: metrics.marksCorrect,
-        },
-        time: {
-          attempted: Math.round(metrics.timeAttempted),
-          correct: Math.round(metrics.timeCorrect),
-        },
-        accuracyRate: parseFloat(accuracyRate.toFixed(2)),
-        marksPercentage: parseFloat(marksPercentage.toFixed(2)),
-        averageTimePerQuestion: parseFloat(averageTimePerQuestion.toFixed(2)),
-        lastAccessedAt: progress.lastAccessedAt,
-        isFavorite: progress.isFavorite,
-        status: progress.status,
-      };
+        // Update metadata if this record is more recent or has better info
+        if (
+          progress.lastAccessedAt &&
+          (!existing.lastAccessedAt ||
+            progress.lastAccessedAt > existing.lastAccessedAt)
+        ) {
+          existing.lastAccessedAt = progress.lastAccessedAt;
+        }
+        if (progress.status && !existing.status)
+          existing.status = progress.status;
+      } else {
+        topicAggregatedProgress.set(progress.topicId, {
+          topicName: progress.topic?.name || 'Unknown',
+          moduleName: progress.topic?.module?.name || 'Unknown',
+          questionsAttempted: progress.questionsAttempted || 0,
+          questionsCorrect: progress.questionsCorrect || 0,
+          lastAccessedAt: progress.lastAccessedAt,
+          isFavorite: progress.isFavorite,
+          status: progress.status,
+        });
+      }
     });
+
+    return Array.from(topicAggregatedProgress.entries()).map(
+      ([topicId, progress]) => {
+        const accuracyRate =
+          progress.questionsAttempted > 0
+            ? (progress.questionsCorrect / progress.questionsAttempted) * 100
+            : 0;
+
+        const metrics = topicMetricsMap.get(topicId) || {
+          marksAttempted: 0,
+          marksCorrect: 0,
+          timeAttempted: 0,
+          timeCorrect: 0,
+        };
+
+        const marksPercentage =
+          metrics.marksAttempted > 0
+            ? (metrics.marksCorrect / metrics.marksAttempted) * 100
+            : 0;
+
+        const averageTimePerQuestion =
+          progress.questionsAttempted > 0
+            ? metrics.timeAttempted / progress.questionsAttempted
+            : 0;
+
+        return {
+          topicId: topicId,
+          topicName: progress.topicName,
+          moduleName: progress.moduleName,
+          counts: {
+            attempted: progress.questionsAttempted,
+            correct: progress.questionsCorrect,
+          },
+          marks: {
+            attempted: metrics.marksAttempted,
+            correct: metrics.marksCorrect,
+          },
+          time: {
+            attempted: Math.round(metrics.timeAttempted),
+            correct: Math.round(metrics.timeCorrect),
+          },
+          accuracyRate: parseFloat(accuracyRate.toFixed(2)),
+          marksPercentage: parseFloat(marksPercentage.toFixed(2)),
+          averageTimePerQuestion: parseFloat(averageTimePerQuestion.toFixed(2)),
+          lastAccessedAt: progress.lastAccessedAt,
+          isFavorite: progress.isFavorite,
+          status: progress.status,
+        };
+      },
+    );
   }
 
   private calculateModulePerformance(submissions: any[]): ModulePerformance[] {
