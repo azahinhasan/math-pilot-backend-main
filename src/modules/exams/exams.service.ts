@@ -22,6 +22,7 @@ import {
   Topic,
   SolutionDescriptive,
   SolutionMcq,
+  SubmissionType,
 } from '@prisma/client';
 import { firstValueFrom } from 'rxjs';
 import FormData = require('form-data');
@@ -61,7 +62,7 @@ export class ExamsService {
   async submitTest(dto: SubmitTestDto, clerkId: string) {
     this.logger.log('=== TEST SUBMISSION START ===');
     this.logger.log(`Number of submissions: ${dto.submissions.length}`);
-    
+
     const student = await this.prisma.student.findFirst({
       where: {
         auth: {
@@ -76,7 +77,21 @@ export class ExamsService {
 
     try {
       // Validate student and exam
-      await this.validateStudentAndExam(student.id, dto.examId);
+      const exam = await this.validateStudentAndExam(student.id, dto.examId);
+
+      // Calculate time spent (Exam Duration)
+      // Difference between Now (Submission Time) and Exam Start Time
+      let timeSpentSeconds = 0;
+      if (exam && exam.startTime) {
+        const submissionTime = new Date();
+        const examStartTime = new Date(exam.startTime);
+        const diffMs = submissionTime.getTime() - examStartTime.getTime();
+        timeSpentSeconds = Math.max(0, Math.floor(diffMs / 1000));
+
+        this.logger.log(
+          `Calculated Exam Duration: ${timeSpentSeconds}s (Start: ${examStartTime.toISOString()}, Sub: ${submissionTime.toISOString()})`,
+        );
+      }
 
       // Process all submissions
       const savedSubmissions = await this.processSubmissions(dto, student.id);
@@ -84,7 +99,11 @@ export class ExamsService {
       this.logger.log('✅ All submissions saved with Submitted status');
 
       // Start background evaluation (non-blocking)
-      this.startBackgroundEvaluation(savedSubmissions, student.id);
+      this.startBackgroundEvaluation(
+        savedSubmissions,
+        student.id,
+        timeSpentSeconds,
+      );
 
       return this.buildSubmissionResponse(savedSubmissions);
     } catch (error) {
@@ -99,7 +118,7 @@ export class ExamsService {
   private async validateStudentAndExam(
     studentId: string,
     examId?: string,
-  ): Promise<void> {
+  ): Promise<any | null> {
     // Verify student exists
     const student = await this.prisma.student.findUnique({
       where: { id: studentId },
@@ -118,7 +137,9 @@ export class ExamsService {
       if (!exam) {
         throw new NotFoundException(`Exam with ID "${examId}" not found`);
       }
+      return exam;
     }
+    return null;
   }
 
   /**
@@ -330,7 +351,7 @@ export class ExamsService {
         solutionImageFileName:
           question.solutionBases[0]?.solutionDescriptives?.[0]
             ?.descriptiveSolutionImage || null,
-        canvasData: descriptiveData.canvasData || "",
+        canvasData: descriptiveData.canvasData || '',
         hint: question.hint || null,
         // chatHistory: descriptiveData.chatHistory || null,
         isCorrect: false, // Will be updated during evaluation
@@ -345,12 +366,15 @@ export class ExamsService {
   private startBackgroundEvaluation(
     savedSubmissions: SavedSubmissionData[],
     studentId: string,
+    timeSpentSeconds: number = 0,
   ): void {
-    this.evaluateSubmissionsInBackground(savedSubmissions, studentId).catch(
-      (error) => {
-        this.logger.error('Background evaluation error:', error);
-      },
-    );
+    this.evaluateSubmissionsInBackground(
+      savedSubmissions,
+      studentId,
+      timeSpentSeconds,
+    ).catch((error) => {
+      this.logger.error('Background evaluation error:', error);
+    });
   }
 
   /**
@@ -373,8 +397,15 @@ export class ExamsService {
   private async evaluateSubmissionsInBackground(
     savedSubmissions: SavedSubmissionData[],
     studentId: string,
+    timeSpentSeconds: number,
   ) {
     this.logger.log('=== BACKGROUND EVALUATION START ===');
+
+    // Track stats per topic
+    const topicStats = new Map<
+      string,
+      { attempted: number; correct: number }
+    >();
 
     for (const {
       submission,
@@ -382,15 +413,22 @@ export class ExamsService {
       questionType,
       solutionBase,
     } of savedSubmissions) {
+      // Initialize topic stats if needed
+      if (submission.topicId && !topicStats.has(submission.topicId)) {
+        topicStats.set(submission.topicId, { attempted: 0, correct: 0 });
+      }
+
       try {
         this.logger.log(
           `Evaluating submission ${submission.id} (${questionType})`,
         );
 
+        let isCorrect = false;
+
         switch (questionType) {
           case QuestionTypeEnum.MCQ:
           case QuestionTypeEnum.TrueFalse:
-            await this.evaluateMCQOrTrueFalse(
+            isCorrect = await this.evaluateMCQOrTrueFalse(
               submission,
               submissionData,
               solutionBase,
@@ -398,12 +436,21 @@ export class ExamsService {
             break;
 
           case QuestionTypeEnum.Descriptive:
-            await this.evaluateDescriptive(
+            isCorrect = await this.evaluateDescriptive(
               submission,
               submissionData,
               solutionBase,
             );
             break;
+        }
+
+        // Update topic stats
+        if (submission.topicId) {
+          const stats = topicStats.get(submission.topicId);
+          if (stats) {
+            stats.attempted += 1;
+            if (isCorrect) stats.correct += 1;
+          }
         }
 
         // Update submission status to Graded
@@ -427,6 +474,18 @@ export class ExamsService {
           data: { status: SubmissionStatus.Submitted },
         });
       }
+    }
+
+    // Bulk update StudentTopicDetails after all evaluations
+    this.logger.log('Updating Student Topic Details...');
+    for (const [topicId, stats] of topicStats.entries()) {
+      await this.updateStudentTopicDetails(
+        studentId,
+        topicId,
+        stats.attempted,
+        stats.correct,
+        timeSpentSeconds,
+      );
     }
 
     this.logger.log('=== BACKGROUND EVALUATION END ===');
@@ -480,6 +539,8 @@ export class ExamsService {
     this.logger.log(
       `MCQ/TrueFalse evaluated: ${isCorrect ? 'Correct' : 'Incorrect'}, Marks: ${awardedMark}`,
     );
+
+    return isCorrect;
   }
 
   /**
@@ -512,7 +573,7 @@ export class ExamsService {
           submission.id,
           submittedDescriptive.id,
         );
-        return;
+        return false;
       }
 
       // Download image and call Math API
@@ -548,6 +609,8 @@ export class ExamsService {
       this.logger.log(
         `Descriptive evaluated: ${apiResult.verdict}, Marks: ${awardedMarks}`,
       );
+
+      return isCorrect;
     } catch (error) {
       await this.handleDescriptiveEvaluationError(
         error,
@@ -888,5 +951,57 @@ export class ExamsService {
         totalExams: results.length,
       },
     };
+  }
+
+  /**
+   * Update StudentTopicDetails for tracking progress
+   */
+  private async updateStudentTopicDetails(
+    studentId: string,
+    topicId: string,
+    attemptsAdded: number,
+    correctAdded: number,
+    timeAdded: number,
+  ) {
+    try {
+      // Find existing record for Exam type
+      const existingRecord = await this.prisma.studentTopicDetails.findFirst({
+        where: {
+          studentId,
+          topicId,
+          type: SubmissionType.Exam, // Using string literal matching the schema enum if needed, or SubmissionType.Exam
+        },
+      });
+
+      if (existingRecord) {
+        await this.prisma.studentTopicDetails.update({
+          where: { id: existingRecord.id },
+          data: {
+            questionsAttempted: { increment: attemptsAdded },
+            questionsCorrect: { increment: correctAdded },
+            timeSpentInSeconds: { increment: timeAdded },
+            lastAccessedAt: new Date(),
+          },
+        });
+      } else {
+        await this.prisma.studentTopicDetails.create({
+          data: {
+            studentId,
+            topicId,
+            type: SubmissionType.Exam,
+            questionsAttempted: attemptsAdded,
+            questionsCorrect: correctAdded,
+            timeSpentInSeconds: timeAdded,
+            lastAccessedAt: new Date(),
+            status: SubmissionStatus.InProgress,
+          },
+        });
+      }
+    } catch (error) {
+      this.logger.error(
+        `Failed to update StudentTopicDetails for student ${studentId} and topic ${topicId}`,
+        error.message,
+      );
+    }
   }
 }
