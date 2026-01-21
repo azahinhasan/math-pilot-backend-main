@@ -1,0 +1,73 @@
+{
+  "Chapter 1 - Algebraic expressions": [
+    {
+      "subtopic_name": "Index laws",
+      "question_type": "MCQ",
+      "serial_no": 1,
+      "question_title": "Q1_GM_001",
+      "question_text": "Solve for x: 2x + 4 = 10",
+      "question_image": "Q1_GM_001.png",
+      "on_canvas": false,
+      "question_difficulty": "Easy",
+      "total_marks": 1,
+      "time_limit_in_min": 2,
+      "question_for": "Test",
+      "past_paper_name": "No",
+      "past_paper_year": 2025,
+      "past_paper_season": "May/June 2023 Paper 1",
+      "mcq_option_1_text": 3,
+      "mcq_option_2_text": 4,
+      "mcq_option_3_text": 5,
+      "mcq_option_4_text": 2,
+      "solution_image": "temp.png",
+      "solution_text": 5,
+      "explanation": "Subtract 4 from both sides then divide by 2.",
+      "hint": "Isolate x."
+    },
+     {
+      "subtopic_name": "Index laws",
+      "question_type": "MCQ",
+      "serial_no": 1,
+      "question_title": "Q1_GM_001 2",
+      "question_text": "Solve for x: 2x + 4 = 10 32",
+      "question_image": "Q1_GM_001.png",
+      "on_canvas": false,
+      "question_difficulty": "Easy",
+      "total_marks": 1,
+      "time_limit_in_min": 2,
+      "question_for": "Practice",
+      "past_paper_name": "",
+      "past_paper_year": null,
+      "past_paper_season": "",
+      "mcq_option_1_text": 3,
+      "mcq_option_2_text": 4,
+      "mcq_option_3_text": 5,
+      "mcq_option_4_text": 2,
+      "solution_image": "temp.png",
+      "solution_text": 5,
+      "explanation": "Subtract 4 from both sides then divide by 2.",
+      "hint": "Isolate x."
+    }
+  ],
+  "Chapter 2 - Quadratics": [
+    {
+      "subtopic_name": "Solving quadratic equations",
+      "question_type": "Descriptive",
+      "serial_no": 1,
+      "question_title": "Q1_Mech_001",
+      "question_text": "Explain Newton's Second Law of Motion.",
+      "question_image": "Q1_Summer_2023.png",
+      "on_canvas": true,
+      "question_difficulty": "Medium",
+      "total_marks": 4,
+      "time_limit_in_min": 10,
+      "question_for": "Test",
+      "past_paper_name": "May\/June 2023 Paper 1",
+      "past_paper_year": 2023,
+      "past_paper_season": "Summer",
+      "solution_text": "Force equals mass times acceleration (F=ma).",
+      "explanation": "This is a fundamental principle of dynamics.",
+      "hint": "Think about F=ma."
+    }
+  ]
+}
