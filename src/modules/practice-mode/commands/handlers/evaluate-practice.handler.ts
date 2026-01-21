@@ -343,8 +343,8 @@ export class EvaluatePracticeHandler implements ICommandHandler<EvaluatePractice
             },
           });
 
-          // Get all correct submissions for this topic
-          const correctSubmissions = await tx.submission.findMany({
+          // Get all submissions for this topic to calculate stats
+          const allTopicSubmissions = await tx.submission.findMany({
             where: {
               studentId: student.id,
               question: {
@@ -359,9 +359,9 @@ export class EvaluatePracticeHandler implements ICommandHandler<EvaluatePractice
             },
           });
 
-          // Count unique questions with correct answers
+          // Count unique questions with correct answers (for topic completion status)
           const uniqueCorrectQuestions = new Set(
-            correctSubmissions
+            allTopicSubmissions
               .filter(
                 (sub) =>
                   sub.submittedDescriptives.some((desc) => desc.isCorrect) &&
@@ -370,14 +370,11 @@ export class EvaluatePracticeHandler implements ICommandHandler<EvaluatePractice
               .map((sub) => sub.questionId),
           );
 
-          const uniqueAttempts = new Set(
-            correctSubmissions.map((sub) => sub.questionId),
-          );
-
-          // Add current question if it's correct and finished
-          if (isCorrect) {
-            uniqueCorrectQuestions.add(questionId);
-          }
+          // Calculate Total Stats for Analytics
+          const totalAttemptsCount = allTopicSubmissions.length;
+          const totalCorrectCount = allTopicSubmissions.filter(
+            (sub) => sub.status === 'Graded',
+          ).length;
 
           const correctQuestionsCount = uniqueCorrectQuestions.size;
 
@@ -389,20 +386,15 @@ export class EvaluatePracticeHandler implements ICommandHandler<EvaluatePractice
 
           if (existingTopicDetails) {
             // Update existing record
-            const updateData: any = {
-              timeSpentInSeconds: { increment: timeSpent || 0 },
-              lastAccessedAt: new Date(),
-              status: topicStatus,
-              questionsAttempted: uniqueAttempts.size,
-            };
-
-            if (isCorrect) {
-              updateData.questionsCorrect = { increment: 1 };
-            }
-
             await tx.studentTopicDetails.update({
               where: { id: existingTopicDetails.id },
-              data: updateData,
+              data: {
+                timeSpentInSeconds: { increment: timeSpent || 0 },
+                lastAccessedAt: new Date(),
+                status: topicStatus,
+                questionsAttempted: totalAttemptsCount,
+                questionsCorrect: totalCorrectCount,
+              },
             });
           } else {
             // Create new record
@@ -411,8 +403,8 @@ export class EvaluatePracticeHandler implements ICommandHandler<EvaluatePractice
                 studentId: student.id,
                 topicId: question.topicId,
                 type: 'Practice',
-                questionsAttempted: 1,
-                questionsCorrect: isCorrect ? 1 : 0,
+                questionsAttempted: totalAttemptsCount,
+                questionsCorrect: totalCorrectCount,
                 timeSpentInSeconds: timeSpent || 0,
                 lastAccessedAt: new Date(),
                 status: topicStatus,
@@ -448,10 +440,8 @@ export class EvaluatePracticeHandler implements ICommandHandler<EvaluatePractice
           message: 'AI evaluation successful',
           data: formattedResponse,
         };
-      }else{
-        throw new InternalServerErrorException(
-        'AI evaluation failed',
-      );
+      } else {
+        throw new InternalServerErrorException('AI evaluation failed');
       }
       // Return failure response if AI evaluation was not successful
       // return { success: false, message: 'AI evaluation failed' };
