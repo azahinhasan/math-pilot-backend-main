@@ -7,6 +7,8 @@
 - npx ts-node prisma/seed/question/a-level-practice-questions-descriptive.ts 2
 - npx ts-node prisma/seed/question/a-level-practice-questions-descriptive.ts 3
 - npx ts-node prisma/seed/question/a-level-practice-questions-descriptive.ts 4
+- npx ts-node prisma/seed/question/a-level-practice-questions-descriptive.ts 5
+- npx ts-node prisma/seed/question/a-level-practice-questions-descriptive.ts 6
 
 - npx ts-node prisma/seed/question/a-level-past-paper-questions-descriptive.ts
 
