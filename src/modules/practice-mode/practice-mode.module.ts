@@ -7,10 +7,16 @@ import { PracticeModeController } from './practice-mode.controller';
 import { EvaluatePracticeHandler } from './commands/handlers/evaluate-practice.handler';
 import { TryAgainHandler } from './commands/handlers/try-again.handler';
 import { GetSubmissionsHandler } from './queries/handlers/get-submissions.handler';
+import { DeleteSubmissionDataHandler } from './commands/handlers/delete-submission-data.handler';
 
 @Module({
   imports: [CqrsModule, PrismaModule, HttpModule, ConfigModule],
   controllers: [PracticeModeController],
-  providers: [EvaluatePracticeHandler, TryAgainHandler, GetSubmissionsHandler],
+  providers: [
+    EvaluatePracticeHandler,
+    TryAgainHandler,
+    GetSubmissionsHandler,
+    DeleteSubmissionDataHandler,
+  ],
 })
 export class PracticeModeModule {}

@@ -6,11 +6,14 @@ import {
   ParseFilePipe,
   Post,
   Param,
+  Delete,
   UploadedFiles,
   UseInterceptors,
   UseGuards,
   Req,
   InternalServerErrorException,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { FilesInterceptor } from '@nestjs/platform-express';
@@ -21,6 +24,8 @@ import { TryAgainCommand } from './commands/try-again.command';
 import { GetSubmissionsQuery } from './queries/get-submissions.query';
 import { ClerkAuthGuard } from 'src/clerk-auth-guard';
 import { GetModuleStatisticsQuery } from './queries/get-module-statistics.query';
+import { GetUserQuery } from 'src/modules/users/queries/get-user.query';
+import { DeleteSubmissionDataCommand } from './commands/delete-submission-data.command';
 
 @Controller('practice')
 @UseGuards(ClerkAuthGuard)
@@ -95,6 +100,23 @@ export class PracticeModeController {
 
     return this.queryBus.execute(
       new GetModuleStatisticsQuery(moduleId, clerkId),
+    );
+  }
+
+  @Delete('submissions/:id')
+  async deleteSubmissionData(@Param('id') id: string, @Req() req) {
+    const clerkId = req.user.sub;
+
+    const auth = await this.queryBus.execute(new GetUserQuery(clerkId));
+
+    if (!auth.student) {
+      throw new HttpException('User is not a student', HttpStatus.BAD_REQUEST);
+    }
+
+    const studentId = auth.student.id;
+
+    return this.commandBus.execute(
+      new DeleteSubmissionDataCommand(id, studentId),
     );
   }
 }
