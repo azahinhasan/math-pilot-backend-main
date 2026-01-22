@@ -2,7 +2,8 @@ import { PrismaClient, DifficultyLevel, QuestionFor } from '@prisma/client';
 import * as fs from 'fs';
 import * as path from 'path';
 
-// Run with: npx ts-node prisma/seed/question/a-level-practice-questions-descriptive.ts
+// Run with: npx ts-node prisma/seed/question/a-level-practice-questions-descriptive.ts [fileNumber]
+// Example: npx ts-node prisma/seed/question/a-level-practice-questions-descriptive.ts 2
 const prisma = new PrismaClient();
 
 function removeComments(text: string): string {
@@ -16,12 +17,14 @@ function normalizeString(str: string): string {
 }
 
 async function main() {
-  console.log('Seeding practice questions...');
+  const fileNumber = process.argv[2];
+  const fileName = fileNumber
+    ? `Level-A-Math-Question-desc-descriptive-practice-${fileNumber}.json`
+    : 'Level-A-Math-Question-desc-descriptive-practice.json';
 
-  const practiceQusPath = path.join(
-    __dirname,
-    'Level-A-Math-Question-desc-descriptive-practice.json',
-  );
+  console.log(`Seeding practice questions from: ${fileName}`);
+
+  const practiceQusPath = path.join(__dirname, fileName);
   const practiceQusFile = fs.readFileSync(practiceQusPath, 'utf-8');
   const practiceQusData = JSON.parse(practiceQusFile);
 
