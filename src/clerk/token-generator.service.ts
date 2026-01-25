@@ -65,4 +65,33 @@ export class TokenGeneratorService {
       throw error;
     }
   }
+
+  /**
+   * Deletes a user from Clerk.
+   * This is a workaround for Clerk's signing key rotation issues.
+   */
+  async deleteUser(email: string): Promise<{ userId: string }> {
+    try {
+      const users = await this.clerkClient.users.getUserList({
+        emailAddress: [email],
+        limit: 10,
+      });
+
+      if (users.data.length === 0) {
+        throw new NotFoundException(`User with email ${email} not found.`);
+      }
+
+      const userId = users.data[0].id;
+      this.logger.log(`Deleting Clerk user: ${userId} (${email})`);
+
+      await this.clerkClient.users.deleteUser(userId);
+
+      this.logger.log(`User deleted successfully`);
+
+      return { userId };
+    } catch (error) {
+      this.logger.error('Failed to delete Clerk user', error);
+      throw error;
+    }
+  }
 }
