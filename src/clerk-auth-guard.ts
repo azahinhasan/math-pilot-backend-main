@@ -1,10 +1,13 @@
-import clerkClient from '@clerk/clerk-sdk-node';
 import {
   CanActivate,
   ExecutionContext,
+  Inject,
   Injectable,
   Logger,
 } from '@nestjs/common';
+import { verifyToken } from '@clerk/backend';
+import type { ClerkClient } from '@clerk/backend';
+import { CLERK_CLIENT } from './clerk/clerk.provider';
 
 @Injectable()
 /**
@@ -17,7 +20,10 @@ import {
  * 4. Attaches the decoded claims to `request.user`.
  */
 export class ClerkAuthGuard implements CanActivate {
-  private readonly logger = new Logger();
+  private readonly logger = new Logger(ClerkAuthGuard.name);
+
+  constructor(@Inject(CLERK_CLIENT) private readonly clerkClient: ClerkClient) {}
+
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
 
@@ -35,7 +41,9 @@ export class ClerkAuthGuard implements CanActivate {
 
     // Verify the retrieved token, and log errors if verification fails
     try {
-      const claims = await clerkClient.verifyToken(token);
+      const claims = await verifyToken(token, {
+        secretKey: process.env.CLERK_SECRET_KEY,
+      });
       request.user = claims;
     } catch (err) {
       this.logger.error(err);

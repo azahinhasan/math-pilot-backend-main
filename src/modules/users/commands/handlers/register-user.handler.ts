@@ -1,12 +1,14 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { RegisterUserCommand } from '../register-user.command';
-import clerkClient from '@clerk/clerk-sdk-node';
+import { Inject, Injectable } from '@nestjs/common';
+import type { ClerkClient } from '@clerk/backend';
+import { CLERK_CLIENT } from 'src/clerk/clerk.provider';
 import {
   ConflictException,
-  Injectable,
   InternalServerErrorException,
   NotFoundException,
   OnModuleInit,
+  Logger,
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Role } from 'types/role-type';
@@ -17,8 +19,12 @@ export class RegisterUserHandler
   implements ICommandHandler<RegisterUserCommand>, OnModuleInit
 {
   private roles: Map<string, string> = new Map();
+  private readonly logger = new Logger(RegisterUserHandler.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    @Inject(CLERK_CLIENT) private readonly clerkClient: ClerkClient,
+  ) {}
 
   async onModuleInit() {
     const roles = await this.prisma.role.findMany();
@@ -40,7 +46,7 @@ export class RegisterUserHandler
     let clerkUserId: string | null = null;
 
     try {
-      const user = await clerkClient.users.createUser({
+      const user = await this.clerkClient.users.createUser({
         emailAddress: [email],
         firstName: name.split(' ')[0],
         lastName: name.split(' ').slice(1).join(' ') || '',
@@ -65,7 +71,7 @@ export class RegisterUserHandler
           data: {
             email: email,
             clerkId: user.id,
-            roleId: roleId
+            roleId: roleId,
           },
         });
 
@@ -105,7 +111,7 @@ export class RegisterUserHandler
 
       if (clerkUserId) {
         try {
-          await clerkClient.users.deleteUser(clerkUserId);
+          await this.clerkClient.users.deleteUser(clerkUserId);
           console.log(`Rolled back: Deleted Clerk user ${clerkUserId}`);
         } catch (deleteError) {
           console.error(

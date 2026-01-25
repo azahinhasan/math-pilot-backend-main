@@ -43,16 +43,24 @@ export class TokenGeneratorService {
         userEmail = users.data[0].emailAddresses[0]?.emailAddress;
       }
 
-      // Create a session with 12-hour duration
+      // Delete any existing sessions for this user to ensure fresh token
+      const existingSessions = await this.clerkClient.sessions.getSessionList({
+        userId,
+      });
+      for (const session of existingSessions.data) {
+        await this.clerkClient.sessions.revokeSession(session.id);
+      }
+
+      // Create a fresh session
       const session = await this.clerkClient.sessions.createSession({
         userId,
-        sessionTokenDurationInSeconds: 43200, // 12 hours
       });
 
+      // Get fresh token with default template
       const tokenObj = await this.clerkClient.sessions.getToken(session.id);
 
       this.logger.log(
-        `Generated 12-hour session token for user: ${userId} (${userEmail})`,
+        `Generated fresh session token for user: ${userId} (${userEmail})`,
       );
 
       return {
