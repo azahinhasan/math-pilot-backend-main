@@ -7,6 +7,7 @@ import { GetQuestionsByTopicHandler } from './queries/handlers/get-questions-by-
 import { CreateQuestionHandler } from './commands/handlers/create-question.handler';
 import { GetQuestionSolutionHandler } from './queries/handlers/get-question-solution.handler';
 import { GetQuestionsByTopicQuery } from './queries/get-questions-by-topic.query';
+import { ClerkModule } from 'src/clerk/clerk.module';
 
 // List of all Command Handlers to be registered as providers
 export const CommandHandlers = [CreateQuestionHandler];
@@ -19,7 +20,7 @@ export const QueryHandlers = [
 ];
 
 @Module({
-  imports: [CqrsModule, ConfigModule, PrismaModule],
+  imports: [CqrsModule, ConfigModule, PrismaModule, ClerkModule],
   controllers: [QuestionsController],
   providers: [...CommandHandlers, ...QueryHandlers],
 })

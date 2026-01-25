@@ -7,9 +7,10 @@ import { CreateModuleHandler } from './commands/handlers/create-module.handler';
 import { DeleteModuleHandler } from './commands/handlers/delete-module.handler';
 import { GetModulesBySubjectHandler } from './queries/handlers/get-modules-by-subject.handler';
 import { GetModuleStatisticsHandler } from '../practice-mode/queries/handlers/get-module-statistics.handler';
+import { ClerkModule } from 'src/clerk/clerk.module';
 
 @Module({
-  imports: [CqrsModule, ConfigModule, PrismaModule],
+  imports: [CqrsModule, ConfigModule, PrismaModule, ClerkModule],
   controllers: [ModulesController],
   providers: [
     CreateModuleHandler,

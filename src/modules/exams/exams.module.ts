@@ -13,6 +13,7 @@ import { GetExamQuestionsHandler } from './queries/handlers/get-exam-questions.h
 import { GetExamSolutionsHandler } from './queries/handlers/get-exam-solutions.handler';
 import { GetExamSubmissionsHandler } from './queries/handlers/get-exam-submissions.handler';
 import { GetMockPastPapersHandler } from './queries/handlers/get-mock-past-papers.handler';
+import { ClerkModule } from 'src/clerk/clerk.module';
 
 // List of all Command Handlers to be registered as providers
 export const CommandHandlers = [
@@ -31,7 +32,7 @@ export const QueryHandlers = [
 ];
 
 @Module({
-  imports: [CqrsModule, PrismaModule, HttpModule, ConfigModule],
+  imports: [CqrsModule, PrismaModule, HttpModule, ConfigModule, ClerkModule],
   controllers: [ExamsController],
   providers: [ExamsService, ...CommandHandlers, ...QueryHandlers],
 })

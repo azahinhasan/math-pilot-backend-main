@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import { ConfigModule } from '@nestjs/config';
 import { PrismaModule } from 'src/prisma/prisma.module';
+import { ClerkModule } from 'src/clerk/clerk.module';
 import { UsersController } from './users.controller';
 import { GetUsersHandler } from './queries/handlers/get-users.handler';
 import { GetUserHandler } from './queries/handlers/get-user.handler';
@@ -19,7 +20,7 @@ import { UpdateUserConfigHandler } from './commands/handlers/update-user-config.
 import { GetSubjectsProgressHandler } from './queries/handlers/get-subjects-progress.handler';
 
 @Module({
-  imports: [CqrsModule, ConfigModule, PrismaModule],
+  imports: [CqrsModule, ConfigModule, PrismaModule, ClerkModule],
   controllers: [UsersController],
   providers: [
     GetUsersHandler,

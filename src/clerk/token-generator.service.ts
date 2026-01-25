@@ -43,8 +43,25 @@ export class TokenGeneratorService {
         userEmail = users.data[0].emailAddresses[0]?.emailAddress;
       }
 
-      const session = await this.clerkClient.sessions.createSession({ userId });
+      // Delete any existing sessions for this user to ensure fresh token
+      const existingSessions = await this.clerkClient.sessions.getSessionList({
+        userId,
+      });
+      for (const session of existingSessions.data) {
+        await this.clerkClient.sessions.revokeSession(session.id);
+      }
+
+      // Create a fresh session
+      const session = await this.clerkClient.sessions.createSession({
+        userId,
+      });
+
+      // Get fresh token with default template
       const tokenObj = await this.clerkClient.sessions.getToken(session.id);
+
+      this.logger.log(
+        `Generated fresh session token for user: ${userId} (${userEmail})`,
+      );
 
       return {
         token: tokenObj.jwt,
@@ -53,6 +70,35 @@ export class TokenGeneratorService {
       };
     } catch (error) {
       this.logger.error('Clerk User Token Generation Failed', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Deletes a user from Clerk.
+   * This is a workaround for Clerk's signing key rotation issues.
+   */
+  async deleteUser(email: string): Promise<{ userId: string }> {
+    try {
+      const users = await this.clerkClient.users.getUserList({
+        emailAddress: [email],
+        limit: 10,
+      });
+
+      if (users.data.length === 0) {
+        throw new NotFoundException(`User with email ${email} not found.`);
+      }
+
+      const userId = users.data[0].id;
+      this.logger.log(`Deleting Clerk user: ${userId} (${email})`);
+
+      await this.clerkClient.users.deleteUser(userId);
+
+      this.logger.log(`User deleted successfully`);
+
+      return { userId };
+    } catch (error) {
+      this.logger.error('Failed to delete Clerk user', error);
       throw error;
     }
   }
