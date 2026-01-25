@@ -2,8 +2,7 @@ import { PrismaClient, DifficultyLevel, QuestionFor } from '@prisma/client';
 import * as fs from 'fs';
 import * as path from 'path';
 
-// Run with: npx ts-node prisma/seed/question/a-level-practice-questions-descriptive.ts [fileNumber]
-// Example: npx ts-node prisma/seed/question/a-level-practice-questions-descriptive.ts 2
+// Run with: npx ts-node prisma/seed/question/a-level-practice-test-descriptive/a-level-practice-test-descriptive.ts 1
 const prisma = new PrismaClient();
 
 function removeComments(text: string): string {
@@ -18,13 +17,24 @@ function normalizeString(str: string): string {
 
 async function main() {
   const fileNumber = process.argv[2];
-  const fileName = fileNumber
-    ? `Level-A-Math-Question-desc-descriptive-practice-${fileNumber}.json`
-    : 'Level-A-Math-Question-desc-descriptive-practice.json';
+  
+  if (!fileNumber) {
+    console.error('Error: Please provide a file number as argument');
+    console.error('Usage: npx ts-node prisma/seed/question/a-level-practice-test-descriptive/a-level-practice-test-descriptive.ts <file_number>');
+    console.error('Example: npx ts-node prisma/seed/question/a-level-practice-test-descriptive/a-level-practice-test-descriptive.ts 1');
+    process.exit(1);
+  }
 
-  console.log(`Seeding practice questions from: ${fileName}`);
+  const fileName = `Level-A-Math-Question-desc-descriptive-test-${fileNumber}.json`;
+  console.log(`Seeding practice questions from ${fileName}...`);
 
   const practiceQusPath = path.join(__dirname, fileName);
+  
+  if (!fs.existsSync(practiceQusPath)) {
+    console.error(`Error: File not found: ${practiceQusPath}`);
+    process.exit(1);
+  }
+  
   const practiceQusFile = fs.readFileSync(practiceQusPath, 'utf-8');
   const practiceQusData = JSON.parse(practiceQusFile);
 
@@ -81,7 +91,7 @@ async function main() {
       const serialNo = removeComments(
         questionData.seriel_no?.toString() || serialNoCount.toString(),
       );
-      const correctAnswer = removeComments(questionData.correct_answer || '');
+      const correctAnswer = removeComments(questionData.solution_text || '');
 
       const topic = await prisma.topic.findFirst({
         where: {
@@ -155,7 +165,7 @@ async function main() {
           questionText: questionText,
           questionContentLink: '',
           hint: hint,
-          questionFor: QuestionFor.Practice,
+          questionFor: QuestionFor.Test,
           totalMarks: questionData.total_marks || 1,
           timeLimit: questionData.time_limit_in_min || 1,
           imageFileName: questionData.question_image
@@ -175,7 +185,7 @@ async function main() {
               solutionDescriptives: {
                 create: {
                   isInputCanvases:
-                    questionData.Canvas == 'Yes' || questionData.canvas == 'Yes'
+                    questionData.on_canvas?.toLowerCase() == 'yes'
                       ? true
                       : false,
                   descriptiveSolution: correctAnswer,

@@ -108,6 +108,7 @@
     "Chapter 14 - Exponentials and logarithms": "Solving equations using logarithms"
   },
   {
+    "Chapter 1 - Algebraic expressions": "Negative indices",
     "Chapter 3 - Equations and inequalities": "Regions",
     "Chapter 4 - Graphs and transformations": "Points of intersection",
     "Chapter 10 - Trigonometric identities and equations": "Mixed exercise (Trigonometric ratios)",
@@ -126,8 +127,9 @@
   {
     "Chapter 12 - Differentiation": "Sketching gradient functions",
      "Chapter 14 - Exponentials and logarithms":"Exponentials"
-  },
+  }, 
   {
-    "Chapter 12 - Differentiation": "Modelling with differentiation"
+    "Chapter 12 - Differentiation": "Modelling with differentiation",
+    "Chapter 14 - Exponentials and logarithms":"Similarity & scaling laws"
   }
 ]
