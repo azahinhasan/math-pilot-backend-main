@@ -4,6 +4,8 @@ export class SubmitTestCommand {
   constructor(
     public readonly dto: SubmitTestDto,
     public readonly clerkId: string,
-    public readonly files: Array<Express.Multer.File>,
+    public readonly files?: Array<Express.Multer.File>,
   ) {}
 }
+
+

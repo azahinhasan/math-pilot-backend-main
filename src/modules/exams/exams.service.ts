@@ -64,7 +64,7 @@ export class ExamsService {
   async submitTest(
     dto: SubmitTestDto,
     clerkId: string,
-    files: Array<Express.Multer.File>,
+    files?: Array<Express.Multer.File>,
   ) {
     this.logger.log('=== TEST SUBMISSION START ===');
     this.logger.log(`Number of submissions: ${dto.submissions.length}`);
@@ -365,7 +365,7 @@ export class ExamsService {
         solutionImageFileName:
           question.solutionBases[0]?.solutionDescriptives?.[0]
             ?.descriptiveSolutionImage || null,
-        canvasData: descriptiveData.canvasData || '',
+        canvasData: JSON.stringify(descriptiveData.canvasData) || '',
         hint: question.hint || null,
         // chatHistory: descriptiveData.chatHistory || null,
         isCorrect: false, // Will be updated during evaluation
@@ -381,7 +381,7 @@ export class ExamsService {
     savedSubmissions: SavedSubmissionData[],
     studentId: string,
     timeSpentSeconds: number = 0,
-    files: Array<Express.Multer.File>,
+    files?: Array<Express.Multer.File>,
   ): void {
     this.evaluateSubmissionsInBackground(
       savedSubmissions,
@@ -414,7 +414,7 @@ export class ExamsService {
     savedSubmissions: SavedSubmissionData[],
     studentId: string,
     timeSpentSeconds: number,
-    files: Array<Express.Multer.File>,
+    files?: Array<Express.Multer.File>,
   ) {
     this.logger.log('=== BACKGROUND EVALUATION START ===');
 
@@ -571,7 +571,7 @@ export class ExamsService {
     submission: any,
     submittedDescriptive: any,
     solutionBase: any,
-    files: Array<Express.Multer.File>,
+    files: Array<Express.Multer.File> | undefined,
     studentId: string,
     imageFileName?: string,
   ) {
@@ -602,7 +602,7 @@ export class ExamsService {
 
       // Get uploaded image
       let uploadedFile: Express.Multer.File | undefined;
-      if (imageFileName) {
+      if (imageFileName && files && files.length > 0) {
         uploadedFile = files.find(
           (f) => path.parse(f.originalname).name === imageFileName,
         );

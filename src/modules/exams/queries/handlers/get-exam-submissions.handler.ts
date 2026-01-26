@@ -278,7 +278,7 @@ export class GetExamSubmissionsHandler implements IQueryHandler<GetExamSubmissio
                 submittedAnswerId: latestGraded.submittedAnswers?.[0]?.id,
                 submissionId: latestGraded.id,
                 solutionId: typeSpecificData.solutionId,
-
+                canvasData:typeSpecificData.canvasData,
                 // Type specific fields
                 submittedOption: typeSpecificData.submittedOption, // MCQ/Boolean
                 descriptiveSubmittedAnswer:

@@ -165,7 +165,7 @@ export class ExamsController {
   async submitTest(
     @Body() dto: SubmitTestDto,
     @Req() req,
-    @UploadedFiles() files: Array<Express.Multer.File>,
+    @UploadedFiles() files?: Array<Express.Multer.File>,
   ) {
     return this.commandBus.execute(
       new SubmitTestCommand(dto, req.user.sub, files),
