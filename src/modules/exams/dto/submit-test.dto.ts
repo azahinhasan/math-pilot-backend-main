@@ -39,6 +39,10 @@ export class DescriptiveSubmissionDataDto {
   @IsOptional()
   canvasData?: any;
 
+  @IsString()
+  @IsOptional()
+  imageFileName?: string;
+
   // @IsString()
   // @IsOptional()
   // hint?: string;
@@ -59,7 +63,10 @@ export class QuestionSubmissionDto {
 
   @IsObject()
   @IsNotEmpty()
-  data: MCQSubmissionDataDto | TrueFalseSubmissionDataDto | DescriptiveSubmissionDataDto;
+  data:
+    | MCQSubmissionDataDto
+    | TrueFalseSubmissionDataDto
+    | DescriptiveSubmissionDataDto;
 }
 
 export class SubmitTestDto {
@@ -85,4 +92,3 @@ export class SubmitTestDto {
   @Type(() => QuestionSubmissionDto)
   submissions: QuestionSubmissionDto[];
 }
-

@@ -9,6 +9,8 @@ import {
   Param,
   HttpException,
   HttpStatus,
+  UseInterceptors,
+  UploadedFiles,
 } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { CreateExamDto } from './dto/create-exam.dto';
@@ -26,6 +28,7 @@ import { SubmitTestDto } from './dto/submit-test.dto';
 import { SubmitTestCommand } from './commands/submit-test.command';
 import { ExamsService } from './exams.service';
 import { GetMockPastPapersQuery } from './queries/get-mock-past-papers.query';
+import { FilesInterceptor } from '@nestjs/platform-express';
 
 /**
  * Controller for managing Exam-related operations, including creation and historical retrieval.
@@ -158,8 +161,15 @@ export class ExamsController {
    * Protected by ClerkAuthGuard.
    */
   @Post('submit')
-  async submitTest(@Body() dto: SubmitTestDto, @Req() req) {
-    return this.commandBus.execute(new SubmitTestCommand(dto, req.user.sub));
+  @UseInterceptors(FilesInterceptor('images'))
+  async submitTest(
+    @Body() dto: SubmitTestDto,
+    @Req() req,
+    @UploadedFiles() files: Array<Express.Multer.File>,
+  ) {
+    return this.commandBus.execute(
+      new SubmitTestCommand(dto, req.user.sub, files),
+    );
   }
 
   /**
