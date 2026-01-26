@@ -22,17 +22,24 @@ function extractTopicName(topicName: string): string {
   return topicName.trim();
 }
 
-function parseSeasonYear(seasonYear: string): { season: string; year: number } | null {
+function parseSeasonYear(
+  seasonYear: string,
+): { season: string; year: number } | null {
   if (!seasonYear) return null;
-  
+
   const parts = seasonYear.split('_');
   if (parts.length !== 2) return null;
-  
+
   const year = parseInt(parts[0]);
-  const season = parts[1];
-  
+  const month = parts[1];
+  let season = 'Unknown';
+
+  if (['january'].includes(month.toLowerCase())) season = 'Winter';
+  if (['october'].includes(month.toLowerCase())) season = 'Fall';
+  if (['may', 'june'].includes(month.toLowerCase())) season = 'Summer';
+
   if (isNaN(year)) return null;
-  
+
   return { season, year };
 }
 
@@ -85,14 +92,14 @@ async function main() {
   const allSubtopics = await prisma.subtopic.findMany();
 
   // Create normalized lookup maps
-  const topicMap = new Map<string, typeof allTopics[0]>();
+  const topicMap = new Map<string, (typeof allTopics)[0]>();
   allTopics.forEach((topic) => {
     const extractedName = extractTopicName(topic.name);
     const normalizedName = normalizeString(extractedName);
     topicMap.set(normalizedName, topic);
   });
 
-  const subtopicMap = new Map<string, typeof allSubtopics[0][]>();
+  const subtopicMap = new Map<string, (typeof allSubtopics)[0][]>();
   allSubtopics.forEach((subtopic) => {
     const normalizedName = normalizeString(subtopic.name);
     if (!subtopicMap.has(normalizedName)) {
@@ -120,9 +127,7 @@ async function main() {
     const questionTitle = removeComments(questionData.question_title || '');
     const questionText = removeComments(questionData.question_text || '');
     const hint = removeComments(questionData.hint || '');
-    const serialNo = removeComments(
-      questionData.seriel_no?.toString() || '1',
-    );
+    const serialNo = removeComments(questionData.seriel_no?.toString() || '1');
     const correctAnswer = removeComments(questionData.correct_answer || '');
     const seasonYear = removeComments(questionData.season_year || '');
 
@@ -167,8 +172,7 @@ async function main() {
       const notFoundEntry = { topic: topicName, subtopic: subtopicName };
       if (
         !notFoundSubtopics.some(
-          (item) =>
-            item.topic === topicName && item.subtopic === subtopicName,
+          (item) => item.topic === topicName && item.subtopic === subtopicName,
         )
       ) {
         notFoundSubtopics.push(notFoundEntry);
@@ -242,9 +246,7 @@ async function main() {
           boardId: topic.module.boardAgeLevelId,
         },
       });
-      console.log(
-        `Created PastPaper: ${pastPaperName} - ${pastPaper.id}`,
-      );
+      console.log(`Created PastPaper: ${pastPaperName} - ${pastPaper.id}`);
     }
 
     // Create question

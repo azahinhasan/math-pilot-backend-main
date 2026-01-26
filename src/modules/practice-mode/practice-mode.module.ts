@@ -8,9 +8,10 @@ import { EvaluatePracticeHandler } from './commands/handlers/evaluate-practice.h
 import { TryAgainHandler } from './commands/handlers/try-again.handler';
 import { GetSubmissionsHandler } from './queries/handlers/get-submissions.handler';
 import { DeleteSubmissionDataHandler } from './commands/handlers/delete-submission-data.handler';
+import { ClerkModule } from 'src/clerk/clerk.module';
 
 @Module({
-  imports: [CqrsModule, PrismaModule, HttpModule, ConfigModule],
+  imports: [CqrsModule, PrismaModule, HttpModule, ConfigModule, ClerkModule],
   controllers: [PracticeModeController],
   providers: [
     EvaluatePracticeHandler,
