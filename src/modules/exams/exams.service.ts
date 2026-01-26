@@ -28,6 +28,7 @@ import { firstValueFrom } from 'rxjs';
 import FormData = require('form-data');
 import { AxiosError } from 'axios';
 import axios from 'axios';
+import * as path from 'path';
 
 interface QuestionWithRelations extends Question {
   questionType: QuestionType;
@@ -44,7 +45,7 @@ interface SavedSubmissionData {
   submissionData: any;
   questionType: QuestionTypeEnum;
   solutionBase: any;
-  imageFileName?: string; // Added to track uploaded file
+  imageFileName?: string; // For Descriptive: expected uploaded image base name (questionId)
 }
 
 @Injectable()
@@ -201,8 +202,8 @@ export class ExamsService {
 
     let imageFileName: string | undefined;
     if (question.questionType.name === QuestionTypeEnum.Descriptive) {
-      const data = submission.data as DescriptiveSubmissionDataDto;
-      imageFileName = data.imageFileName;
+      // Client uploads images named as <questionId>.<ext> (ext can be png/jpg/jpeg/etc)
+      imageFileName = submission.questionId;
     }
 
     return {
@@ -602,7 +603,9 @@ export class ExamsService {
       // Get uploaded image
       let uploadedFile: Express.Multer.File | undefined;
       if (imageFileName) {
-        uploadedFile = files.find((f) => f.originalname === imageFileName);
+        uploadedFile = files.find(
+          (f) => path.parse(f.originalname).name === imageFileName,
+        );
       }
 
       // Download question image if exists

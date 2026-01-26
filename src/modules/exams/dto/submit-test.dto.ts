@@ -39,10 +39,6 @@ export class DescriptiveSubmissionDataDto {
   @IsOptional()
   canvasData?: any;
 
-  @IsString()
-  @IsOptional()
-  imageFileName?: string;
-
   // @IsString()
   // @IsOptional()
   // hint?: string;
