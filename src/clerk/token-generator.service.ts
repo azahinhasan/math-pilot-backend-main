@@ -56,8 +56,11 @@ export class TokenGeneratorService {
         userId,
       });
 
-      // Get fresh token with default template
-      const tokenObj = await this.clerkClient.sessions.getToken(session.id);
+      // Get fresh token with custom template for 12+ hour expiration
+      const tokenObj = await this.clerkClient.sessions.getToken(
+        session.id,
+        'backend-testing',
+      );
 
       this.logger.log(
         `Generated fresh session token for user: ${userId} (${userEmail})`,
