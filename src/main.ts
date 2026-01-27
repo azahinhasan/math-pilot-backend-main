@@ -8,8 +8,8 @@ import * as bodyParser from 'body-parser';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  app.use(bodyParser.json({ limit: '20mb' }));  //have to find better solution for this part
-  app.use(bodyParser.urlencoded({ limit: '20mb', extended: true })); //have to find better solution for this part
+  app.use(bodyParser.json({ limit: '50mb' }));  //have to find better solution for this part
+  app.use(bodyParser.urlencoded({ limit: '50mb', extended: true })); //have to find better solution for this part
 
   app.use(cookieParser());
   app.useGlobalPipes(
