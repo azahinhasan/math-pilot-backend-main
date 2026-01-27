@@ -13,17 +13,10 @@
 ---
 - npx ts-node prisma/seed/question/a-level-past-paper-questions-descriptive.ts
 ---
-- npx ts-node prisma/seed/question/a-level-practice-test-descriptive/a-level-practice-test-descriptive.ts 1
-- npx ts-node prisma/seed/question/a-level-practice-test-descriptive/a-level-practice-test-descriptive.ts 2
-- npx ts-node prisma/seed/question/a-level-practice-test-descriptive/a-level-practice-test-descriptive.ts 3
-- npx ts-node prisma/seed/question/a-level-practice-test-descriptive/a-level-practice-test-descriptive.ts 4
-- npx ts-node prisma/seed/question/a-level-practice-test-descriptive/a-level-practice-test-descriptive.ts 5
-- npx ts-node prisma/seed/question/a-level-practice-test-descriptive/a-level-practice-test-descriptive.ts 6
-- npx ts-node prisma/seed/question/a-level-practice-test-descriptive/a-level-practice-test-descriptive.ts 7
-- npx ts-node prisma/seed/question/a-level-practice-test-descriptive/a-level-practice-test-descriptive.ts 8
-- npx ts-node prisma/seed/question/a-level-practice-test-descriptive/a-level-practice-test-descriptive.ts 9
-- npx ts-node prisma/seed/question/a-level-practice-test-descriptive/a-level-practice-test-descriptive.ts 10
-- npx ts-node prisma/seed/question/a-level-practice-test-descriptive/a-level-practice-test-descriptive.ts 11
+Single file: 
+- npx ts-node prisma/seed/question/a-level-practice-test-descriptive/a-level-practice-test-descriptive.ts 1  (up to 11)
+Range: 
+- npx ts-node prisma/seed/question/a-level-practice-test-descriptive/a-level-practice-test-descriptive.ts 1 4
 
 --------------------------------------------------------------
 - npx ts-node prisma/seed/seed-past-papers.ts

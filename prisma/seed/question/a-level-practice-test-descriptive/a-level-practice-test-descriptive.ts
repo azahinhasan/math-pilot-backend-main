@@ -2,7 +2,9 @@ import { PrismaClient, DifficultyLevel, QuestionFor } from '@prisma/client';
 import * as fs from 'fs';
 import * as path from 'path';
 
-// Run with: npx ts-node prisma/seed/question/a-level-practice-test-descriptive/a-level-practice-test-descriptive.ts 1
+// Run with: 
+// Single file: npx ts-node prisma/seed/question/a-level-practice-test-descriptive/a-level-practice-test-descriptive.ts 1
+// Range: npx ts-node prisma/seed/question/a-level-practice-test-descriptive/a-level-practice-test-descriptive.ts 1 4
 const prisma = new PrismaClient();
 
 function removeComments(text: string): string {
@@ -15,18 +17,11 @@ function normalizeString(str: string): string {
   return str.trim().toLowerCase();
 }
 
-async function main() {
-  const fileNumber = process.argv[2];
-  
-  if (!fileNumber) {
-    console.error('Error: Please provide a file number as argument');
-    console.error('Usage: npx ts-node prisma/seed/question/a-level-practice-test-descriptive/a-level-practice-test-descriptive.ts <file_number>');
-    console.error('Example: npx ts-node prisma/seed/question/a-level-practice-test-descriptive/a-level-practice-test-descriptive.ts 1');
-    process.exit(1);
-  }
-
+async function processFile(fileNumber: number) {
   const fileName = `Level-A-Math-Question-desc-descriptive-test-${fileNumber}.json`;
+  console.log(`\n${'='.repeat(60)}`);
   console.log(`Seeding practice questions from ${fileName}...`);
+  console.log('='.repeat(60));
 
   const practiceQusPath = path.join(__dirname, fileName);
   
@@ -76,6 +71,28 @@ async function main() {
 
   console.log(`Loaded ${topicMap.size} topics and ${subtopicMap.size} subtopics into memory`);
 
+  console.log('Fetching existing questions from database...');
+  const existingQuestions = await prisma.question.findMany({
+    where: {
+      questionFor: QuestionFor.Test,
+    },
+    select: {
+      name: true,
+      questionText: true,
+      subtopicId: true,
+      questionFor: true,
+    },
+  });
+
+  const existingQuestionsSet = new Set<string>();
+  existingQuestions.forEach((q) => {
+    const key = `${q.name}_${q.questionText}_${q.subtopicId}_${q.questionFor}`;
+    existingQuestionsSet.add(key);
+  });
+  console.log(
+    `Loaded ${existingQuestionsSet.size} existing questions from database`,
+  );
+
   let createdCount = 0;
   let skippedCount = 0;
   let notFoundTopic = 0;
@@ -85,7 +102,6 @@ async function main() {
   
   const questionsToInsert: any[] = [];
   const solutionDataMap: Map<string, any> = new Map();
-  const existingQuestionsSet = new Set<string>();
 
   for (const [topicKey, questions] of Object.entries(practiceQusData)) {
     console.log(`\nProcessing topic: ${topicKey}`);
@@ -151,7 +167,7 @@ async function main() {
         continue;
       }
 
-      const questionKey = `${questionTitle}_${questionText}_${subtopic.id}`;
+      const questionKey = `${questionTitle}_${questionText}_${subtopic.id}_${QuestionFor.Test}`;
       if (existingQuestionsSet.has(questionKey)) {
         console.log(
           `Skipping duplicate question: ${questionTitle}`,
@@ -298,7 +314,52 @@ async function main() {
     });
   }
 
-  console.log('\nFinished seeding practice questions.');
+  console.log('\nFinished seeding practice questions for this file.');
+}
+
+async function main() {
+  const startFileNumber = process.argv[2];
+  const endFileNumber = process.argv[3];
+  
+  if (!startFileNumber) {
+    console.error('Error: Please provide at least one file number as argument');
+    console.error('Usage:');
+    console.error('  Single file: npx ts-node prisma/seed/question/a-level-practice-test-descriptive/a-level-practice-test-descriptive.ts <file_number>');
+    console.error('  Range: npx ts-node prisma/seed/question/a-level-practice-test-descriptive/a-level-practice-test-descriptive.ts <start> <end>');
+    console.error('Examples:');
+    console.error('  npx ts-node prisma/seed/question/a-level-practice-test-descriptive/a-level-practice-test-descriptive.ts 1');
+    console.error('  npx ts-node prisma/seed/question/a-level-practice-test-descriptive/a-level-practice-test-descriptive.ts 1 4');
+    process.exit(1);
+  }
+
+  const start = parseInt(startFileNumber);
+  const end = endFileNumber ? parseInt(endFileNumber) : start;
+
+  if (isNaN(start) || isNaN(end)) {
+    console.error('Error: File numbers must be valid integers');
+    process.exit(1);
+  }
+
+  if (start > end) {
+    console.error('Error: Start file number must be less than or equal to end file number');
+    process.exit(1);
+  }
+
+  console.log(`\n${'*'.repeat(60)}`);
+  if (start === end) {
+    console.log(`Processing single file: ${start}`);
+  } else {
+    console.log(`Processing files from ${start} to ${end} (${end - start + 1} files)`);
+  }
+  console.log('*'.repeat(60));
+
+  for (let fileNum = start; fileNum <= end; fileNum++) {
+    await processFile(fileNum);
+  }
+
+  console.log(`\n${'*'.repeat(60)}`);
+  console.log('All files processed successfully!');
+  console.log('*'.repeat(60));
 }
 
 main()
