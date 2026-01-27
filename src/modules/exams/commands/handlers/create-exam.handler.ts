@@ -6,7 +6,7 @@ import {
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateExamCommand } from '../create-exam.command';
-import { ExamType, Prisma, ReviewStatus } from '@prisma/client';
+import { ExamType, Prisma, QuestionFor, ReviewStatus } from '@prisma/client';
 
 type TopicSubtopicPair = { topicId: string; subtopicId: string };
 type DbClient = PrismaService | Prisma.TransactionClient;
@@ -258,6 +258,7 @@ export class CreateExamHandler implements ICommandHandler<CreateExamCommand> {
     const available = await db.question.findMany({
       where: {
         voided: false,
+        questionFor: QuestionFor.Test,
         subtopicId: { in: subtopicIds },
       },
       select: { id: true },

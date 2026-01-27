@@ -261,7 +261,7 @@ model Question {
   name                String
   questionText        String      @map("question_text")
   questionContentLink String?     @map("question_content_link")
-  contentBy           ContentBy   @default(AI) @map("content_by")
+  contentBy           ContentBy   @default(Human) @map("content_by")
   questionFor         QuestionFor @default(Practice) @map("question_for")
   totalMarks          Int?        @map("total_marks")
   timeLimit           Int?        @map("time_limit")
