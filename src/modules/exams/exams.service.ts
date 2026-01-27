@@ -500,12 +500,22 @@ export class ExamsService {
     // Bulk update StudentTopicDetails after all evaluations
     this.logger.log('Updating Student Topic Details...');
     for (const [topicId, stats] of topicStats.entries()) {
+      // Get total questions for this topic
+      const totalQuestions = await this.getTotalQuestionsForTopic(topicId);
+
+      // Only set status to Graded if all questions have been attempted
+      const status =
+        stats.attempted >= totalQuestions
+          ? SubmissionStatus.Graded
+          : SubmissionStatus.InProgress;
+
       await this.updateStudentTopicDetails(
         studentId,
         topicId,
         stats.attempted,
         stats.correct,
         timeSpentSeconds,
+        status,
       );
     }
 
@@ -531,10 +541,8 @@ export class ExamsService {
       throw new Error('No correct option found in solution');
     }
 
-    // Compare submitted option with correct option
-    const isCorrect =
-      submittedMcq.submittedOption.trim().toLowerCase() ===
-      correctOption.optionText.trim().toLowerCase();
+    // Compare submitted option ID with correct option ID
+    const isCorrect = submittedMcq.submittedOption === correctOption.id;
 
     // Calculate marks
     const awardedMark = isCorrect ? correctOption.mark || 1 : 0;
@@ -591,8 +599,9 @@ export class ExamsService {
         throw new Error('Question not found');
       }
 
-      // Check if solution image exists
-      if (!submittedDescriptive.solutionImageFileName) {
+      // Check if solution image exists (only required for Descriptive with canvas input, not ShortAnswer)
+      const needsImage = solutionDescriptive.isInputCanvases;
+      if (needsImage && !submittedDescriptive.solutionImageFileName) {
         await this.handleMissingSolutionImage(
           submission.id,
           submittedDescriptive.id,
@@ -632,9 +641,46 @@ export class ExamsService {
         }
       }
 
+      let isCorrect: boolean;
+      let awardedMarks: number;
+      let apiResult: any;
+
+      // For ShortAnswer questions (no image needed), do direct text comparison
+      if (!needsImage) {
+        const submittedAnswer = (
+          submittedDescriptive.descriptiveSubmittedAnswer || ''
+        ).trim();
+        const correctAnswer = (
+          solutionDescriptive.descriptiveSolution || ''
+        ).trim();
+
+        isCorrect = submittedAnswer === correctAnswer;
+        awardedMarks = isCorrect ? solutionDescriptive.maxMarks || 0 : 0;
+
+        // Save evaluation results for ShortAnswer
+        await this.saveDescriptiveEvaluationResults(
+          submission.id,
+          submittedDescriptive.id,
+          {
+            evaluation: isCorrect ? 'Correct' : 'Incorrect',
+            score: awardedMarks,
+          },
+          isCorrect,
+          awardedMarks,
+          submittedDescriptive,
+        );
+
+        this.logger.log(
+          `ShortAnswer evaluated: ${isCorrect ? 'Correct' : 'Incorrect'}, Marks: ${awardedMarks}`,
+        );
+
+        return isCorrect;
+      }
+
+      // For Descriptive questions with canvas input, call Math API
       // Call Math API
       const evaluateMathApiUrl = this.getEvaluationApiUrl();
-      const apiResult = await this.callMathEvaluationAPI(
+      apiResult = await this.callMathEvaluationAPI(
         evaluateMathApiUrl,
         question,
         solutionDescriptive,
@@ -645,11 +691,13 @@ export class ExamsService {
       );
 
       // Calculate marks based on AI verdict
-      const { isCorrect, awardedMarks } = this.calculateMarks(
+      const marksResult = this.calculateMarks(
         apiResult,
         solutionDescriptive,
         question,
       );
+      isCorrect = marksResult.isCorrect;
+      awardedMarks = marksResult.awardedMarks;
 
       // Save evaluation results
       await this.saveDescriptiveEvaluationResults(
@@ -707,7 +755,9 @@ export class ExamsService {
    * Get evaluation API URL from config
    */
   private getEvaluationApiUrl(): string {
-    const apiUrl = this.configService.get<string>('EVALUATE_MATH_API_URL');
+    const apiUrl =
+      this.configService.get<string>('EVALUATE_MATH_API_URL') +
+      '/test_assessment';
 
     if (!apiUrl) {
       throw new InternalServerErrorException('Math API URL not configured');
@@ -715,6 +765,16 @@ export class ExamsService {
 
     this.logger.log(`Calling Math API at: ${apiUrl}`);
     return apiUrl;
+  }
+
+  /**
+   * Get total questions for a topic
+   */
+  private async getTotalQuestionsForTopic(topicId: string): Promise<number> {
+    const count = await this.prisma.question.count({
+      where: { topicId },
+    });
+    return count;
   }
 
   /**
@@ -811,7 +871,6 @@ export class ExamsService {
     formData.append('user_id', studentId);
     formData.append('question_id', question.id);
     formData.append('question_text', question.questionText || '');
-    formData.append('currentStepCount', (question.stepCount || 0).toString());
     formData.append(
       'solution_text',
       solutionDescriptive.descriptiveSolution || '',
@@ -837,7 +896,7 @@ export class ExamsService {
       });
     }
 
-    this.logger.log('Sending request to Math API...');
+    this.logger.log(`Sending request to Math API...`);
 
     const response = await axios.post(apiUrl, formData, {
       headers: { ...formData.getHeaders() },
@@ -1033,6 +1092,7 @@ export class ExamsService {
     attemptsAdded: number,
     correctAdded: number,
     timeAdded: number,
+    status: SubmissionStatus = SubmissionStatus.InProgress,
   ) {
     try {
       // Find existing record for Exam type
@@ -1052,6 +1112,7 @@ export class ExamsService {
             questionsCorrect: { increment: correctAdded },
             timeSpentInSeconds: { increment: timeAdded },
             lastAccessedAt: new Date(),
+            status,
           },
         });
       } else {
@@ -1064,7 +1125,7 @@ export class ExamsService {
             questionsCorrect: correctAdded,
             timeSpentInSeconds: timeAdded,
             lastAccessedAt: new Date(),
-            status: SubmissionStatus.InProgress,
+            status,
           },
         });
       }

@@ -161,7 +161,7 @@ export class ExamsController {
    * Protected by ClerkAuthGuard.
    */
   @Post('submit')
-  @UseInterceptors(FilesInterceptor('images'))
+  @UseInterceptors(FilesInterceptor('files'))
   async submitTest(
     @Body() dto: SubmitTestDto,
     @Req() req,
