@@ -120,7 +120,7 @@ export async function seedALevelMathTopicsSubtopics() {
     }
   }
 
-  console.log('Seeded GCSE Math topics and subtopics');
+  console.log('Seeded A Level Pure Mathematics 1 topics and subtopics');
   console.log('\n=== NEWLY CREATED ITEMS ===');
   console.log('\nTopics not found (newly created):');
   console.log(newTopics);

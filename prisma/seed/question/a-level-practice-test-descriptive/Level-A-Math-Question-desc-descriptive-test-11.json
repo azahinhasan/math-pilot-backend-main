@@ -3454,7 +3454,7 @@
     {
       "tutorial_name": "Chapter 14 - Exponentials and logarithms ",
       "serial_no": 9,
-      "subtopic_name": "similarity & scaling laws",
+      "subtopic_name": "Similarity & scaling laws",
       "question_title": "$$\\text{Similar shapes }A=pw^q$$",
       "question_text": "$$\\text{A student investigates a family of similar shapes. She measures width }w\\text{ and area }A,\\ \\text{and plots }\\log A\\text{ against }\\log w.\\ \\text{The graph has gradient }2\\text{ and y-intercept }-0.1049.\\ (a)\\ \\text{Write the equation of the line.}\\ (b)\\ \\text{Find the exact values of }q\\text{ and }p.\\ (c)\\ \\text{Suggest the family of shapes and justify.}$$",
       "hint": "$$\\text{From }A=pw^q,\\ \\log A=\\log p+q\\log w.\\ \\text{So gradient }=q,\\ \\text{intercept }=\\log p.$$",
