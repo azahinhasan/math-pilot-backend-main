@@ -77,30 +77,22 @@ export class GetSubjectPerformanceHandler implements IQueryHandler<GetSubjectPer
     const whereClause: any = {
       studentId,
       type: SubmissionType.Exam,
-      question: {
-        questionFor: QuestionFor.Test,
-      },
-      beganAt: {
-        gte: currentStart,
-        lte: currentEnd,
-      },
-      // Only consider submitted or graded submissions
-      status: {
-        in: ['Submitted', 'Graded'],
-      },
+      // Include all statuses (InProgress, Submitted, Graded) for performance tracking
     };
 
     if (subject) {
-      whereClause.question.module = {
-        subject: subject as Subject,
+      whereClause.topic = {
+        module: {
+          subject: subject as Subject,
+        },
       };
     }
 
-    // Get all test/exam submissions
-    const testSubmissions = await this.prisma.submission.findMany({
+    // Get all StudentTopicDetails for exams
+    const studentTopicDetails = await this.prisma.studentTopicDetails.findMany({
       where: whereClause,
       include: {
-        question: {
+        topic: {
           include: {
             module: true,
           },
@@ -108,16 +100,40 @@ export class GetSubjectPerformanceHandler implements IQueryHandler<GetSubjectPer
       },
     });
 
+    // Get marks from Submission table for each topic
+    const topicIds = studentTopicDetails.map((std) => std.topicId);
+    const submissions = await this.prisma.submission.findMany({
+      where: {
+        topicId: { in: topicIds },
+        studentId,
+        type: SubmissionType.Exam,
+      },
+      include: {
+        question: true,
+      },
+    });
+
+    // Group submissions by topicId for easy lookup
+    const submissionsByTopic = new Map<string, typeof submissions>();
+    for (const submission of submissions) {
+      if (!submission.topicId) continue;
+      if (!submissionsByTopic.has(submission.topicId)) {
+        submissionsByTopic.set(submission.topicId, []);
+      }
+      submissionsByTopic.get(submission.topicId)!.push(submission);
+    }
+
     // Group by subject and module
     const subjectMap = new Map<Subject, Map<string, ModulePerformance>>();
 
-    // Process submissions and build performance data
-    for (const submission of testSubmissions) {
-      if (!submission.question.module) continue;
+    // Process student topic details and build performance data
+    for (const studentTopicDetail of studentTopicDetails) {
+      if (!studentTopicDetail.topic || !studentTopicDetail.topic.module)
+        continue;
 
-      const subj = submission.question.module.subject;
-      const moduleId = submission.question.module.id;
-      const moduleName = submission.question.module.name;
+      const subj = studentTopicDetail.topic.module.subject;
+      const moduleId = studentTopicDetail.topic.module.id;
+      const moduleName = studentTopicDetail.topic.module.name;
 
       // Initialize subject map
       if (!subjectMap.has(subj)) {
@@ -143,23 +159,21 @@ export class GetSubjectPerformanceHandler implements IQueryHandler<GetSubjectPer
 
       const modulePerf = moduleMap.get(moduleId)!;
 
-      // Update counts
-      modulePerf.testQuestionsAttempted++;
+      // Update counts using StudentTopicDetails fields
+      modulePerf.testQuestionsAttempted +=
+        studentTopicDetail.questionsAttempted || 0;
+      modulePerf.testQuestionsCorrect +=
+        studentTopicDetail.questionsCorrect || 0;
 
-      // Count correct answers
-      if (submission.correctAnswersCount) {
-        // If the question has all correct answers
-        // Assuming if correctAnswersCount equals total answers, it's correct
-        // You may need to adjust this logic based on your grading system
-        modulePerf.testQuestionsCorrect += submission.correctAnswersCount;
+      // Calculate marks from submissions for this topic
+      const topicSubmissions =
+        submissionsByTopic.get(studentTopicDetail.topicId) || [];
+      for (const submission of topicSubmissions) {
+        const marksObtained = submission.awardedMarks || 0;
+        const totalMarks = submission.question.totalMarks || 0;
+        modulePerf.totalMarksObtained += marksObtained;
+        modulePerf.totalMarksPossible += totalMarks;
       }
-
-      // Update marks
-      const marksObtained = submission.awardedMarks || 0;
-      const totalMarks = submission.question.totalMarks || 0;
-
-      modulePerf.totalMarksObtained += marksObtained;
-      modulePerf.totalMarksPossible += totalMarks;
     }
 
     // Calculate percentages for each module
