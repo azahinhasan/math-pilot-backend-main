@@ -601,45 +601,6 @@ export class ExamsService {
 
       // Check if solution image exists (only required for Descriptive with canvas input, not ShortAnswer)
       const needsImage = solutionDescriptive.isInputCanvases;
-      if (needsImage && !submittedDescriptive.solutionImageFileName) {
-        await this.handleMissingSolutionImage(
-          submission.id,
-          submittedDescriptive.id,
-        );
-        return false;
-      }
-
-      // Get uploaded image
-      let uploadedFile: Express.Multer.File | undefined;
-      if (imageFileName && files && files.length > 0) {
-        uploadedFile = files.find(
-          (f) => path.parse(f.originalname).name === imageFileName,
-        );
-      }
-
-      // Download question image if exists
-      let questionImageBuffer: Buffer | null = null;
-      if (question.imageFileName) {
-        try {
-          questionImageBuffer = await this.downloadSolutionImage(
-            question.imageFileName,
-          );
-        } catch (e) {
-          this.logger.warn(`Failed to download question image: ${e.message}`);
-        }
-      }
-
-      // Download solution image if exists
-      let solutionImageBuffer: Buffer | null = null;
-      if (solutionDescriptive.descriptiveSolutionImage) {
-        try {
-          solutionImageBuffer = await this.downloadSolutionImage(
-            solutionDescriptive.descriptiveSolutionImage,
-          );
-        } catch (e) {
-          this.logger.warn(`Failed to download solution image: ${e.message}`);
-        }
-      }
 
       let isCorrect: boolean;
       let awardedMarks: number;
@@ -675,6 +636,38 @@ export class ExamsService {
         );
 
         return isCorrect;
+      }
+
+      // Get uploaded image
+      let uploadedFile: Express.Multer.File | undefined;
+      if (imageFileName && files && files.length > 0) {
+        uploadedFile = files.find(
+          (f) => path.parse(f.originalname).name === imageFileName,
+        );
+      }
+
+      // Download question image if exists
+      let questionImageBuffer: Buffer | null = null;
+      if (question.imageFileName) {
+        try {
+          questionImageBuffer = await this.downloadSolutionImage(
+            question.imageFileName,
+          );
+        } catch (e) {
+          this.logger.warn(`Failed to download question image: ${e.message}`);
+        }
+      }
+
+      // Download solution image if exists
+      let solutionImageBuffer: Buffer | null = null;
+      if (solutionDescriptive.descriptiveSolutionImage) {
+        try {
+          solutionImageBuffer = await this.downloadSolutionImage(
+            solutionDescriptive.descriptiveSolutionImage,
+          );
+        } catch (e) {
+          this.logger.warn(`Failed to download solution image: ${e.message}`);
+        }
       }
 
       // For Descriptive questions with canvas input, call Math API
