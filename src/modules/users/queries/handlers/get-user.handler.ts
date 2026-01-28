@@ -2,10 +2,14 @@ import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { GetUserQuery } from '../get-user.query';
 import { PrismaService } from '../../../../prisma/prisma.service';
 import { HttpException, HttpStatus } from '@nestjs/common';
+import { StreakService } from '../../../users/streak.service';
 
 @QueryHandler(GetUserQuery)
 export class GetUserHandler implements IQueryHandler<GetUserQuery> {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly streakService: StreakService,
+  ) {}
 
   async execute(query: GetUserQuery): Promise<any> {
     const { clerkId } = query;
@@ -48,6 +52,11 @@ export class GetUserHandler implements IQueryHandler<GetUserQuery> {
 
     if (!auth) {
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+
+    // Check and reset streak if last activity was more than 2 days ago
+    if (auth.student) {
+      await this.streakService.checkAndResetStreak(auth.student.id);
     }
 
     return auth;

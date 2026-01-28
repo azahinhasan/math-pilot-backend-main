@@ -18,6 +18,7 @@ import { GetSubjectProgressHandler } from './queries/handlers/get-subject-progre
 import { GetSubjectPerformanceHandler } from './queries/handlers/get-subject-performance.handler';
 import { UpdateUserConfigHandler } from './commands/handlers/update-user-config.handler';
 import { GetSubjectsProgressHandler } from './queries/handlers/get-subjects-progress.handler';
+import { StreakService } from '../../users/streak.service';
 
 @Module({
   imports: [CqrsModule, ConfigModule, PrismaModule, ClerkModule],
@@ -37,6 +38,7 @@ import { GetSubjectsProgressHandler } from './queries/handlers/get-subjects-prog
     GetSubjectPerformanceHandler,
     UpdateUserConfigHandler,
     GetSubjectsProgressHandler,
+    StreakService,
   ],
 })
 export class UsersModule {}

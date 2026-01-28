@@ -9,6 +9,7 @@ import { TryAgainHandler } from './commands/handlers/try-again.handler';
 import { GetSubmissionsHandler } from './queries/handlers/get-submissions.handler';
 import { DeleteSubmissionDataHandler } from './commands/handlers/delete-submission-data.handler';
 import { ClerkModule } from 'src/clerk/clerk.module';
+import { StreakService } from '../../users/streak.service';
 
 @Module({
   imports: [CqrsModule, PrismaModule, HttpModule, ConfigModule, ClerkModule],
@@ -18,6 +19,7 @@ import { ClerkModule } from 'src/clerk/clerk.module';
     TryAgainHandler,
     GetSubmissionsHandler,
     DeleteSubmissionDataHandler,
+    StreakService,
   ],
 })
 export class PracticeModeModule {}

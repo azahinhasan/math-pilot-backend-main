@@ -11,6 +11,7 @@ import {
 } from '@nestjs/common';
 import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
 import { Readable } from 'stream';
+import { StreakService } from '../../../../users/streak.service';
 
 /**
  * Handler for evaluating practice question submissions.
@@ -25,6 +26,7 @@ export class EvaluatePracticeHandler implements ICommandHandler<EvaluatePractice
     private readonly prisma: PrismaService,
     private readonly httpService: HttpService,
     private readonly configService: ConfigService,
+    private readonly streakService: StreakService,
   ) {}
 
   async execute(command: EvaluatePracticeCommand): Promise<any> {
@@ -292,6 +294,9 @@ export class EvaluatePracticeHandler implements ICommandHandler<EvaluatePractice
               },
             });
           }
+
+          // Increment streak after successful submission (regardless of evaluation result)
+          await this.streakService.incrementStreak(student.id);
 
           // Delete the active canvas for this question if submission submitted
           await tx.activeCanvas.deleteMany({

@@ -14,6 +14,7 @@ import { GetExamSolutionsHandler } from './queries/handlers/get-exam-solutions.h
 import { GetExamSubmissionsHandler } from './queries/handlers/get-exam-submissions.handler';
 import { GetMockPastPapersHandler } from './queries/handlers/get-mock-past-papers.handler';
 import { ClerkModule } from 'src/clerk/clerk.module';
+import { StreakService } from '../../users/streak.service';
 
 // List of all Command Handlers to be registered as providers
 export const CommandHandlers = [
@@ -34,6 +35,11 @@ export const QueryHandlers = [
 @Module({
   imports: [CqrsModule, PrismaModule, HttpModule, ConfigModule, ClerkModule],
   controllers: [ExamsController],
-  providers: [ExamsService, ...CommandHandlers, ...QueryHandlers],
+  providers: [
+    ExamsService,
+    StreakService,
+    ...CommandHandlers,
+    ...QueryHandlers,
+  ],
 })
 export class ExamsModule {}
