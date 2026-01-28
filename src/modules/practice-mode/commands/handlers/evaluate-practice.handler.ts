@@ -278,6 +278,7 @@ export class EvaluatePracticeHandler implements ICommandHandler<EvaluatePractice
                 studentId: student.id,
                 questionId,
                 type: 'Practice',
+                topicId: question.topicId,
                 status: isCorrect ? 'Graded' : 'InProgress',
                 beganAt: new Date(),
                 endedAt: isCorrect ? new Date() : null,
