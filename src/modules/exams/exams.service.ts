@@ -465,12 +465,24 @@ export class ExamsService {
             break;
         }
 
-        // Update topic stats
+        // Update topic stats - only count unique questions attempted
         if (submission.topicId) {
           const stats = topicStats.get(submission.topicId);
           if (stats) {
-            stats.attempted += 1;
-            if (isCorrect) stats.correct += 1;
+            // Check if this question has been attempted before in the database
+            const previousSubmission = await this.prisma.submission.findFirst({
+              where: {
+                studentId,
+                questionId: submission.questionId,
+                id: { not: submission.id }, // Exclude current submission
+              },
+            });
+
+            // Only increment attempted count if this is the first time attempting this question
+            if (!previousSubmission) {
+              stats.attempted += 1;
+              if (isCorrect) stats.correct += 1;
+            }
           }
         }
 
