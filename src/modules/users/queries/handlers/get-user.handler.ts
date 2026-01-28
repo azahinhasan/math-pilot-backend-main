@@ -2,7 +2,7 @@ import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { GetUserQuery } from '../get-user.query';
 import { PrismaService } from '../../../../prisma/prisma.service';
 import { HttpException, HttpStatus } from '@nestjs/common';
-import { StreakService } from '../../../users/streak.service';
+import { StreakService } from '../../../../users/streak.service';
 
 @QueryHandler(GetUserQuery)
 export class GetUserHandler implements IQueryHandler<GetUserQuery> {
@@ -62,4 +62,3 @@ export class GetUserHandler implements IQueryHandler<GetUserQuery> {
     return auth;
   }
 }
-
