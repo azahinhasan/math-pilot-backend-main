@@ -68,10 +68,12 @@ export class ExamsController {
    */
   @Get('mock/past-papers')
   async getMockPastPapers(
+    @Req() req,
     @Query('moduleId') moduleId?: string,
     @Query('boardId') boardId?: string,
   ) {
-    return this.queryBus.execute(new GetMockPastPapersQuery(moduleId, boardId));
+    const clerkId = req.user.sub;
+    return this.queryBus.execute(new GetMockPastPapersQuery(clerkId, moduleId, boardId));
   }
 
   /**
